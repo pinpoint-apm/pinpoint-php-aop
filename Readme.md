@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/eeliu/php_simple_aop.svg?branch=master)](https://travis-ci.com/eeliu/php_simple_aop)
+[![Build Status](https://travis-ci.com/naver/pinpoint-php-aop.svg?branch=master)](https://travis-ci.com/naver/pinpoint-php-aop)
 
 ##  How to Use 
 
@@ -8,7 +8,7 @@ Add requirement into composer.json
 
 ```Json
     "require": {
-        "naver/php_simple_aop": "v1.0.0"
+        "naver/pinpoint-php-aop": "v1.0.0"
     }
 ```
 
@@ -71,15 +71,15 @@ define('USER_DEFINED_CLASS_MAP_IMPLEMENT','\Plugins\ClassMapInFile.php');
 // since 0.2.5+ PINPOINT_ENV = dev, auto_pinpointed.php will generate Cache/* on every request. 
 // Recommended in debug mode.
 define('PINPOINT_ENV','dev');
-// Use php_simple_aop auto_pinpointed.php instead of vendor/autoload.php
-require_once __DIR__. '/../vendor/eeliu/php_simple_aop/auto_pinpointed.php';
+// Use pinpoint-php-aop auto_pinpointed.php instead of vendor/autoload.php
+require_once __DIR__. '/../vendor/naver/pinpoint-php-aop/auto_pinpointed.php';
 
 ```
 
 
 ### How it works
 
-php_simple_aop wrappers your class with an onBefore/onEnd/onException suite.
+pinpoint-php-aop wrappers your class with an onBefore/onEnd/onException suite.
 
 ![how it works](https://raw.githubusercontent.com/naver/pinpoint-c-agent/master/images/principle_v0.2.x.png)
 
