@@ -1,5 +1,5 @@
 {
-    "name": "naver/php_simple_aop",
+    "name": "naver/pinpoint-php-aop",
     "description": "A simple Aop library via php-parse",
     "type": "library",
     "license": "Apache-2.0",
