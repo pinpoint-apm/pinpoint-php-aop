@@ -7,7 +7,7 @@ Change configuration file in PHP/pinpoint_php_example/composer.json
 
 ```Json
     "require": {
-        "naver/pinpoint-php-aop": "v0.3.1"
+        "naver/pinpoint-php-aop": "v0.3.2"
     }
 ```
 
