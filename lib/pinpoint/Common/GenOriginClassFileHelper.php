@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019 NAVER Corp.
+ * Copyright 2020-present NAVER Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ class GenOriginClassFileHelper extends ClassFile
 {
     private $factory;
 
-    private $classNode; // class { }
-    private $traitNode;
+    private $mClassNode; // class { }
+    private $mTraitNode;
 
     private $extendTraitName;
 
@@ -44,14 +44,15 @@ class GenOriginClassFileHelper extends ClassFile
 
     private $handleMethodNodeLeaveFunc = '';
     private $handleEndTraversFunc='';
+    public $mAopFunInfoAr = [];
 
-    public function __construct($prefix = 'Proxied_')
+    public function __construct(array $aopFuncInfo, $prefix)
     {
         parent::__construct($prefix);
         $this->factory= new BuilderFactory();
-
-        $this->classNode = null;
-        $this->traitNode = null;
+        $this->mAopFunInfoAr = $aopFuncInfo;
+        $this->mClassNode = null;
+        $this->mTraitNode = null;
     }
 
 
@@ -67,21 +68,21 @@ class GenOriginClassFileHelper extends ClassFile
         parent::handleEnterClassNode($node);
 
         $extendClass = $this->prefix.$node->name->toString();
-        $this->classNode  = $this->factory->class(trim($node->name->toString()))->extend($extendClass);
+        $this->mClassNode  = $this->factory->class(trim($node->name->toString()))->extend($extendClass);
         if(!empty($this->namespace))
         {
             // if the proxied_class has namespace, add into use
             // if not, just ignore it . support for yii1
             $fullName = $this->namespace.'\\'.$extendClass;
-            $this->useBlockAr[$fullName] = null;
+            $this->useBlockAr[] = array($fullName,null);
         }
 
         switch($node->flags) {
             case Node\Stmt\Class_::MODIFIER_FINAL:
-                $this->classNode->makeFinal();
+                $this->mClassNode->makeFinal();
                 break;
             case Node\Stmt\Class_::MODIFIER_ABSTRACT:
-                $this->classNode->makeAbstract();
+                $this->mClassNode->makeAbstract();
                 break;
            default:
                 break;
@@ -95,7 +96,7 @@ class GenOriginClassFileHelper extends ClassFile
     {
         assert($node instanceof Node\Stmt\Trait_);
         parent::handleEnterTraitNode($node);
-        $this->traitNode  = $this->factory->trait(trim($node->name->toString()));
+        $this->mTraitNode  = $this->factory->trait(trim($node->name->toString()));
         $this->extendTraitName = $this->prefix.$node->name->toString();
         $this->handleMethodNodeLeaveFunc = 'handleTraitLeaveMethodNode';
         $this->handleEndTraversFunc   = 'handleAfterTraversTrait';
@@ -127,9 +128,9 @@ class GenOriginClassFileHelper extends ClassFile
 
         $namespace = rtrim($namespace,"\\");
         $np = empty($namespace) ? "\\".$className  : $namespace. '\\' . $className;
-
-        if(!in_array($np,$this->useBlockAr)){
-            $this->useBlockAr[$np] =null;
+        $np_ar = [$np,null];
+        if( !static::itemInArray($this->useBlockAr,$np_ar)){
+            $this->useBlockAr[] = $np_ar;
         }
 
         // foo_1
@@ -263,7 +264,18 @@ class GenOriginClassFileHelper extends ClassFile
 
         $thisMethod->addStmt($tryCatchFinallyNode);
 
-        $this->classNode->addStmt($thisMethod);
+        $this->mClassNode->addStmt($thisMethod);
+    }
+
+    public static function itemInArray($ar,$v)
+    {
+        $new = array_filter($ar,function ($a) use($v){
+            if($a == $v){
+                return $a;
+            }
+        });
+
+        return !empty($new);
     }
 
     public function handleTraitLeaveMethodNode(&$node,&$info)
@@ -282,9 +294,10 @@ class GenOriginClassFileHelper extends ClassFile
         $thisFuncName = $node->name->toString();
 
         $np = empty($namespace) ? $className  : $namespace. '\\' . $className;
+        $np_ar = [$np,null];
         // use CommonPlugins\Plugins;
-        if(!in_array($np,$this->useBlockAr)){
-            $this->useBlockAr[$np] = null;
+        if(!static::itemInArray($this->useBlockAr,$np_ar)){
+            $this->useBlockAr[] = $np_ar;
         }
 
         // $this->extendTraitName::$thisFuncName as $this->extendTraitName_$thisFuncName;
@@ -418,13 +431,18 @@ class GenOriginClassFileHelper extends ClassFile
 
         $thisMethod->addStmt($tryCatchFinallyNode);
 
-        $this->traitNode->addStmt($thisMethod);
+        $this->mTraitNode->addStmt($thisMethod);
 
     }
 
-    public function handleLeaveMethodNode(&$node,&$info)
+    public function handleLeaveMethodNode(&$node)
     {
-        call_user_func_array([$this,$this->handleMethodNodeLeaveFunc],[&$node,&$info]);
+        $func = trim( $node->name->toString());
+        if(array_key_exists($func,$this->mAopFunInfoAr))
+        {
+            call_user_func_array([$this,$this->handleMethodNodeLeaveFunc],[&$node,&$this->mAopFunInfoAr[$func]]);
+            unset( $this->mAopFunInfoAr[$func] );
+        }
     }
 
     public function handleAfterTraversClass(&$nodes,&$mFuncAr)
@@ -439,7 +457,7 @@ class GenOriginClassFileHelper extends ClassFile
             if(count($useNodes) > 0){
                 $this->fileNode->addStmts($useNodes);
             }
-            $this->fileNode->addStmt($this->classNode);
+            $this->fileNode->addStmt($this->mClassNode);
             return array($this->fileNode->getNode());
         }else{
             $this->fileNode = [] ;//$this->factory->namespace($this->namespace);
@@ -447,7 +465,7 @@ class GenOriginClassFileHelper extends ClassFile
             {
                 $this->fileNode[] = $node->getNode();
             }
-            $this->fileNode[] = $this->classNode->getNode();
+            $this->fileNode[] = $this->mClassNode->getNode();
             return $this->fileNode;
         }
     }
@@ -455,12 +473,12 @@ class GenOriginClassFileHelper extends ClassFile
     private function useBlockArToNodes(&$stmNode)
     {
 
-        foreach ($this->useBlockAr as $useName=>$useAlias){
+        foreach ($this->useBlockAr as $var){
 
-            if($useAlias){ // the second must be alias : use class as foo
-                $node = $this->factory->use($useName)->as($useAlias);
+            if(isset($var[1])){ // the second must be alias : use class as foo
+                $node = $this->factory->use($var[0])->as($var[1]);
             }else {//== 1
-                $node = $this->factory->use($useName);
+                $node = $this->factory->use($var[0]);
             }
 
             $stmNode[] = $node;
@@ -481,20 +499,20 @@ class GenOriginClassFileHelper extends ClassFile
             $useTraitNode->with($this->factory->traitUseAdaptation($this->extendTraitName,$alias)->as($this->extendTraitName.'_'.$alias));
         }
 
-        $this->traitNode->addStmt($useTraitNode);
+        $this->mTraitNode->addStmt($useTraitNode);
         // todo does need to handle trait without any namespace
         $this->fileNode = $this->factory->namespace($this->namespace)
             ->addStmts($useNodes)
-            ->addStmt($this->traitNode);
+            ->addStmt($this->mTraitNode);
 
         $this->fileName = $this->traitName;
 
         return array($this->fileNode->getNode());
     }
 
-    public function handleAfterTravers(&$nodes,&$mFuncAr)
+    public function handleAfterTravers(&$nodes)
     {
-        return call_user_func_array([$this,$this->handleEndTraversFunc],[&$nodes,&$mFuncAr]);
+        return call_user_func_array([$this,$this->handleEndTraversFunc],[&$nodes,&$this->mAopFunInfoAr]);
     }
 
     function handleLeaveNamespace(&$nodes)
@@ -502,17 +520,13 @@ class GenOriginClassFileHelper extends ClassFile
         // do nothing
     }
 
-    function handlerUseNode(&$nodes)
+    function handlerUseNode(&$node)
     {
-        assert($nodes instanceof Node\Stmt\Use_);
-        foreach ($nodes->uses as $uses)
+        assert($node instanceof Node\Stmt\Use_);
+        foreach ($node->uses as $uses)
         {
-//            $block= array($uses->name->toString());
-//            if(isset($uses->alias)){
-//                $block[]= $uses->alias->name;
-//            }
-
-            $this->useBlockAr[$uses->name->toString()] = $uses->alias ?  $uses->alias->name : null;
+//            $this->useBlockAr[$uses->name->toString()] = $uses->alias ?  $uses->alias->name : null;
+            $this->useBlockAr[] = array($uses->name->toString(),$uses->alias ?  $uses->alias->name : null);
         }
 
     }
