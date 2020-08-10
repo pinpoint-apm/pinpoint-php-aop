@@ -19,6 +19,6 @@
         "phpunit/phpunit": "^7"
     },
     "require": {
-        "nikic/php-parser": "4.10.0"
+        "nikic/php-parser": "^4.1"
     }
 }

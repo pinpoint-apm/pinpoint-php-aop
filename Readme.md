@@ -8,12 +8,12 @@ Add requirement into composer.json
 
 ```Json
     "require": {
-        "pinpoint-apm/pinpoint-php-aop": "v1.0.0"
+        "pinpoint-apm/pinpoint-php-aop": "v2.0.0"
     }
 ```
 
 > Latest
-PHP7: `v1.0.0`
+PHP7: `v2.0.0`
 
 ### Write your plugins
 This is a plugin template for reference.
@@ -50,10 +50,6 @@ class CommonPlugin
 }
 ```
 
-> Example
-
-https://github.com/pinpoint-apm/pinpoint-c-agent/tree/v0.2.2/PHP/pinpoint_php_example/Plugins
-
 ### Activate plugins 
 This could be found in PHP/pinpoint_php_example/app/index.php.
 
@@ -68,13 +64,15 @@ define('AOP_CACHE_DIR',__DIR__.'/Cache/');
 define('PLUGINS_DIR',__DIR__.'/../Plugins/');
 // since 0.2.3 supports user filter when loadering a class.
 define('USER_DEFINED_CLASS_MAP_IMPLEMENT','\Plugins\ClassMapInFile.php');
-// since 0.2.5+ PINPOINT_ENV = dev, auto_pinpointed.php will generate Cache/* on every request. 
-// Recommended in debug mode.
-define('PINPOINT_ENV','dev');
+// since 0.2.5+ PINPOINT_USE_CACHE = N, auto_pinpointed.php will generate Cache/* on every request. 
+define('PINPOINT_USE_CACHE','no');
 // Use pinpoint-php-aop auto_pinpointed.php instead of vendor/autoload.php
 require_once __DIR__. '/../vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
 
 ```
+#### How to use setting.ini
+
+> Read the setting.ini comments
 
 
 ### How it works
