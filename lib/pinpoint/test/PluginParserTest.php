@@ -15,6 +15,13 @@ use pinpoint\Common\PluginParser;
 
 use pinpoint\Plugins\CommonPlugin;
 use pinpoint\Common\Util;
+use pinpoint\test\AccessRemote;
+
+function curl_init()
+{
+    echo "callme \n";
+    return \curl_init();
+}
 
 /**
  * Test findFile
@@ -46,4 +53,11 @@ class PluginParserTest extends TestCase
 //        self::assertEquals($array['app\Foo::curl_init']['mode'] ,7);
 
     }
+
+    public function testCurl()
+    {
+        $ac = new AccessRemote();
+        $ac->gotoUrl("www.example.com");
+    }
+
 }

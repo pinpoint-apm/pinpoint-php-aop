@@ -63,7 +63,6 @@ class GenerateBIHelper
         if ($param->isVariadic())
             $node->makeVariadic();
         elseif ($param->isOptional())
-//            new Node\Name('null')
             $node->setDefault(null);
 
         if($param->isPassedByReference())
