@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019 NAVER Corp.
+ * Copyright 2020-present NAVER Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ class PinpointDriver
                 continue;
             }
 
-            $osr = new OrgClassParse($fullPath,$cl,$info);
+            $osr = new OrgClassParse($fullPath,$info);
             foreach ($osr->classIndex as $clName=>$path)
             {
                 $classMap->insertMapping($clName,$path);

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019 NAVER Corp.
+ * Copyright 2020-present NAVER Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ use PhpParser\Node;
 use PhpParser\BuilderFactory;
 use pinpoint\Common\Util;
 
-
 class OrgClassParse
 {
     private $originFile;
@@ -46,13 +45,10 @@ class OrgClassParse
     private $rawOrigStmts;
 
     public $classIndex = [];
-    public $requiredFile;
 
     public $className;// app\foo\DBManager
 
-    const PRE_FIX = 'Proxied_';
-
-    public $mFuncAr;
+    public $mFuncAr=[];
 
     public $proxiedClassFile;
     public $originClassFile;
@@ -61,15 +57,15 @@ class OrgClassParse
     public $shadowClassPath;
 
 
-    public function __construct($fullPath, $cl, $info)
+    public function __construct($fullPath, $info=null,array $naming=null)
     {
         assert(file_exists($fullPath));
+        if($info)
+        {
+            $this->mFuncAr = $info;
+        }
 
-        $this->className = $cl;
-        $this->mFuncAr = $info;
         $this->originFile = $fullPath;
-
-
         $this->lexer = new Lexer\Emulative([
             'usedAttributes' => [
                 'comments',
@@ -93,8 +89,8 @@ class OrgClassParse
 
         $this->printer = new PrettyPrinter\Standard();
 
-        $this->proxiedClassFile = new GenProxiedClassFileHelper($fullPath,OrgClassParse::PRE_FIX);
-        $this->originClassFile =  new GenOriginClassFileHelper(OrgClassParse::PRE_FIX);
+        $this->proxiedClassFile = new GenProxiedClassFileHelper($fullPath,$naming);
+        $this->originClassFile =  new GenOriginClassFileHelper(CLASS_PREFIX);
 
         $this->parseOriginFile();
     }
@@ -110,21 +106,23 @@ class OrgClassParse
     }
 
     /// convert $node to file
-    public function orgClassNodeDoneCB($node,$fullName)
+    public function proxyFileNodeDoneCB($node, $fullName)
     {
         $fullPath = AOP_CACHE_DIR.'/'.str_replace('\\','/',$fullName).'.php';
         // try to keep blank and filenu
-        $orgClassContext = $this->printer->printFormatPreserving(
-            $node,
-            $this->rawOrigStmts,
-            $this->lexer->getTokens());
+        $orgClassContext =  $this->printer->prettyPrintFile($node);
+
+//        $orgClassContext = $this->printer->printFormatPreserving(
+//            $node,
+//         $this->rawOrigStmts,
+//            $this->lexer->getTokens());
 
         Util::flushStr2File($orgClassContext,$fullPath);
         $this->classIndex[$fullName] = $fullPath;
     }
 
     /// convert $node to file
-    public function shadowClassNodeDoneCB(&$node,$fullName)
+    public function orginFileNodeDoneCB(&$node, $fullName)
     {
         $fullPath = AOP_CACHE_DIR.'/'.str_replace('\\','/',$fullName).'.php';
         $context= $this->printer->prettyPrintFile($node);

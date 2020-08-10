@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019 NAVER Corp.
+ * Copyright 2020-present NAVER Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,14 @@ namespace pinpoint\Common;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
-use pinpoint\Common\GenRequiredBIFileHelper;
+//use pinpoint\Common\GenRequiredBIFileHelper;
 
 class CodeVisitor extends NodeVisitorAbstract
 {
 
     protected $ospIns;
     private $curNamespace;
-    private $curClass;
+    private $curName;
 
     protected $builtInAr = []; // curl_init PDO
 
@@ -41,7 +41,6 @@ class CodeVisitor extends NodeVisitorAbstract
     {
         assert($ospIns instanceof OrgClassParse);
         $this->ospIns = $ospIns;
-        $this->curClass = $ospIns->className;
     }
 
     public function enterNode(Node $node)
@@ -52,46 +51,24 @@ class CodeVisitor extends NodeVisitorAbstract
             /// set namespace
             $this->ospIns->originClassFile->handleEnterNamespaceNode($node);
             $this->ospIns->proxiedClassFile->handleEnterNamespaceNode($node);
-
-            $reqFile = new GenRequiredBIFileHelper($this->curNamespace);
-            foreach ($this->ospIns->mFuncAr as $key => $value)
-            {
-                $ret = Util::isBuiltIn($key);
-
-                if($ret == Util::U_Method){
-                    list($clName,$clMethod) = preg_split ("/[::|\\\]/",$key,-1,PREG_SPLIT_NO_EMPTY);
-                    $this->builtInAr[] = $clName;
-                    $reqFile->extendsMethod($clName,$clMethod,$value);
-                }elseif ($ret == Util::U_Function){
-
-                    list($funcName) = preg_split ("/[\\\]/",$key,-1,PREG_SPLIT_NO_EMPTY);
-                    $this->builtInAr [] = $funcName ;
-                    $reqFile->extendsFunc($funcName,$value);
-                }else{
-                    //do nothing
-                }
-            }
-
-            $reqRelativityFile = str_replace('\\','/', $this->curClass).'_required.php';
-            $reqFile->loadToFile(AOP_CACHE_DIR.$reqRelativityFile);
-            $this->ospIns->requiredFile = AOP_CACHE_DIR.$reqRelativityFile;
-            $this->ospIns->proxiedClassFile->addRequiredFile($reqRelativityFile);
         }
         elseif ($node instanceof Node\Stmt\Use_){
             $this->ospIns->proxiedClassFile->handlerUseNode($node);
             $this->ospIns->originClassFile->handlerUseNode($node);
         }
         elseif ($node instanceof Node\Stmt\Class_){
-
+            if(empty($node->name->toString())){
+                throw new \Exception("can't AOP an anonymous class");
+            }
+            $this->curName = empty($this->curNamespace) ? ($node->name->toString()):($this->curNamespace.'\\'.$node->name->toString());
             $this->ospIns->originClassFile->handleEnterClassNode($node);
             $this->ospIns->proxiedClassFile->handleEnterClassNode($node);
         }
         elseif( $node instanceof Node\Stmt\Trait_){
-            if( $this->curNamespace.'\\'.$node->name->toString() != $this->curClass)
-            {
-                // ignore uncared
-                return NodeTraverser::DONT_TRAVERSE_CHILDREN;
+            if(empty($node->name->toString())){
+                throw new \Exception("can't AOP an anonymous trait");
             }
+            $this->curName = empty($this->curNamespace) ? ($node->name->toString()):($this->curNamespace.'\\'.$node->name->toString());
 
             $this->ospIns->proxiedClassFile->handleEnterTraitNode($node);
             $this->ospIns->originClassFile->handleEnterTraitNode($node);
@@ -130,8 +107,7 @@ class CodeVisitor extends NodeVisitorAbstract
             return $this->ospIns->proxiedClassFile->handleFullyQualifiedNode($node);
         }
         elseif ($node instanceof Node\Scalar\MagicConst){
-
-            $this->ospIns->proxiedClassFile->handleMagicConstNode($node);
+            return $this->ospIns->proxiedClassFile->handleMagicConstNode($node);
         }elseif ($node instanceof Node\Stmt\Namespace_){
             return $this->ospIns->proxiedClassFile->handleLeaveNamespace($node);
         }
@@ -146,10 +122,14 @@ class CodeVisitor extends NodeVisitorAbstract
         elseif ($node instanceof Node\Stmt\UseUse){
             /// scene : use \PDO
             ///        replace \PDO to \Np\PDO
-            if( in_array($node->name->toString(),$this->builtInAr))
-            {
-                $node->name   = new Node\Name($this->curNamespace.'\\'.$node->name->toString());
-            }
+//            if( in_array($node->name->toString(),$this->builtInAr))
+//            {
+//                $node->name   = new Node\Name($this->curNamespace.'\\'.$node->name->toString());
+//            }
+
+//            $this->ospIns->proxiedClassFile->handlerUseUseNode($node);
+
+
             return $node;
         }
     }
@@ -159,12 +139,12 @@ class CodeVisitor extends NodeVisitorAbstract
         $node = $this->ospIns->proxiedClassFile->handleAfterTravers($nodes,
             $this->ospIns->mFuncAr);
 
-        $this->ospIns->orgClassNodeDoneCB($node,$this->ospIns->proxiedClassFile->name);
+        $this->ospIns->proxyFileNodeDoneCB($node,$this->ospIns->proxiedClassFile->name);
 
         $node = $this->ospIns->originClassFile->handleAfterTravers($nodes,
             $this->ospIns->mFuncAr);
 
-        $this->ospIns->shadowClassNodeDoneCB($node,$this->ospIns->originClassFile->fileName);
+        $this->ospIns->orginFileNodeDoneCB($node,$this->ospIns->originClassFile->fileName);
 
     }
 

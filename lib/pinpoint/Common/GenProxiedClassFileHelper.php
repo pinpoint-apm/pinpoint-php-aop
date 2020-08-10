@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019 NAVER Corp.
+ * Copyright 2020-present NAVER Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,15 +32,20 @@ class GenProxiedClassFileHelper extends ClassFile
 
     protected $orgDir;
     protected $orgFile;
+    protected $useBlockAr=[];
+    protected $t_clName=[];
+    protected $t_funName=[];
 
-
-    public function __construct($fullFile,$internalFuncs,$prefix = 'Proxied_')
+    public function __construct($fullFile,array $naming=null)
     {
-        parent::__construct($prefix);
+        parent::__construct(CLASS_PREFIX);
 
         $this->orgDir = dirname($fullFile);
         $this->orgFile = $fullFile;
-        $this->prefix = $prefix;
+        if($naming){
+            $this->t_clName  = $naming['classCall'];
+            $this->t_funName = $naming['funCall'];
+        }
     }
 
 
@@ -50,7 +55,7 @@ class GenProxiedClassFileHelper extends ClassFile
     public function handleLeaveClassNode(&$node)
     {
         assert($node instanceof Node\Stmt\Class_);
-        $className =$this->prefix.$node->name->toString();
+        $className = $this->prefix.$node->name->toString();
 
         $node->name = new Node\Identifier($className);
 
@@ -111,11 +116,7 @@ class GenProxiedClassFileHelper extends ClassFile
 
     public function addRequiredFile($fullName)
     {
-        // modify the namespace
-        if(!in_array($fullName,$this->appendingFile))
-        {
-            $this->appendingFile[] = $fullName;
-        }
+
     }
 
     public function handleMagicConstNode(&$node)
@@ -124,59 +125,82 @@ class GenProxiedClassFileHelper extends ClassFile
         {
             case '__FILE__':
                 return new Node\Scalar\String_($this->orgFile);
-                break;
             case '__DIR__':
                 return new Node\Scalar\String_($this->orgDir);
-                break;
             case '__FUNCTION__':
                 return new Node\Scalar\String_($this->classMethod);
-                break;
             case '__CLASS__':
                 return new Node\Scalar\String_($this->className);
-                break;
             case '__METHOD__':
                 return new Node\Scalar\String_($this->classMethod);
-                break;
             case '__NAMESPACE__':
                 return new Node\Scalar\String_($this->namespace);
-                break;
+            case '__LINE__':
+                return new Node\Scalar\LNumber($node->getAttribute('startLine'));
+//                return new Node\Scalar\String_($node);
+
             default:
                 break;
         }
-
+        return $node;
     }
 
 
     public function handleLeaveNamespace(&$nodes)
     {
-        //todo
-        // This is just a temporary solution,just some tricks on origNode.
-        // Maybe one day php-parse could handle such scene
-        assert($nodes instanceof Node\Stmt\Namespace_);
-        foreach ($this->appendingFile as $fullPath)
-        {
-            $expression= new Node\Stmt\Expression(
-                new Node\Expr\Include_(
-                    new Node\Expr\BinaryOp\Concat(new Node\Expr\ConstFetch( new Node\Name("AOP_CACHE_DIR")),new Node\Scalar\String_($fullPath))
-                    ,Node\Expr\Include_::TYPE_REQUIRE
-                ), ['startTokenPos'=>$nodes->getStartTokenPos(),'endTokenPos'=> $nodes->getEndTokenPos()]
-            );
-            $nodes->stmts[]  = $expression;
-            $originNode = $nodes->getAttribute("origNode");
-            $originNode->stmts[] = $expression;
-        }
-
         return $nodes;
     }
 
     public function handleAfterTravers(&$nodes,&$mFuncAr)
     {
-
         return $nodes;
     }
 
-    function handlerUseNode(&$nodes)
+    function handlerUseUseNode(&$node)
     {
-        // do nothing
+        $fullName = trim($node->name->toString(),"\ \\");
+        if($node->type == Node\Stmt\Use_::TYPE_FUNCTION){
+            if(isset($this->t_funName[$fullName])){
+                $newName = new Node\Name($this->t_funName[$fullName]);
+                $node->name = $newName;
+            }
+        }
+        else{ // normal and unknow
+            if(isset($this->t_clName[$fullName])){
+                $newName = new Node\Name($this->t_clName[$fullName]);
+                $node->name = $newName;
+            }
+        }
+    }
+
+    function handlerUseNode(&$node)
+    {
+        //rename the nodes
+        assert($node instanceof Node\Stmt\Use_);
+        $type = $node->type;
+        if($type == Node\Stmt\Use_::TYPE_CONSTANT){
+            return ;
+        }
+
+        foreach ($node->uses as &$uses)
+        {
+            $fullName = trim($uses->name->toString(),"\ \\");
+            $attributes = $uses->name->getAttributes();
+            if($type == Node\Stmt\Use_::TYPE_FUNCTION){
+                if(isset($this->t_funName[$fullName])){
+                    $newName = new Node\Name($this->t_funName[$fullName],
+                        $attributes  );
+                    $uses->name = $newName;
+                }
+            }
+            else{ // normal and unknow
+                if(isset($this->t_clName[$fullName])){
+                    $newName = new Node\Name($this->t_clName[$fullName],
+                        $attributes  );
+                    $uses->name = $newName;
+                }
+            }
+        }
+
     }
 }

@@ -14,6 +14,8 @@ if(defined('USER_DEFINED_CLASS_MAP_IMPLEMENT'))
     $classMap = new AopClassMap();
 }
 
+define('CLASS_PREFIX','Proxied_');
+
 PinpointDriver::getInstance()->init($classMap);
 
 if(class_exists("\Plugins\PerRequestPlugins")){

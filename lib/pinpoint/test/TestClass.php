@@ -16,6 +16,8 @@ abstract class TestClass
     public function foo($a,$b,$v,$d) :array
     {
         echo date("y-m-d");
+        echo __FUNCTION__;
+        echo __LINE__;
         return [$a,$b,$v,$d];
     }
 

@@ -15,6 +15,7 @@ define('PLUGINS_DIR',__DIR__.'/Plugins/');
  */
 class ClassParseTest extends TestCase
 {
+    public static  $naming=[];
     public static function cleanDir($dirName)
     {
         $files = glob($dirName."*",GLOB_MARK);
@@ -32,27 +33,37 @@ class ClassParseTest extends TestCase
     public static function setUpBeforeClass()
     {
         static::cleanDir(AOP_CACHE_DIR);
+
+        static::$naming = [
+            'classCall'=>[
+                'PDO'=>'plugins\\PDO',
+                'type03'=>'plugins\\type03',
+                'test\\curl'=>'plugins\\test\\curl',
+                'test\\type1'=>'plugins\\test\\type1',
+                'app\\curl_init_01'=>'plugins\\app\\curl_init_01'
+            ],
+            'funCall'=>[
+                'curl_init'=>'plugins\\curl_init',
+                'app\\foo\\curl_02'=>'plugins\\app\\foo\\curl_02',
+                'app\\foo\\curl_03'=>'plugins\\app\\foo\\curl_03'
+            ]
+        ];
     }
 
     public function testTrait()
     {
         $fullpath =__DIR__.'/TestTrait.php';
-        $cl = "pinpoint\\test\\TestTrait";
         $info = [
             'getReturnType'=>[7,'pinpoint\\test','traitTestPlugin']
         ];
 
-        $osr = new OrgClassParse($fullpath,$cl,$info);
+        $osr = new OrgClassParse($fullpath,$info,static::$naming);
 
         foreach ($osr->classIndex as $class => $location)
         {
             $exp = str_replace('Cache','Comparison',$location);
             self::assertFileEquals($exp,$location);
         }
-
-        $requireFile = $osr->requiredFile;
-        $expRequired= str_replace('Cache','Comparison',$requireFile);
-        self::assertFileEquals($requireFile,$expRequired);
     }
 
     public function testClass()
@@ -75,7 +86,7 @@ class ClassParseTest extends TestCase
         ];
 
 
-        $osr = new OrgClassParse($fullpath,$cl,$info);
+        $osr = new OrgClassParse($fullpath,$info,static::$naming);
 
         foreach ($osr->classIndex as $class => $location)
         {
@@ -83,8 +94,17 @@ class ClassParseTest extends TestCase
             self::assertFileEquals($exp,$location);
         }
 
-        $requireFile = $osr->requiredFile;
-        $expRequired= str_replace('Cache','Comparison',$requireFile);
-        self::assertFileEquals($requireFile,$expRequired);
+    }
+
+    public function testNamingReplace()
+    {
+        $fullpath =__DIR__.'/Foo.php';
+        $osr = new OrgClassParse($fullpath,null,static::$naming);
+        foreach ($osr->classIndex as $class => $location)
+        {
+            $exp = str_replace('Cache','Comparison',$location);
+            self::assertFileEquals($exp,$location);
+        }
+
     }
 }
