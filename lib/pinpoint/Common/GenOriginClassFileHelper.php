@@ -68,7 +68,13 @@ class GenOriginClassFileHelper extends ClassFile
 
         $extendClass = $this->prefix.$node->name->toString();
         $this->classNode  = $this->factory->class(trim($node->name->toString()))->extend($extendClass);
-        $this->useBlockAr[$this->namespace.'\\'.$extendClass] = null;
+        if(!empty($this->namespace))
+        {
+            // if the proxied_class has namespace, add into use
+            // if not, just ignore it . support for yii1
+            $fullName = $this->namespace.'\\'.$extendClass;
+            $this->useBlockAr[$fullName] = null;
+        }
 
         switch($node->flags) {
             case Node\Stmt\Class_::MODIFIER_FINAL:
@@ -119,7 +125,8 @@ class GenOriginClassFileHelper extends ClassFile
 
         list($mode, $namespace, $className) = $info;
 
-        $np = $namespace . '\\' . $className;
+        $namespace = rtrim($namespace,"\\");
+        $np = empty($namespace) ? "\\".$className  : $namespace. '\\' . $className;
 
         if(!in_array($np,$this->useBlockAr)){
             $this->useBlockAr[$np] =null;
@@ -274,7 +281,7 @@ class GenOriginClassFileHelper extends ClassFile
         // foo_1
         $thisFuncName = $node->name->toString();
 
-        $np = $namespace . '\\' . $className;
+        $np = empty($namespace) ? $className  : $namespace. '\\' . $className;
         // use CommonPlugins\Plugins;
         if(!in_array($np,$this->useBlockAr)){
             $this->useBlockAr[$np] = null;
@@ -420,27 +427,29 @@ class GenOriginClassFileHelper extends ClassFile
         call_user_func_array([$this,$this->handleMethodNodeLeaveFunc],[&$node,&$info]);
     }
 
-
-
-
     public function handleAfterTraversClass(&$nodes,&$mFuncAr)
     {
         $useNodes = [];
-
-        $this->useBlockArToNodes($useNodes);
-
-        $this->fileNode = $this->factory->namespace($this->namespace);
-
-        if(count($useNodes) > 0){
-
-            $this->fileNode->addStmts($useNodes);
-        }
-
-        $this->fileNode->addStmt($this->classNode);
-
         $this->fileName = $this->className;
 
-        return $this->fileNode->getNode();
+        $this->useBlockArToNodes($useNodes);
+        if( !empty($this->namespace))
+        {
+            $this->fileNode = $this->factory->namespace($this->namespace);
+            if(count($useNodes) > 0){
+                $this->fileNode->addStmts($useNodes);
+            }
+            $this->fileNode->addStmt($this->classNode);
+            return array($this->fileNode->getNode());
+        }else{
+            $this->fileNode = [] ;//$this->factory->namespace($this->namespace);
+            foreach ($useNodes as $node)
+            {
+                $this->fileNode[] = $node->getNode();
+            }
+            $this->fileNode[] = $this->classNode->getNode();
+            return $this->fileNode;
+        }
     }
 
     private function useBlockArToNodes(&$stmNode)
@@ -473,14 +482,14 @@ class GenOriginClassFileHelper extends ClassFile
         }
 
         $this->traitNode->addStmt($useTraitNode);
-
+        // todo does need to handle trait without any namespace
         $this->fileNode = $this->factory->namespace($this->namespace)
             ->addStmts($useNodes)
             ->addStmt($this->traitNode);
 
         $this->fileName = $this->traitName;
 
-        return $this->fileNode->getNode();
+        return array($this->fileNode->getNode());
     }
 
     public function handleAfterTravers(&$nodes,&$mFuncAr)
