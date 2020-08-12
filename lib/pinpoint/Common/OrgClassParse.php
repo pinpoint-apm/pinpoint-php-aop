@@ -126,9 +126,8 @@ class OrgClassParse
     /// convert $node to file
     public function shadowClassNodeDoneCB(&$node,$fullName)
     {
-
         $fullPath = AOP_CACHE_DIR.'/'.str_replace('\\','/',$fullName).'.php';
-        $context= $this->printer->prettyPrintFile(array($node));
+        $context= $this->printer->prettyPrintFile($node);
         Util::flushStr2File($context,$fullPath);
         $this->classIndex[$fullName] = $fullPath;
     }
