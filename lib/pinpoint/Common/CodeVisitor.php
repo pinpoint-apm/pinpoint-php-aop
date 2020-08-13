@@ -84,6 +84,13 @@ class CodeVisitor extends NodeVisitorAbstract
         elseif ($node instanceof Node\Expr\Yield_){
             $this->ospIns->originClassFile->markHasYield($node);
         }
+        elseif ($node instanceof Node\Expr\ClassConstFetch){
+            return $this->ospIns->proxiedClassFile->handleEnterClassConstFetch($node);
+        }elseif ($node instanceof  Node\Expr\New_){
+            return $this->ospIns->proxiedClassFile->handleEnterNew_($node);
+        }elseif ($node instanceof Node\Expr\FuncCall){
+            return $this->ospIns->proxiedClassFile->handleEnterFuncCall($node);
+        }
     }
 
 
@@ -111,10 +118,8 @@ class CodeVisitor extends NodeVisitorAbstract
         }elseif ($node instanceof Node\Stmt\Namespace_){
             return $this->ospIns->proxiedClassFile->handleLeaveNamespace($node);
         }
-        elseif ($node instanceof Node\Stmt\Class_){
-
+        elseif ($node instanceof Node\Stmt\Class_) {
             $this->ospIns->proxiedClassFile->handleLeaveClassNode($node);
-
         }elseif ($node instanceof Node\Stmt\Trait_){
 
             $this->ospIns->proxiedClassFile->handleLeaveTraitNode($node);

@@ -43,12 +43,12 @@ abstract class Proxied_TestClass
     }
     public function fooTestBi()
     {
-        $ch = \curl_init();
+        $ch = \plugins\curl_init();
         \curl_exec($ch);
         curl_close();
         $username = '2343';
         $passwd = "152351";
-        $mysql = new \PDO("mysql:host=localhost;dbname=user", $username, $passwd);
+        $mysql = new \plugins\PDO("mysql:host=localhost;dbname=user", $username, $passwd);
         $mysql->query('SELECT name, color, calories FROM fruit ORDER BY name');
     }
     protected function fooTestACPrivate()

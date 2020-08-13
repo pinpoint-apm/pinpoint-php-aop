@@ -46,7 +46,9 @@ class ClassParseTest extends TestCase
                 'curl_init'=>'plugins\\curl_init',
                 'app\\foo\\curl_02'=>'plugins\\app\\foo\\curl_02',
                 'app\\foo\\curl_03'=>'plugins\\app\\foo\\curl_03'
-            ]
+            ],
+            'ignoreFiles'=>["pinpoint\\test\\BlackList"],
+            'forceRenderFiles'=>[""]
         ];
     }
 
@@ -56,8 +58,8 @@ class ClassParseTest extends TestCase
         $info = [
             'getReturnType'=>[7,'pinpoint\\test','traitTestPlugin']
         ];
-
-        $osr = new OrgClassParse($fullpath,$info,static::$naming);
+        // test empty naming
+        $osr = new OrgClassParse($fullpath,$info);
 
         foreach ($osr->classIndex as $class => $location)
         {
@@ -105,6 +107,18 @@ class ClassParseTest extends TestCase
             $exp = str_replace('Cache','Comparison',$location);
             self::assertFileEquals($exp,$location);
         }
-
     }
+
+    public function testIgnoreList()
+    {
+//        $fullpath =__DIR__.'/Foo.php';
+//        $osr = new OrgClassParse($fullpath,null,static::$naming);
+//        foreach ($osr->classIndex as $class => $location)
+//        {
+//            $exp = str_replace('Cache','Comparison',$location);
+//            self::assertFileEquals($exp,$location);
+//        }
+        self::assertTrue(true);
+    }
+
 }

@@ -7,7 +7,8 @@ use type03;
 
 use function app\foo\curl_02 as curl_02;
 use function app\foo\curl_03;
-
+use \PDO;
+use \PDO as TPDO;
 
 class Foo
 {
@@ -25,11 +26,19 @@ class Foo
 
     public function  testPDO()
     {
-        $pdo = new PDO('xx','xx','xx');
+        $pdo = new \PDO('xx','xx','xx');
+        $pdo2 = new PDO('xx','xx','xx');
+        return [$pdo,$pdo2];
     }
 
     public function __destruct()
     {
 
+    }
+
+    public function returnPDO()
+    {
+        $pdoClass=\PDO::class;
+        return TPDO::class;
     }
 }

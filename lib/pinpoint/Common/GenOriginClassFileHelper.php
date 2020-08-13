@@ -73,7 +73,7 @@ class GenOriginClassFileHelper extends ClassFile
             // if the proxied_class has namespace, add into use
             // if not, just ignore it . support for yii1
             $fullName = $this->namespace.'\\'.$extendClass;
-            $this->useBlockAr[$fullName] = null;
+            $this->useBlockAr[] = array($fullName,null);
         }
 
         switch($node->flags) {
@@ -127,9 +127,9 @@ class GenOriginClassFileHelper extends ClassFile
 
         $namespace = rtrim($namespace,"\\");
         $np = empty($namespace) ? "\\".$className  : $namespace. '\\' . $className;
-
-        if(!in_array($np,$this->useBlockAr)){
-            $this->useBlockAr[$np] =null;
+        $np_ar = [$np,null];
+        if( !static::itemInArray($this->useBlockAr,$np_ar)){
+            $this->useBlockAr[] = $np_ar;
         }
 
         // foo_1
@@ -266,6 +266,17 @@ class GenOriginClassFileHelper extends ClassFile
         $this->classNode->addStmt($thisMethod);
     }
 
+    public static function itemInArray($ar,$v)
+    {
+        $new = array_filter($ar,function ($a) use($v){
+            if($a == $v){
+                return $a;
+            }
+        });
+
+        return !empty($new);
+    }
+
     public function handleTraitLeaveMethodNode(&$node,&$info)
     {
         /// todo this func looks ugly
@@ -282,9 +293,10 @@ class GenOriginClassFileHelper extends ClassFile
         $thisFuncName = $node->name->toString();
 
         $np = empty($namespace) ? $className  : $namespace. '\\' . $className;
+        $np_ar = [$np,null];
         // use CommonPlugins\Plugins;
-        if(!in_array($np,$this->useBlockAr)){
-            $this->useBlockAr[$np] = null;
+        if(!static::itemInArray($this->useBlockAr,$np_ar)){
+            $this->useBlockAr[] = $np_ar;
         }
 
         // $this->extendTraitName::$thisFuncName as $this->extendTraitName_$thisFuncName;
@@ -455,12 +467,12 @@ class GenOriginClassFileHelper extends ClassFile
     private function useBlockArToNodes(&$stmNode)
     {
 
-        foreach ($this->useBlockAr as $useName=>$useAlias){
+        foreach ($this->useBlockAr as $var){
 
-            if($useAlias){ // the second must be alias : use class as foo
-                $node = $this->factory->use($useName)->as($useAlias);
+            if(isset($var[1])){ // the second must be alias : use class as foo
+                $node = $this->factory->use($var[0])->as($var[1]);
             }else {//== 1
-                $node = $this->factory->use($useName);
+                $node = $this->factory->use($var[0]);
             }
 
             $stmNode[] = $node;
@@ -507,7 +519,8 @@ class GenOriginClassFileHelper extends ClassFile
         assert($node instanceof Node\Stmt\Use_);
         foreach ($node->uses as $uses)
         {
-            $this->useBlockAr[$uses->name->toString()] = $uses->alias ?  $uses->alias->name : null;
+//            $this->useBlockAr[$uses->name->toString()] = $uses->alias ?  $uses->alias->name : null;
+            $this->useBlockAr[] = array($uses->name->toString(),$uses->alias ?  $uses->alias->name : null);
         }
 
     }

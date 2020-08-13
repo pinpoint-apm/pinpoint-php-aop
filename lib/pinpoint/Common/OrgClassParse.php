@@ -57,9 +57,13 @@ class OrgClassParse
     public $shadowClassPath;
 
 
-    public function __construct($fullPath, $info=null,array $naming=null)
+    public function __construct($fullPath,$info=null,array $naming=null)
     {
-        assert(file_exists($fullPath));
+        if(!file_exists($fullPath))
+        {
+            throw new \Exception("$fullPath not found");
+        }
+
         if($info)
         {
             $this->mFuncAr = $info;
@@ -111,11 +115,6 @@ class OrgClassParse
         $fullPath = AOP_CACHE_DIR.'/'.str_replace('\\','/',$fullName).'.php';
         // try to keep blank and filenu
         $orgClassContext =  $this->printer->prettyPrintFile($node);
-
-//        $orgClassContext = $this->printer->printFormatPreserving(
-//            $node,
-//         $this->rawOrigStmts,
-//            $this->lexer->getTokens());
 
         Util::flushStr2File($orgClassContext,$fullPath);
         $this->classIndex[$fullName] = $fullPath;

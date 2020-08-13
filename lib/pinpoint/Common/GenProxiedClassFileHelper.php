@@ -29,12 +29,11 @@ use pinpoint\Common\ClassFile;
 
 class GenProxiedClassFileHelper extends ClassFile
 {
-
     protected $orgDir;
     protected $orgFile;
     protected $useBlockAr=[];
-    protected $t_clName=[];
-    protected $t_funName=[];
+    protected $t_covertCls=[];
+    protected $t_covertFuns=[];
 
     public function __construct($fullFile,array $naming=null)
     {
@@ -43,9 +42,45 @@ class GenProxiedClassFileHelper extends ClassFile
         $this->orgDir = dirname($fullFile);
         $this->orgFile = $fullFile;
         if($naming){
-            $this->t_clName  = $naming['classCall'];
-            $this->t_funName = $naming['funCall'];
+            $this->t_covertCls  = $naming['classCall'];
+            $this->t_covertFuns = $naming['funCall'];
         }
+    }
+
+    public function renderClassName(&$node,$filer)
+    {
+        if($node instanceof Node\Name\FullyQualified) // \PDO()
+        {
+            $classFullName = $node->toString();
+            if(isset( $filer[$classFullName]))
+            {
+                $newName =$filer[$classFullName];
+                return new Node\Name\FullyQualified($newName);
+            }
+        }
+        return $node;
+    }
+
+    public function handleEnterFuncCall(&$node)
+    {
+        assert($node instanceof Node\Expr\FuncCall);
+        $node->name =  $this->renderClassName($node->name,$this->t_covertFuns);
+        return $node;
+    }
+
+
+    public function handleEnterNew_(&$node)
+    {
+        assert($node instanceof Node\Expr\New_);
+        $node->class =  $this->renderClassName($node->class,$this->t_covertCls);
+        return $node;
+
+    }
+    public function handleEnterClassConstFetch(&$node)
+    {
+        assert($node instanceof Node\Expr\ClassConstFetch);
+        $node->class =  $this->renderClassName($node->class,$this->t_covertCls);
+        return $node;
     }
 
 
@@ -137,8 +172,6 @@ class GenProxiedClassFileHelper extends ClassFile
                 return new Node\Scalar\String_($this->namespace);
             case '__LINE__':
                 return new Node\Scalar\LNumber($node->getAttribute('startLine'));
-//                return new Node\Scalar\String_($node);
-
             default:
                 break;
         }
@@ -158,19 +191,19 @@ class GenProxiedClassFileHelper extends ClassFile
 
     function handlerUseUseNode(&$node)
     {
-        $fullName = trim($node->name->toString(),"\ \\");
-        if($node->type == Node\Stmt\Use_::TYPE_FUNCTION){
-            if(isset($this->t_funName[$fullName])){
-                $newName = new Node\Name($this->t_funName[$fullName]);
-                $node->name = $newName;
-            }
-        }
-        else{ // normal and unknow
-            if(isset($this->t_clName[$fullName])){
-                $newName = new Node\Name($this->t_clName[$fullName]);
-                $node->name = $newName;
-            }
-        }
+//        $fullName = trim($node->name->toString(),"\ \\");
+//        if($node->type == Node\Stmt\Use_::TYPE_FUNCTION){
+//            if(isset($this->t_funName[$fullName])){
+//                $newName = new Node\Name($this->t_funName[$fullName]);
+//                $node->name = $newName;
+//            }
+//        }
+//        else{ // normal and unknow
+//            if(isset($this->t_clName[$fullName])){
+//                $newName = new Node\Name($this->t_clName[$fullName]);
+//                $node->name = $newName;
+//            }
+//        }
     }
 
     function handlerUseNode(&$node)
@@ -185,18 +218,15 @@ class GenProxiedClassFileHelper extends ClassFile
         foreach ($node->uses as &$uses)
         {
             $fullName = trim($uses->name->toString(),"\ \\");
-            $attributes = $uses->name->getAttributes();
             if($type == Node\Stmt\Use_::TYPE_FUNCTION){
-                if(isset($this->t_funName[$fullName])){
-                    $newName = new Node\Name($this->t_funName[$fullName],
-                        $attributes  );
+                if(isset($this->t_covertFuns[$fullName])){
+                    $newName = new Node\Name($this->t_covertFuns[$fullName]);
                     $uses->name = $newName;
                 }
             }
             else{ // normal and unknow
-                if(isset($this->t_clName[$fullName])){
-                    $newName = new Node\Name($this->t_clName[$fullName],
-                        $attributes  );
+                if(isset($this->t_covertCls[$fullName])){
+                    $newName = new Node\Name($this->t_covertCls[$fullName]);
                     $uses->name = $newName;
                 }
             }

@@ -8,6 +8,8 @@ use plugins\test\type1;
 use plugins\type03;
 use plugins\app\foo\curl_02 as curl_02;
 use plugins\app\foo\curl_03;
+use plugins\PDO;
+use plugins\PDO as TPDO;
 use pinpoint\test\Proxied_Foo;
 class Foo extends Proxied_Foo
 {
