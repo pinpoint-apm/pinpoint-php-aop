@@ -22,23 +22,22 @@
  */
 
 namespace pinpoint\Common;
-use pinpoint\Common\OrgClassParse;
-use pinpoint\Common\PinpointClassLoader;
-use pinpoint\Common\AopClassMap;
-use pinpoint\Common\PluginParser;
 
 class PinpointDriver
 {
     protected static $instance;
     protected $clAr;
-    protected $classMap;
+    protected $classMap = null;
+    private $iniFile='';
 
-    /**
-     * @return mixed
-     */
-    public function getClassMap()
+    public function insertLoaderMap(string $name,string $path)
     {
-        return $this->classMap;
+        $this->classMap->insertMapping($name,$path);
+    }
+
+    public function getLoaderMap()
+    {
+        return $this->classMap->getLoadeMap();
     }
 
     public static function getInstance(){
@@ -50,19 +49,25 @@ class PinpointDriver
         return self::$instance;
     }
 
-    public function __construct()
+    final private function __construct()
     {
         $this->clAr = [];
+        $this->classMap = new AopClassMap();
+        $this->iniFile = PLUGINS_DIR."/setting.ini";
     }
 
     public function init(AopClassMap $classMap)
     {
+        // get class index map
+        $this->classMap = $classMap;
+
         /// checking the cached file exist, if exist load it
-        if(!$classMap->updateSelf())
+        if(!$this->classMap->updateSelf())
         {
             PinpointClassLoader::init($classMap);
             return ;
         }
+        $visitor =  new OriginFileVisitor();
 
         $pluFiles = glob(PLUGINS_DIR."/*Plugin.php");
         $pluParsers = [];
@@ -70,30 +75,53 @@ class PinpointDriver
         {
             $pluParsers[] = new PluginParser($file,$this->clAr);
         }
-        foreach ($this->clAr as $cl=> $info)
+        /// there hidden a duplicated visit, class locates in @hook and appendFiles.
+        /// while, it's safe to visit a class/file in appendfiles and @hook order
+        $naming = [];
+        if(file_exists($this->iniFile))
         {
-            if(empty($cl))
-            {
-                continue;
-            }
+            $nConf = new  NamingConf($this->iniFile);
+            $naming = $nConf->getConf();
 
-            $fullPath = Util::findFile($cl);
-            if(!$fullPath)
+            if(isset($naming['appendFiles']))
             {
-                continue;
-            }
-
-            $osr = new OrgClassParse($fullPath,$info);
-            foreach ($osr->classIndex as $clName=>$path)
-            {
-                $classMap->insertMapping($clName,$path);
+                foreach ($naming['appendFiles'] as $class)
+                {
+                    $fullPath = Util::findFile($class);
+                    if(!$fullPath)
+                        continue;
+                    try
+                    {
+                        $visitor->runAllVisitor($fullPath,[],$naming);
+                    }catch (\Exception $e){
+                    }
+                }
             }
         }
 
-        $classMap->persistenceClassMapping();
 
-        PinpointClassLoader::init($classMap);
+        foreach ($this->clAr as $class=> $aopFuncInfo)
+        {
+            if(empty($class))
+                continue;
 
+            $fullPath = Util::findFile($class);
+            if(!$fullPath )
+                continue;
+            try
+            {
+                if(isset($naming['ignoreFiles']) && in_array($class,$naming['ignoreFiles'])){
+                    $visitor->runAllVisitor($fullPath,$aopFuncInfo);
+                }else{
+                    $visitor->runAllVisitor($fullPath,$aopFuncInfo,$naming);
+                }
+            }catch (\Exception $e){
+
+            }
+        }
+
+        $this->classMap->persistenceClassMapping();
+        PinpointClassLoader::init($this->classMap);
     }
 
 

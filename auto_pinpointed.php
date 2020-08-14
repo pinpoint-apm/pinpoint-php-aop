@@ -10,8 +10,6 @@ if(defined('USER_DEFINED_CLASS_MAP_IMPLEMENT'))
     $className = USER_DEFINED_CLASS_MAP_IMPLEMENT;
     $classMap = new $className();
     assert($classMap instanceof AopClassMap);
-}else{
-    $classMap = new AopClassMap();
 }
 
 define('CLASS_PREFIX','Proxied_');

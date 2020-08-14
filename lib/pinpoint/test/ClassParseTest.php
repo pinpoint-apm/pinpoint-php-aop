@@ -2,8 +2,10 @@
 
 namespace pinpoint\test;
 require_once 'bootstrap.php';
-use pinpoint\Common\OrgClassParse;
+use pinpoint\Common\OriginFileVisitor;
 use PHPUnit\Framework\TestCase;
+use pinpoint\Common\PinpointDriver;
+use pinpoint\Common\NamingConf;
 
 define('AOP_CACHE_DIR',__DIR__.'/Cache/');
 define('PLUGINS_DIR',__DIR__.'/Plugins/');
@@ -34,22 +36,26 @@ class ClassParseTest extends TestCase
     {
         static::cleanDir(AOP_CACHE_DIR);
 
-        static::$naming = [
-            'classCall'=>[
-                'PDO'=>'plugins\\PDO',
-                'type03'=>'plugins\\type03',
-                'test\\curl'=>'plugins\\test\\curl',
-                'test\\type1'=>'plugins\\test\\type1',
-                'app\\curl_init_01'=>'plugins\\app\\curl_init_01'
-            ],
-            'funCall'=>[
-                'curl_init'=>'plugins\\curl_init',
-                'app\\foo\\curl_02'=>'plugins\\app\\foo\\curl_02',
-                'app\\foo\\curl_03'=>'plugins\\app\\foo\\curl_03'
-            ],
-            'ignoreFiles'=>["pinpoint\\test\\BlackList"],
-            'forceRenderFiles'=>[""]
-        ];
+// template for dst conf
+//        $dst = [
+//            'classCall'=>[
+//                'PDO'=>'plugins\\PDO',
+//                'type03'=>'plugins\\type03',
+//                'test\\curl'=>'plugins\\test\\curl',
+//                'test\\type1'=>'plugins\\test\\type1',
+//                'app\\curl_init_01'=>'plugins\\app\\curl_init_01'
+//            ],
+//            'funCall'=>[
+//                'curl_init'=>'plugins\\curl_init',
+//                'app\\foo\\curl_02'=>'plugins\\app\\foo\\curl_02',
+//                'app\\foo\\curl_03'=>'plugins\\app\\foo\\curl_03'
+//            ],
+//            'ignoreFiles'=>["pinpoint\\test\\IgnoreClass"],
+//            'appendFiles'=>["pinpoint\\test\\AddClass"]
+//        ];
+
+        $nConf =new NamingConf(__DIR__.'/setting.ini');
+        static::$naming = $nConf->getConf();
     }
 
     public function testTrait()
@@ -59,9 +65,11 @@ class ClassParseTest extends TestCase
             'getReturnType'=>[7,'pinpoint\\test','traitTestPlugin']
         ];
         // test empty naming
-        $osr = new OrgClassParse($fullpath,$info);
+        $visitor = new OriginFileVisitor();
 
-        foreach ($osr->classIndex as $class => $location)
+        $visitor->runAllVisitor($fullpath,$info);
+
+        foreach ( PinpointDriver::getInstance()->getLoaderMap() as $class => $location)
         {
             $exp = str_replace('Cache','Comparison',$location);
             self::assertFileEquals($exp,$location);
@@ -71,7 +79,6 @@ class ClassParseTest extends TestCase
     public function testClass()
     {
         $fullpath =__DIR__.'/TestClass.php';
-        $cl = "pinpoint\\test\\TestClass";
         $info = [
             'foo'=>[7,'pinpoint\\test','traitTestPlugin'],
             'fooUseYield'=>[3,'pinpoint\\test','traitTestPlugin'],
@@ -88,9 +95,10 @@ class ClassParseTest extends TestCase
         ];
 
 
-        $osr = new OrgClassParse($fullpath,$info,static::$naming);
+        $visitor =  new OriginFileVisitor();
 
-        foreach ($osr->classIndex as $class => $location)
+        $visitor->runAllVisitor($fullpath,$info,static::$naming);
+        foreach ( PinpointDriver::getInstance()->getLoaderMap() as $class => $location)
         {
             $exp = str_replace('Cache','Comparison',$location);
             self::assertFileEquals($exp,$location);
@@ -101,8 +109,9 @@ class ClassParseTest extends TestCase
     public function testNamingReplace()
     {
         $fullpath =__DIR__.'/Foo.php';
-        $osr = new OrgClassParse($fullpath,null,static::$naming);
-        foreach ($osr->classIndex as $class => $location)
+        $visitor =  new OriginFileVisitor();
+        $visitor->runAllVisitor($fullpath,[],static::$naming);
+        foreach ( PinpointDriver::getInstance()->getLoaderMap() as $class => $location)
         {
             $exp = str_replace('Cache','Comparison',$location);
             self::assertFileEquals($exp,$location);

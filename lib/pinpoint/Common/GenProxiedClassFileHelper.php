@@ -34,14 +34,16 @@ class GenProxiedClassFileHelper extends ClassFile
     protected $useBlockAr=[];
     protected $t_covertCls=[];
     protected $t_covertFuns=[];
+    public $mAopFuncInfo=[];
 
-    public function __construct($fullFile,array $naming=null)
+    public function __construct($fullFile,string $prefix,array $naming=[],array $aopFuncInfo=[])
     {
-        parent::__construct(CLASS_PREFIX);
+        parent::__construct($prefix);
 
         $this->orgDir = dirname($fullFile);
+        $this->mAopFuncInfo = $aopFuncInfo;
         $this->orgFile = $fullFile;
-        if($naming){
+        if(!empty($naming)){
             $this->t_covertCls  = $naming['classCall'];
             $this->t_covertFuns = $naming['funCall'];
         }
@@ -95,7 +97,7 @@ class GenProxiedClassFileHelper extends ClassFile
         $node->name = new Node\Identifier($className);
 
         $this->className = empty($this->namespace) ? ($className): $this->namespace.'\\'.$className;
-        $this->name = $this->className;
+        $this->myLoaderName = $this->className;
 
         if($node->flags & Node\Stmt\Class_::MODIFIER_FINAL)
         {
@@ -116,12 +118,18 @@ class GenProxiedClassFileHelper extends ClassFile
         $node->name = new Node\Identifier($className);
 
         $this->traitName = empty($this->namespace) ? ($className):($this->namespace.'\\'.$className);
-        $this->name = $this->traitName;
+        $this->myLoaderName = $this->traitName;
     }
 
 
-    public function handleLeaveMethodNode(&$node,&$info)
+    public function handleLeaveMethodNode(&$node)
     {
+        $func = trim( $node->name->toString());
+        if(!array_key_exists($func,$this->mAopFuncInfo))
+        {
+            return ;
+        }
+
         assert($node instanceof Node\Stmt\ClassMethod);
         if($node->flags &  Node\Stmt\Class_::MODIFIER_PRIVATE)
         {
@@ -139,7 +147,13 @@ class GenProxiedClassFileHelper extends ClassFile
 
     }
 
-
+    /**
+     * @obsoleted
+     * convert \Exception to Exception
+     * try to use namespace cover
+     * @param $node
+     * @return Node\Name
+     */
     public function handleFullyQualifiedNode(&$node)
     {
         assert($node instanceof Node\Name\FullyQualified);
@@ -184,7 +198,7 @@ class GenProxiedClassFileHelper extends ClassFile
         return $nodes;
     }
 
-    public function handleAfterTravers(&$nodes,&$mFuncAr)
+    public function handleAfterTravers(&$nodes)
     {
         return $nodes;
     }

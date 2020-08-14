@@ -24,6 +24,7 @@
 namespace pinpoint\Common;
 
 use PhpParser\Node;
+use PhpParser\PrettyPrinter;
 
 /**
  * Class ClassFile
@@ -52,7 +53,7 @@ abstract class ClassFile
 
     public $fileName='';  /// output file Name
 
-    public $name='';      /// output name
+    public $myLoaderName='';      /// output name
 
     public $classMethod;
 
@@ -64,11 +65,14 @@ abstract class ClassFile
 
     public $fileNode;
 
+    protected $_astPrinter;
+
     public $namespace='';
 
     public function __construct($prefix)
     {
         $this->prefix = $prefix;
+        $this->_astPrinter = new PrettyPrinter\Standard();
     }
 
     public function getNode()
@@ -110,7 +114,7 @@ abstract class ClassFile
         $this->hasRet = false;
     }
 
-    abstract function handleLeaveMethodNode(&$node,&$info);
+    abstract function handleLeaveMethodNode(&$node);
 
     public function markHasReturn(&$node)
     {
@@ -125,8 +129,15 @@ abstract class ClassFile
         $this->hasRet = true;
     }
 
+    public function fileNodeDoneCB(&$node, $loaderName)
+    {
+        $fullPath = AOP_CACHE_DIR.'/'.str_replace('\\','/',$loaderName).'.php';
+        $context= $this->_astPrinter->prettyPrintFile($node);
+        Util::flushStr2File($context,$fullPath);
+        PinpointDriver::getInstance()->insertLoaderMap($loaderName,$fullPath);
+    }
 
-    abstract function handleAfterTravers(&$nodes,&$mFuncAr);
+    abstract function handleAfterTravers(&$nodes);
     abstract function handleLeaveNamespace(&$nodes);
     abstract function handlerUseNode(&$node);
 }

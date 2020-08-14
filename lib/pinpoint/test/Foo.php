@@ -9,6 +9,8 @@ use function app\foo\curl_02 as curl_02;
 use function app\foo\curl_03;
 use \PDO;
 use \PDO as TPDO;
+use A\B;
+
 
 class Foo
 {
@@ -28,7 +30,8 @@ class Foo
     {
         $pdo = new \PDO('xx','xx','xx');
         $pdo2 = new PDO('xx','xx','xx');
-        return [$pdo,$pdo2];
+        $np = new B\LongNP();
+        return [$pdo,$pdo2,$np];
     }
 
     public function __destruct()

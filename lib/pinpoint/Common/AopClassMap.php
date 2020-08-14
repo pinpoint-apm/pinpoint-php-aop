@@ -18,20 +18,19 @@
 
 namespace pinpoint\Common;
 
-use pinpoint\Common\Util;
-
 class AopClassMap
 {
     protected $index_file_path=AOP_CACHE_DIR.'__class_index_table';
     private $cached = false;
     private $classLoaderMap = [];
+
     public function __construct()
     {
+
     }
 
     public function updateSelf()
     {
-
         if( ( !defined('PINPOINT_ENV') ||
             stristr(PINPOINT_ENV,"dev") === false ) &&
             file_exists($this->index_file_path) )
@@ -52,7 +51,7 @@ class AopClassMap
         }
     }
 
-    public  function findFile($classFullName)
+    public function findFile($classFullName)
     {
         if(isset($this->classLoaderMap[$classFullName]))
         {
@@ -64,6 +63,11 @@ class AopClassMap
     public  function insertMapping($cl,$file)
     {
         $this->classLoaderMap[$cl] = $file;
+    }
+
+    public function getLoadeMap()
+    {
+        return $this->classLoaderMap;
     }
 
 }

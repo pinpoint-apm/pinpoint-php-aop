@@ -33,8 +33,8 @@ class GenOriginClassFileHelper extends ClassFile
 {
     private $factory;
 
-    private $classNode; // class { }
-    private $traitNode;
+    private $mClassNode; // class { }
+    private $mTraitNode;
 
     private $extendTraitName;
 
@@ -44,14 +44,15 @@ class GenOriginClassFileHelper extends ClassFile
 
     private $handleMethodNodeLeaveFunc = '';
     private $handleEndTraversFunc='';
+    public $mAopFunInfoAr = [];
 
-    public function __construct($prefix = 'Proxied_')
+    public function __construct(array $aopFuncInfo, $prefix)
     {
         parent::__construct($prefix);
         $this->factory= new BuilderFactory();
-
-        $this->classNode = null;
-        $this->traitNode = null;
+        $this->mAopFunInfoAr = $aopFuncInfo;
+        $this->mClassNode = null;
+        $this->mTraitNode = null;
     }
 
 
@@ -67,7 +68,7 @@ class GenOriginClassFileHelper extends ClassFile
         parent::handleEnterClassNode($node);
 
         $extendClass = $this->prefix.$node->name->toString();
-        $this->classNode  = $this->factory->class(trim($node->name->toString()))->extend($extendClass);
+        $this->mClassNode  = $this->factory->class(trim($node->name->toString()))->extend($extendClass);
         if(!empty($this->namespace))
         {
             // if the proxied_class has namespace, add into use
@@ -78,10 +79,10 @@ class GenOriginClassFileHelper extends ClassFile
 
         switch($node->flags) {
             case Node\Stmt\Class_::MODIFIER_FINAL:
-                $this->classNode->makeFinal();
+                $this->mClassNode->makeFinal();
                 break;
             case Node\Stmt\Class_::MODIFIER_ABSTRACT:
-                $this->classNode->makeAbstract();
+                $this->mClassNode->makeAbstract();
                 break;
            default:
                 break;
@@ -95,7 +96,7 @@ class GenOriginClassFileHelper extends ClassFile
     {
         assert($node instanceof Node\Stmt\Trait_);
         parent::handleEnterTraitNode($node);
-        $this->traitNode  = $this->factory->trait(trim($node->name->toString()));
+        $this->mTraitNode  = $this->factory->trait(trim($node->name->toString()));
         $this->extendTraitName = $this->prefix.$node->name->toString();
         $this->handleMethodNodeLeaveFunc = 'handleTraitLeaveMethodNode';
         $this->handleEndTraversFunc   = 'handleAfterTraversTrait';
@@ -263,7 +264,7 @@ class GenOriginClassFileHelper extends ClassFile
 
         $thisMethod->addStmt($tryCatchFinallyNode);
 
-        $this->classNode->addStmt($thisMethod);
+        $this->mClassNode->addStmt($thisMethod);
     }
 
     public static function itemInArray($ar,$v)
@@ -430,13 +431,18 @@ class GenOriginClassFileHelper extends ClassFile
 
         $thisMethod->addStmt($tryCatchFinallyNode);
 
-        $this->traitNode->addStmt($thisMethod);
+        $this->mTraitNode->addStmt($thisMethod);
 
     }
 
-    public function handleLeaveMethodNode(&$node,&$info)
+    public function handleLeaveMethodNode(&$node)
     {
-        call_user_func_array([$this,$this->handleMethodNodeLeaveFunc],[&$node,&$info]);
+        $func = trim( $node->name->toString());
+        if(array_key_exists($func,$this->mAopFunInfoAr))
+        {
+            call_user_func_array([$this,$this->handleMethodNodeLeaveFunc],[&$node,&$this->mAopFunInfoAr[$func]]);
+            unset( $this->mAopFunInfoAr[$func] );
+        }
     }
 
     public function handleAfterTraversClass(&$nodes,&$mFuncAr)
@@ -451,7 +457,7 @@ class GenOriginClassFileHelper extends ClassFile
             if(count($useNodes) > 0){
                 $this->fileNode->addStmts($useNodes);
             }
-            $this->fileNode->addStmt($this->classNode);
+            $this->fileNode->addStmt($this->mClassNode);
             return array($this->fileNode->getNode());
         }else{
             $this->fileNode = [] ;//$this->factory->namespace($this->namespace);
@@ -459,7 +465,7 @@ class GenOriginClassFileHelper extends ClassFile
             {
                 $this->fileNode[] = $node->getNode();
             }
-            $this->fileNode[] = $this->classNode->getNode();
+            $this->fileNode[] = $this->mClassNode->getNode();
             return $this->fileNode;
         }
     }
@@ -493,20 +499,20 @@ class GenOriginClassFileHelper extends ClassFile
             $useTraitNode->with($this->factory->traitUseAdaptation($this->extendTraitName,$alias)->as($this->extendTraitName.'_'.$alias));
         }
 
-        $this->traitNode->addStmt($useTraitNode);
+        $this->mTraitNode->addStmt($useTraitNode);
         // todo does need to handle trait without any namespace
         $this->fileNode = $this->factory->namespace($this->namespace)
             ->addStmts($useNodes)
-            ->addStmt($this->traitNode);
+            ->addStmt($this->mTraitNode);
 
         $this->fileName = $this->traitName;
 
         return array($this->fileNode->getNode());
     }
 
-    public function handleAfterTravers(&$nodes,&$mFuncAr)
+    public function handleAfterTravers(&$nodes)
     {
-        return call_user_func_array([$this,$this->handleEndTraversFunc],[&$nodes,&$mFuncAr]);
+        return call_user_func_array([$this,$this->handleEndTraversFunc],[&$nodes,&$this->mAopFunInfoAr]);
     }
 
     function handleLeaveNamespace(&$nodes)
