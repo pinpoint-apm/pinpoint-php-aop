@@ -85,7 +85,6 @@ class PinpointDriver
         $visitor =  new OriginFileVisitor();
 
         $pluFiles = static::getAutoGenPlugins();
-        print_r($pluFiles);
         $pluParsers = [];
         foreach ($pluFiles as $file)
         {

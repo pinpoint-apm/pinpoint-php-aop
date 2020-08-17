@@ -102,4 +102,16 @@ class Util
         return false;
     }
 
+    public static function scanDir($dir,$pattern,&$tree)
+    {
+        foreach (glob($dir.'/*') as $loc)
+        {
+            if(is_dir($loc)){
+                static::scanDir($loc,$pattern,$tree);
+            }elseif (preg_match($pattern,$loc)){
+                $tree[]=$loc;
+            }
+        }
+    }
+
 }
