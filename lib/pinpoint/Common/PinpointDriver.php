@@ -29,7 +29,7 @@ class PinpointDriver
     protected $clAr;
     protected $classMap = null;
     private $iniFile='';
-
+    protected static $pluginDir = [PLUGINS_DIR."/AutoGen/",PLUGINS_DIR."/"]; //*Plugin.php
     public function insertLoaderMap(string $name,string $path)
     {
         $this->classMap->insertMapping($name,$path);
@@ -56,6 +56,21 @@ class PinpointDriver
         $this->iniFile = PLUGINS_DIR."/setting.ini";
     }
 
+    public static function getAutoGenPlugins()
+    {
+        $pluFiles = [];
+
+        foreach (static::$pluginDir as $dir)
+        {
+            if(is_dir($dir))
+            {
+                Util::scanDir($dir,"/Plugin.php$/",$pluFiles);
+                break;
+            }
+        }
+        return $pluFiles;
+    }
+
     public function init(AopClassMap $classMap)
     {
         // get class index map
@@ -69,7 +84,8 @@ class PinpointDriver
         }
         $visitor =  new OriginFileVisitor();
 
-        $pluFiles = glob(PLUGINS_DIR."/*Plugin.php");
+        $pluFiles = static::getAutoGenPlugins();
+        print_r($pluFiles);
         $pluParsers = [];
         foreach ($pluFiles as $file)
         {

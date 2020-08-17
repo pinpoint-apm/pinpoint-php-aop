@@ -48,7 +48,7 @@ class ClassParseTest extends TestCase
 //            'funCall'=>[
 //                'curl_init'=>'plugins\\curl_init',
 //                'app\\foo\\curl_02'=>'plugins\\app\\foo\\curl_02',
-//                'app\\foo\\curl_03'=>'plugins\\app\\foo\\curl_03'
+//                'app\\foo\\curl_03'=>'plugins\\app\\foo\\curl_0/cersv\3'
 //            ],
 //            'ignoreFiles'=>["pinpoint\\test\\IgnoreClass"],
 //            'appendFiles'=>["pinpoint\\test\\AddClass"]
