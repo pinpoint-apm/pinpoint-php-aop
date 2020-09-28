@@ -12,7 +12,7 @@ abstract class Proxied_TestClass
     }
     public function foo($a, $b, $v, $d) : array
     {
-        echo date("y-m-d");
+        echo \plugins\A\B\date("y-m-d");
         echo 'pinpoint\\test\\TestClass::foo';
         echo 20;
         return [$a, $b, $v, $d];
@@ -23,6 +23,7 @@ abstract class Proxied_TestClass
         (yield $i + 1);
         (yield $i + 2);
         (yield $i + 3);
+        \plugins\A\B\date('h');
     }
     public function fooNoReturn()
     {

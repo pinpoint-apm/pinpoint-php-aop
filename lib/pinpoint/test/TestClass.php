@@ -15,7 +15,7 @@ abstract class TestClass
 
     public function foo($a,$b,$v,$d) :array
     {
-        echo date("y-m-d");
+        echo \date("y-m-d");
         echo __FUNCTION__;
         echo __LINE__;
         return [$a,$b,$v,$d];
@@ -27,6 +27,7 @@ abstract class TestClass
         yield $i +1;
         yield $i +2;
         yield $i +3;
+        date('h');
     }
 
     public function fooNoReturn()

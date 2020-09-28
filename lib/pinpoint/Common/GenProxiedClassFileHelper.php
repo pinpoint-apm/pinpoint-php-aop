@@ -63,10 +63,22 @@ class GenProxiedClassFileHelper extends ClassFile
         return $node;
     }
 
+
+    public function renderFunName(&$node,$filer)
+    {
+        $classFullName = $node->toString();
+        if(isset( $filer[$classFullName]))
+        {
+            $newName =$filer[$classFullName];
+            return new Node\Name\FullyQualified($newName);
+        }
+        return $node;
+    }
+
     public function handleEnterFuncCall(&$node)
     {
         assert($node instanceof Node\Expr\FuncCall);
-        $node->name =  $this->renderClassName($node->name,$this->t_covertFuns);
+        $node->name =  $this->renderFunName($node->name,$this->t_covertFuns);
         return $node;
     }
 
