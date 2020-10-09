@@ -31,8 +31,8 @@ class AopClassMap
 
     public function updateSelf()
     {
-        if( ( !defined('PINPOINT_ENV') ||
-            stristr(PINPOINT_ENV,"dev") === false ) &&
+        if( ( !defined('PINPOINT_USE_CACHE') ||
+            stristr(PINPOINT_USE_CACHE,"NO") === false ) &&
             file_exists($this->index_file_path) )
         {
             $this->classLoaderMap = unserialize(file_get_contents($this->index_file_path));

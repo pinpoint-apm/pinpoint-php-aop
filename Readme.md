@@ -68,9 +68,9 @@ define('AOP_CACHE_DIR',__DIR__.'/Cache/');
 define('PLUGINS_DIR',__DIR__.'/../Plugins/');
 // since 0.2.3 supports user filter when loadering a class.
 define('USER_DEFINED_CLASS_MAP_IMPLEMENT','\Plugins\ClassMapInFile.php');
-// since 0.2.5+ PINPOINT_ENV = dev, auto_pinpointed.php will generate Cache/* on every request. 
+// since 0.2.5+ PINPOINT_USE_CACHE = N, auto_pinpointed.php will generate Cache/* on every request. 
 // Recommended in debug mode.
-define('PINPOINT_ENV','dev');
+define('PINPOINT_USE_CACHE','no');
 // Use pinpoint-php-aop auto_pinpointed.php instead of vendor/autoload.php
 require_once __DIR__. '/../vendor/naver/pinpoint-php-aop/auto_pinpointed.php';
 
