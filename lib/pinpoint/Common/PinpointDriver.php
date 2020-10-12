@@ -82,13 +82,14 @@ class PinpointDriver
             PinpointClassLoader::init($classMap);
             return ;
         }
-        $visitor =  new OriginFileVisitor();
+
 
         $pluFiles = static::getAutoGenPlugins();
-        $pluParsers = [];
+//        $pluParsers = [];
         foreach ($pluFiles as $file)
         {
-            $pluParsers[] = new PluginParser($file,$this->clAr);
+//            $pluParsers[] = new PluginParser($file,$this->clAr);
+            new PluginParser($file,$this->clAr);
         }
         /// there hidden a duplicated visit, class locates in @hook and appendFiles.
         /// while, it's safe to visit a class/file in appendfiles and @hook order
@@ -107,6 +108,7 @@ class PinpointDriver
                         continue;
                     try
                     {
+                        $visitor =  new OriginFileVisitor();
                         $visitor->runAllVisitor($fullPath,[],$naming);
                     }catch (\Exception $e){
                     }
@@ -119,12 +121,12 @@ class PinpointDriver
         {
             if(empty($class))
                 continue;
-
             $fullPath = Util::findFile($class);
             if(!$fullPath )
                 continue;
             try
             {
+                $visitor =  new OriginFileVisitor();
                 if(isset($naming['ignoreFiles']) && in_array($class,$naming['ignoreFiles'])){
                     $visitor->runAllVisitor($fullPath,$aopFuncInfo);
                 }else{
