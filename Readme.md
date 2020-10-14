@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/naver/pinpoint-php-aop.svg?branch=master)](https://travis-ci.com/naver/pinpoint-php-aop)
+[![Build Status](https://travis-ci.com/naver/pinpoint-php-aop.svg?branch=master)](https://travis-ci.com/pinpoint-apm/pinpoint-php-aop)
 
 ##  How to Use 
 
@@ -8,7 +8,7 @@ Add requirement into composer.json
 
 ```Json
     "require": {
-        "naver/pinpoint-php-aop": "v1.0.0"
+        "pinpoint-apm/pinpoint-php-aop": "v1.0.0"
     }
 ```
 
@@ -52,7 +52,7 @@ class CommonPlugin
 
 > Example
 
-https://github.com/naver/pinpoint-c-agent/tree/v0.2.2/PHP/pinpoint_php_example/Plugins
+https://github.com/pinpoint-apm/pinpoint-c-agent/tree/v0.2.2/PHP/pinpoint_php_example/Plugins
 
 ### Activate plugins 
 This could be found in PHP/pinpoint_php_example/app/index.php.
@@ -72,7 +72,7 @@ define('USER_DEFINED_CLASS_MAP_IMPLEMENT','\Plugins\ClassMapInFile.php');
 // Recommended in debug mode.
 define('PINPOINT_ENV','dev');
 // Use pinpoint-php-aop auto_pinpointed.php instead of vendor/autoload.php
-require_once __DIR__. '/../vendor/naver/pinpoint-php-aop/auto_pinpointed.php';
+require_once __DIR__. '/../vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
 
 ```
 
@@ -81,7 +81,7 @@ require_once __DIR__. '/../vendor/naver/pinpoint-php-aop/auto_pinpointed.php';
 
 pinpoint-php-aop wrappers your class with an onBefore/onEnd/onException suite.
 
-![how it works](https://raw.githubusercontent.com/naver/pinpoint-c-agent/master/images/principle_v0.2.x.png)
+![how it works](https://raw.githubusercontent.com/pinpoint-apm/pinpoint-c-agent/master/images/principle_v0.2.x.png)
 
 More details please go to lib/pinpoint/test/Comparison/pinpoint/test
 
