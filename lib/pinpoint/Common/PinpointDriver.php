@@ -70,7 +70,6 @@ class PinpointDriver
         {
             $pluParsers[] = new PluginParser($file,$this->clAr);
         }
-
         foreach ($this->clAr as $cl=> $info)
         {
             if(empty($cl))

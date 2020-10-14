@@ -44,15 +44,15 @@ abstract class ClassFile
 
     protected $prefix;
 
-    public $namespace;
+    public $npStr;
 
-    public $className; /// Foo\A Foo\B
+    public $className=''; /// Foo\A Foo\B
 
-    public $traitName; /// trait Foo {}
+    public $traitName=''; /// trait Foo {}
 
-    public $fileName;  /// output file Name
+    public $fileName='';  /// output file Name
 
-    public $name;      /// output name
+    public $name='';      /// output name
 
     public $classMethod;
 
@@ -63,6 +63,8 @@ abstract class ClassFile
     public $hasRet;
 
     public $fileNode;
+
+    public $namespace='';
 
     public function __construct($prefix)
     {
@@ -83,14 +85,21 @@ abstract class ClassFile
     public function handleEnterClassNode(&$node)
     {
         assert($node instanceof Node\Stmt\Class_);
-        $this->className = trim($this->namespace.'\\'.$node->name->toString());
+        if($this->namespace)
+        {
+            $this->className = trim($this->namespace.'\\'.$node->name->toString());
+        }else{
+            $this->className = trim($node->name->toString());
+        }
     }
 
     public function handleEnterTraitNode(&$node)
     {
         assert($node instanceof Node\Stmt\Trait_);
-        // $this->traitName = Foo  trait Foo{}
-        $this->traitName = trim($this->namespace.'\\'.$node->name->toString());
+        if($this->namespace)
+            $this->traitName = trim($this->namespace.'\\'.$node->name->toString());
+        else
+            $this->traitName = trim($node->name->toString());
     }
 
     public function handleClassEnterMethodNode(&$node)

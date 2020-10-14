@@ -64,7 +64,7 @@ class ClassParseTest extends TestCase
             'fooUseYield'=>[3,'pinpoint\\test','traitTestPlugin'],
             'fooNoReturn'=>[4,'pinpoint\\test','traitTestPlugin'],
             'fooNoReturnButReturn'=>[4,'pinpoint\\test\\burden\\depress\\herb\\e\\e\f\\longNp','victim'],
-            'fooNaughtyFinal'=>[7,'','over'],
+            'fooNaughtyFinal'=>[7,'\\','over'],
             '\PDO::query'=>[7,'pinpoint\\test','traitTestPlugin'],
             '\curl_exec' =>[7,'pinpoint\\test','traitTestPlugin'],
             'fooTestACPrivate' =>[4,'pinpoint\\test','traitTestPlugin'],
