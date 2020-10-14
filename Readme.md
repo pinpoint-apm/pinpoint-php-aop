@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/naver/pinpoint-php-aop.svg?branch=master)](https://travis-ci.com/pinpoint-apm/pinpoint-php-aop)
+[![Build Status](https://travis-ci.com/pinpoint-apm/pinpoint-php-aop.svg?branch=master)](https://travis-ci.com/pinpoint-apm/pinpoint-php-aop)
 
 ##  How to Use 
 
