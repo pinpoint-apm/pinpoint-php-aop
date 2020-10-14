@@ -1,5 +1,5 @@
 {
-    "name": "naver/pinpoint-php-aop",
+    "name": "pinpoint-apm/pinpoint-php-aop",
     "description": "A simple Aop library via php-parse",
     "type": "library",
     "license": "Apache-2.0",
@@ -19,6 +19,6 @@
         "phpunit/phpunit": "^7"
     },
     "require": {
-        "nikic/php-parser": "^4.1"
+        "nikic/php-parser": "4.10.0"
     }
 }
