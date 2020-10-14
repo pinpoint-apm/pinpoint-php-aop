@@ -54,7 +54,7 @@ class GenProxiedClassFileHelper extends ClassFile
 
         $node->name = new Node\Identifier($className);
 
-        $this->className = $this->namespace.'\\'.$className;
+        $this->className = empty($this->namespace) ? ($className): $this->namespace.'\\'.$className;
         $this->name = $this->className;
 
         if($node->flags & Node\Stmt\Class_::MODIFIER_FINAL)
@@ -75,7 +75,7 @@ class GenProxiedClassFileHelper extends ClassFile
 
         $node->name = new Node\Identifier($className);
 
-        $this->traitName = $this->namespace.'\\'.$className;
+        $this->traitName = empty($this->namespace) ? ($className):($this->namespace.'\\'.$className);
         $this->name = $this->traitName;
     }
 
