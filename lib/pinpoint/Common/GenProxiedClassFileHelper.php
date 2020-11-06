@@ -264,8 +264,10 @@ class GenProxiedClassFileHelper extends ClassFile
 
         // parse use A/B/C, but the nm_ is A/B/C/D
         $suffixNm = $node->name->getLast();
-        $this->suffix_use[$suffixNm] = trim($node->name->slice(0,-1)->toString(),"\ \\");
-//        print_r($this->suffix_use);
+        if(!$node->name->isUnqualified()){
+            $this->suffix_use[$suffixNm] =$node->name->slice(0,-1)->toString();
+        }
+
     }
 
     function handlerUseNode(&$node)
