@@ -49,20 +49,24 @@ class NpCoderVisitor extends NodeVisitorAbstract
             $this->curNamespace = $node->name->toString();
             /// set namespace
             $this->proxiedClassFile->handleEnterNamespaceNode($node);
+        }elseif ($node instanceof Node\Stmt\UseUse){
+            $this->proxiedClassFile->handlerUseUseNode($node);
         }
         elseif ($node instanceof Node\Stmt\Use_){
             $this->proxiedClassFile->handlerUseNode($node);
         }
         elseif ($node instanceof Node\Stmt\Class_){
             if(empty($node->name->toString())){
-                throw new \Exception("can't AOP an anonymous class");
+                return $node;
+               // throw new \Exception("can't AOP an anonymous class");
             }
             $this->curName = empty($this->curNamespace) ? ($node->name->toString()):($this->curNamespace.'\\'.$node->name->toString());
             $this->proxiedClassFile->handleEnterClassNode($node);
         }
         elseif( $node instanceof Node\Stmt\Trait_){
             if(empty($node->name->toString())){
-                throw new \Exception("can't AOP an anonymous trait");
+                return $node;
+                //throw new \Exception("can't AOP an anonymous trait");
             }
             $this->curName = empty($this->curNamespace) ? ($node->name->toString()):($this->curNamespace.'\\'.$node->name->toString());
 
@@ -78,6 +82,8 @@ class NpCoderVisitor extends NodeVisitorAbstract
         }elseif ($node instanceof Node\Expr\FuncCall){
             return $this->proxiedClassFile->handleEnterFuncCall($node);
         }
+
+        return $node;
     }
 
 

@@ -8,12 +8,12 @@ Add requirement into composer.json
 
 ```Json
     "require": {
-        "pinpoint-apm/pinpoint-php-aop": "v2.0.0"
+        "pinpoint-apm/pinpoint-php-aop": "v2.0.1"
     }
 ```
 
 > Latest
-PHP7: `v2.0.0`
+PHP7: `v2.0.1`
 
 ### Write your plugins
 This is a plugin template for reference.

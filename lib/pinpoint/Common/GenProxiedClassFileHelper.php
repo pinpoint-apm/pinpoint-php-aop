@@ -34,6 +34,7 @@ class GenProxiedClassFileHelper extends ClassFile
     protected $useBlockAr=[];
     protected $t_covertCls=[];
     protected $t_covertFuns=[];
+    protected $suffix_use=[];
     public $mAopFuncInfo=[];
 
     public function __construct($fullFile,string $prefix,array $naming=[],array $aopFuncInfo=[])
@@ -49,20 +50,38 @@ class GenProxiedClassFileHelper extends ClassFile
         }
     }
 
-    public function renderClassName(&$node,$filer)
+    private function getRealNp($node)
     {
-        if($node instanceof Node\Name\FullyQualified) // \PDO()
+        assert($node instanceof Node\Name);
+        if($node instanceof Node\Name\FullyQualified)         // Use directly access
         {
-            $classFullName = $node->toString();
-            if(isset( $filer[$classFullName]))
-            {
-                $newName =$filer[$classFullName];
-                return new Node\Name\FullyQualified($newName);
+            return $node->toString();
+        }else{    // Use namespace suggestion
+            $prefixNm = $node->getFirst();
+            if(isset($this->suffix_use[$prefixNm])){
+                $prefix = $this->suffix_use[$prefixNm];
+                $nm =  $prefix."\\".$node->toString();
+                return $nm;
+            }
+            else{
+                return $node->toString();
             }
         }
-        return $node;
     }
 
+
+    public function renderClassName(&$node,$filer)
+    {
+        $classFullName = $this->getRealNp($node);
+
+        if(isset( $filer[$classFullName]))
+        {
+            $newName =$filer[$classFullName];
+            return new Node\Name\FullyQualified($newName);
+        }
+        return $node;
+
+    }
 
     public function renderFunName(&$node,$filer)
     {
@@ -221,19 +240,32 @@ class GenProxiedClassFileHelper extends ClassFile
 
     function handlerUseUseNode(&$node)
     {
-//        $fullName = trim($node->name->toString(),"\ \\");
-//        if($node->type == Node\Stmt\Use_::TYPE_FUNCTION){
-//            if(isset($this->t_funName[$fullName])){
-//                $newName = new Node\Name($this->t_funName[$fullName]);
-//                $node->name = $newName;
-//            }
-//        }
-//        else{ // normal and unknow
-//            if(isset($this->t_clName[$fullName])){
-//                $newName = new Node\Name($this->t_clName[$fullName]);
-//                $node->name = $newName;
-//            }
-//        }
+        assert($node instanceof  Node\Stmt\UseUse);
+
+        // parse use A/B/C as ABC;
+        if($node->alias){
+            $aliasNm = $node->alias->name;
+            $appendCl =[];
+            $name = trim($node->name->toString(),"\ \\");
+            foreach ($this->t_covertCls as $clName =>$value)
+            {
+                if(strpos($clName,$name) === 0)
+                {
+                    $np = str_replace($name ,$aliasNm,$clName);
+                    $appendCl[$np] = $value;
+                }
+            }
+            if(!empty($appendCl))
+            {
+                $this->t_covertCls += $appendCl;
+            }
+            return ;
+        }
+
+        // parse use A/B/C, but the nm_ is A/B/C/D
+        $suffixNm = $node->name->getLast();
+        $this->suffix_use[$suffixNm] = trim($node->name->slice(0,-1)->toString(),"\ \\");
+//        print_r($this->suffix_use);
     }
 
     function handlerUseNode(&$node)
@@ -245,6 +277,8 @@ class GenProxiedClassFileHelper extends ClassFile
             return ;
         }
 
+        // replace the exactly match
+        // use A/B/C; -> Plugins/A/B/C
         foreach ($node->uses as &$uses)
         {
             $fullName = trim($uses->name->toString(),"\ \\");
