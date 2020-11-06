@@ -10,6 +10,8 @@ use function app\foo\curl_03;
 use \PDO;
 use \PDO as TPDO;
 use A\B;
+use App\A\LONG\NAME as ShortName;
+use A\B\C;
 
 
 class Foo
@@ -20,6 +22,7 @@ class Foo
         $curl = \curl_init();
         $curl_01 = new curl_init_01();
         $curl_02 = new \app\curl_init_01();
+        $a = new ShortName\ClassA();
         print_r(__CLASS__);
         print_r(__LINE__);
         print_r(__FUNCTION__);
@@ -31,6 +34,7 @@ class Foo
         $pdo = new \PDO('xx','xx','xx');
         $pdo2 = new PDO('xx','xx','xx');
         $np = new B\LongNP();
+        $abcd= new C\classC();
         return [$pdo,$pdo2,$np];
     }
 

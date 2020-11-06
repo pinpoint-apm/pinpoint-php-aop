@@ -18,19 +18,7 @@
 namespace pinpoint\Common;
 
 use PhpParser\ParserFactory;
-use pinpoint\Common\GenProxiedClassFileHelper;
-use pinpoint\Common\GenOriginClassFileHelper;
-use pinpoint\Common\CodeVisitor;
-
-use PhpParser\Lexer;
-use PhpParser\Parser;
 use PhpParser\NodeTraverser;
-use PhpParser\NodeVisitor;
-use PhpParser\NodeVisitorAbstract;
-use PhpParser\Error;
-use PhpParser\Node;
-use PhpParser\BuilderFactory;
-use pinpoint\Common\Util;
 
 class OriginFileVisitor
 {
