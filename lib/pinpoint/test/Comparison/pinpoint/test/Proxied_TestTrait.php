@@ -1,6 +1,5 @@
 <?php
 
-
 namespace pinpoint\test;
 
 trait Proxied_TestTrait
@@ -9,11 +8,8 @@ trait Proxied_TestTrait
     {
         echo "1";
     }
-
     function getReturnDescription()
     {
-        echo "2" ;
-
+        echo "2";
     }
-
-}require AOP_CACHE_DIR . 'pinpoint/test/TestTrait_required.php';
+}

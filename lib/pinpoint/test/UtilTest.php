@@ -41,4 +41,11 @@ class UtilTest extends TestCase
         self::assertEquals(count(Util::parseUserFunc('')),0);
         self::assertEquals(count(Util::parseUserFunc('I don\'t now nothing')),0);
     }
+
+    public function testSan()
+    {
+        $tree = [];
+        Util::scanDir('.',"/s.php$/",$tree);
+        self::assertNotEmpty($tree);
+    }
 }

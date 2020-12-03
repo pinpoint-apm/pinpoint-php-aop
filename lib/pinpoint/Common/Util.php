@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2019 NAVER Corp.
+ * Copyright 2020-present NAVER Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,19 @@ class Util
             }
         }
 
-        return null;
+        return false;
+    }
+
+    public static function scanDir($dir,$pattern,&$tree)
+    {
+        foreach (glob($dir.'/*') as $loc)
+        {
+            if(is_dir($loc)){
+                static::scanDir($loc,$pattern,$tree);
+            }elseif (preg_match($pattern,$loc)){
+                $tree[]=$loc;
+            }
+        }
     }
 
 }
