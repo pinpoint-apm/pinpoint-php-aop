@@ -26,22 +26,19 @@ namespace pinpoint\Common;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node;
 use PhpParser\NodeTraverser;
-//use pinpoint\Common\GenRequiredBIFileHelper;
 
-class CodeVisitor extends NodeVisitorAbstract
+class NpCoderVisitor extends NodeVisitorAbstract
 {
 
     protected $ospIns;
     private $curNamespace;
     private $curName;
-    public $originClassFile;
     public $proxiedClassFile;
 
     protected $builtInAr = []; // curl_init PDO
 
-    public function __construct(GenOriginClassFileHelper $originClassFile,GenProxiedClassFileHelper $proxiedClassFile)
+    public function __construct(GenProxiedClassFileHelper $proxiedClassFile)
     {
-        $this->originClassFile = $originClassFile;
         $this->proxiedClassFile = $proxiedClassFile;
     }
 
@@ -51,40 +48,32 @@ class CodeVisitor extends NodeVisitorAbstract
         {
             $this->curNamespace = $node->name->toString();
             /// set namespace
-            $this->originClassFile->handleEnterNamespaceNode($node);
             $this->proxiedClassFile->handleEnterNamespaceNode($node);
+        }elseif ($node instanceof Node\Stmt\UseUse){
+            $this->proxiedClassFile->handlerUseUseNode($node);
         }
         elseif ($node instanceof Node\Stmt\Use_){
             $this->proxiedClassFile->handlerUseNode($node);
-            $this->originClassFile->handlerUseNode($node);
         }
         elseif ($node instanceof Node\Stmt\Class_){
             if(empty($node->name->toString())){
-                throw new \Exception("can't AOP an anonymous class");
+                return $node;
+               // throw new \Exception("can't AOP an anonymous class");
             }
             $this->curName = empty($this->curNamespace) ? ($node->name->toString()):($this->curNamespace.'\\'.$node->name->toString());
-            $this->originClassFile->handleEnterClassNode($node);
             $this->proxiedClassFile->handleEnterClassNode($node);
         }
         elseif( $node instanceof Node\Stmt\Trait_){
             if(empty($node->name->toString())){
-                throw new \Exception("can't AOP an anonymous trait");
+                return $node;
+                //throw new \Exception("can't AOP an anonymous trait");
             }
             $this->curName = empty($this->curNamespace) ? ($node->name->toString()):($this->curNamespace.'\\'.$node->name->toString());
 
             $this->proxiedClassFile->handleEnterTraitNode($node);
-            $this->originClassFile->handleEnterTraitNode($node);
         }elseif ($node instanceof Node\Stmt\ClassMethod)
         {
-            $this->originClassFile->handleClassEnterMethodNode($node);
             $this->proxiedClassFile->handleClassEnterMethodNode($node);
-        }
-        elseif ( $node instanceof Node\Stmt\Return_)
-        {
-            $this->originClassFile->markHasReturn($node);
-        }
-        elseif ($node instanceof Node\Expr\Yield_){
-            $this->originClassFile->markHasYield($node);
         }
         elseif ($node instanceof Node\Expr\ClassConstFetch){
             return $this->proxiedClassFile->handleEnterClassConstFetch($node);
@@ -93,13 +82,14 @@ class CodeVisitor extends NodeVisitorAbstract
         }elseif ($node instanceof Node\Expr\FuncCall){
             return $this->proxiedClassFile->handleEnterFuncCall($node);
         }
+
+        return $node;
     }
 
 
     public function leaveNode(Node $node)
     {
         if ($node instanceof Node\Stmt\ClassMethod){
-            $this->originClassFile->handleLeaveMethodNode($node);
             $this->proxiedClassFile->handleLeaveMethodNode($node);
         }elseif ($node instanceof Node\Name\FullyQualified){
         }
@@ -125,10 +115,6 @@ class CodeVisitor extends NodeVisitorAbstract
         $node = $this->proxiedClassFile->handleAfterTravers($nodes);
 
         $this->proxiedClassFile->fileNodeDoneCB($node,$this->proxiedClassFile->myLoaderName);
-
-        $node = $this->originClassFile->handleAfterTravers($nodes);
-
-        $this->originClassFile->fileNodeDoneCB($node,$this->originClassFile->fileName);
 
     }
 
