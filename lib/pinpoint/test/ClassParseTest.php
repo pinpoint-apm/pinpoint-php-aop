@@ -2,8 +2,10 @@
 
 namespace pinpoint\test;
 require_once 'bootstrap.php';
-use pinpoint\Common\OrgClassParse;
+use pinpoint\Common\OriginFileVisitor;
 use PHPUnit\Framework\TestCase;
+use pinpoint\Common\PinpointDriver;
+use pinpoint\Common\NamingConf;
 
 define('AOP_CACHE_DIR',__DIR__.'/Cache/');
 define('PLUGINS_DIR',__DIR__.'/Plugins/');
@@ -15,6 +17,7 @@ define('PLUGINS_DIR',__DIR__.'/Plugins/');
  */
 class ClassParseTest extends TestCase
 {
+    public static  $naming=[];
     public static function cleanDir($dirName)
     {
         $files = glob($dirName."*",GLOB_MARK);
@@ -32,33 +35,50 @@ class ClassParseTest extends TestCase
     public static function setUpBeforeClass()
     {
         static::cleanDir(AOP_CACHE_DIR);
+
+// template for dst conf
+//        $dst = [
+//            'classCall'=>[
+//                'PDO'=>'plugins\\PDO',
+//                'type03'=>'plugins\\type03',
+//                'test\\curl'=>'plugins\\test\\curl',
+//                'test\\type1'=>'plugins\\test\\type1',
+//                'app\\curl_init_01'=>'plugins\\app\\curl_init_01'
+//            ],
+//            'funCall'=>[
+//                'curl_init'=>'plugins\\curl_init',
+//                'app\\foo\\curl_02'=>'plugins\\app\\foo\\curl_02',
+//                'app\\foo\\curl_03'=>'plugins\\app\\foo\\curl_0/cersv\3'
+//            ],
+//            'ignoreFiles'=>["pinpoint\\test\\IgnoreClass"],
+//            'appendFiles'=>["pinpoint\\test\\AddClass"]
+//        ];
+
+        $nConf =new NamingConf(__DIR__.'/setting.ini');
+        static::$naming = $nConf->getConf();
     }
 
     public function testTrait()
     {
         $fullpath =__DIR__.'/TestTrait.php';
-        $cl = "pinpoint\\test\\TestTrait";
         $info = [
             'getReturnType'=>[7,'pinpoint\\test','traitTestPlugin']
         ];
+        // test empty naming
+        $visitor = new OriginFileVisitor();
 
-        $osr = new OrgClassParse($fullpath,$cl,$info);
+        $visitor->runAllVisitor($fullpath,$info);
 
-        foreach ($osr->classIndex as $class => $location)
+        foreach ( PinpointDriver::getInstance()->getLoaderMap() as $class => $location)
         {
             $exp = str_replace('Cache','Comparison',$location);
             self::assertFileEquals($exp,$location);
         }
-
-        $requireFile = $osr->requiredFile;
-        $expRequired= str_replace('Cache','Comparison',$requireFile);
-        self::assertFileEquals($requireFile,$expRequired);
     }
 
     public function testClass()
     {
         $fullpath =__DIR__.'/TestClass.php';
-        $cl = "pinpoint\\test\\TestClass";
         $info = [
             'foo'=>[7,'pinpoint\\test','traitTestPlugin'],
             'fooUseYield'=>[3,'pinpoint\\test','traitTestPlugin'],
@@ -75,16 +95,39 @@ class ClassParseTest extends TestCase
         ];
 
 
-        $osr = new OrgClassParse($fullpath,$cl,$info);
+        $visitor =  new OriginFileVisitor();
 
-        foreach ($osr->classIndex as $class => $location)
+        $visitor->runAllVisitor($fullpath,$info,static::$naming);
+        foreach ( PinpointDriver::getInstance()->getLoaderMap() as $class => $location)
         {
             $exp = str_replace('Cache','Comparison',$location);
             self::assertFileEquals($exp,$location);
         }
 
-        $requireFile = $osr->requiredFile;
-        $expRequired= str_replace('Cache','Comparison',$requireFile);
-        self::assertFileEquals($requireFile,$expRequired);
     }
+
+    public function testNamingReplace()
+    {
+        $fullpath =__DIR__.'/Foo.php';
+        $visitor =  new OriginFileVisitor();
+        $visitor->runAllVisitor($fullpath,[],static::$naming);
+        foreach ( PinpointDriver::getInstance()->getLoaderMap() as $class => $location)
+        {
+            $exp = str_replace('Cache','Comparison',$location);
+            self::assertFileEquals($exp,$location);
+        }
+    }
+
+    public function testIgnoreList()
+    {
+//        $fullpath =__DIR__.'/Foo.php';
+//        $osr = new OrgClassParse($fullpath,null,static::$naming);
+//        foreach ($osr->classIndex as $class => $location)
+//        {
+//            $exp = str_replace('Cache','Comparison',$location);
+//            self::assertFileEquals($exp,$location);
+//        }
+        self::assertTrue(true);
+    }
+
 }
