@@ -32,7 +32,7 @@ class ClassParseTest extends TestCase
         }
     }
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass():void
     {
         static::cleanDir(AOP_CACHE_DIR);
 
