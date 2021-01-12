@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/pinpoint-apm/pinpoint-php-aop.svg?branch=master)](https://travis-ci.com/pinpoint-apm/pinpoint-php-aop)
+[![Build](https://github.com/pinpoint-apm/pinpoint-php-aop/workflows/Build/badge.svg?branch=master)](https://github.com/pinpoint-apm/pinpoint-php-aop/actions) [![LICENSE](https://img.shields.io/github/license/pinpoint-apm/pinpoint-php-aop)](LICENSE)
 
 ##  How to Use 
 
