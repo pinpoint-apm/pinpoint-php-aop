@@ -30,16 +30,6 @@ class PinpointDriver
     protected $clAr;
     private $iniFile='';
     protected static $pluginDir = [PLUGINS_DIR."/AutoGen/",PLUGINS_DIR."/"]; //*Plugin.php
-//    public function insertLoaderMap(string $name,string $path)
-//    {
-//        $this->classMap->insertMapping($name,$path);
-//    }
-
-//    //test only
-//    public function getLoaderMap()
-//    {
-//        return $this->classMap->getLoadeMap();
-//    }
 
     public static function getInstance(){
 
@@ -53,7 +43,6 @@ class PinpointDriver
     final private function __construct()
     {
         $this->clAr = [];
-//        $this->classMap = new RenderAopClass();
         $this->iniFile = PLUGINS_DIR."/setting.ini";
     }
 
@@ -76,7 +65,7 @@ class PinpointDriver
     {
 
         VendorAdaptorClassLoader::init();
-
+        RenderAopClass::getInstance();
         /// checking the cached file exist, if exist load it
         if(Util::checkCacheReady())
         {
@@ -105,12 +94,8 @@ class PinpointDriver
                     $fullPath = Util::findFile($class);
                     if(!$fullPath)
                         continue;
-                    try
-                    {
-                        $visitor =  new OriginFileVisitor();
-                        $visitor->runAllVisitor($fullPath,[],$naming);
-                    }catch (\Exception $e){
-                    }
+                    $visitor =  new OriginFileVisitor();
+                    $visitor->runAllVisitor($fullPath,[],$naming);
                 }
             }
         }
@@ -123,17 +108,12 @@ class PinpointDriver
             $fullPath = Util::findFile($class);
             if(!$fullPath )
                 continue;
-//            try
-//            {
             $visitor =  new OriginFileVisitor();
             if(isset($naming['ignoreFiles']) && in_array($class,$naming['ignoreFiles'])){
                 $visitor->runAllVisitor($fullPath,$aopFuncInfo);
             }else{
                 $visitor->runAllVisitor($fullPath,$aopFuncInfo,$naming);
             }
-//            }catch (\Exception $e){
-//
-//            }
         }
 
         RenderAopClassLoader::start();

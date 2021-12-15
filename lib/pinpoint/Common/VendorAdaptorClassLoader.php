@@ -77,7 +77,7 @@ class VendorAdaptorClassLoader
 
     public function findFile(string $classFullName):string
     {
-
+        
         if( is_callable($this->callOrgFindFile) )
         {
             $file = call_user_func($this->callOrgFindFile,$classFullName);
@@ -99,7 +99,6 @@ class VendorAdaptorClassLoader
         if(is_callable($this->vendor_load_class_func)){
             return call_user_func($this->vendor_load_class_func,$class);
         }
-        return false;
     }
 
     /**

@@ -23,9 +23,6 @@
 
 namespace pinpoint\Common;
 
-use PhpParser\Node\Expr\FuncCall;
-use pinpoint\Common\VendorAdaptorClassLoader;
-
 class Util
 {
     const U_Method= 1;
