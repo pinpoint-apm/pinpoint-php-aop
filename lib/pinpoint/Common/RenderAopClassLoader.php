@@ -7,21 +7,19 @@
 
 namespace pinpoint\Common;
 
-
 class RenderAopClassLoader
 {
-    public static function loadClass($class):bool
+    public static function loadClass($class)
     {
         $file = RenderAopClass::getInstance()->findFile($class);
-        if($file!==''){
+        if($file != ''){
             require $file;
             return true;
         }
-        return false;
     }
 
     public static function start()
     {
-        spl_autoload_register(array_flip(static::loadClass),true,true);
+        spl_autoload_register( [__NAMESPACE__.'\RenderAopClassLoader','loadClass'],true,true);
     }
 }
