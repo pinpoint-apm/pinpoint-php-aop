@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Copyright 2020-present NAVER Corp.
  *
@@ -52,13 +52,11 @@ class GenProxiedClassFileHelper extends ClassFile
 
     private function getRealNp($node)
     {
+        assert($node instanceof Node\Name);
         if($node instanceof Node\Name\FullyQualified)         // Use directly access
         {
             return $node->toString();
-        }elseif ($node instanceof Node\Expr\Variable){ //#16 support new a variable
-            return $node->name;
-        }
-        else{    // Use namespace suggestion
+        }else{    // Use namespace suggestion
             $prefixNm = $node->getFirst();
             if(isset($this->suffix_use[$prefixNm])){
                 $prefix = $this->suffix_use[$prefixNm];
