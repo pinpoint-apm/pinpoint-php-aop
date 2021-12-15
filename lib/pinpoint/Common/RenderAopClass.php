@@ -26,6 +26,7 @@ class RenderAopClass
     // mark as private
     private function __construct(){}
 
+    private $clsLoadUserFilterCB = null;
 
     public static function getInstance():RenderAopClass {
         if(self::$_instance){
@@ -40,31 +41,19 @@ class RenderAopClass
         $this->classLoaderMap = $clsMap;
     }
 
-//    public function useCache()
-//    {
-//        if( Util::useCachedFiles())
-//        {
-//            $this->classLoaderMap = Util::getCachedClass();
-//            $this->cached = true;
-//            return true;
-//        }else{
-//            return false;
-//        }
-//    }
-//
-//    public function persistenceClassMapping()
-//    {
-//        if(!$this->cached){
-//            Util::updateCachedClass($this->classLoaderMap);
-//        }
-//    }
-
     public function findFile($classFullName):string
     {
+        if(is_callable($this->clsLoadUserFilterCB)){
+            if( call_user_func($this->clsLoadUserFilterCB,$classFullName) == true ){
+                return '';
+            }
+        }
+
         if(isset($this->classLoaderMap[$classFullName]))
         {
             return $this->classLoaderMap[$classFullName];
         }
+
         return '';
     }
 
@@ -78,4 +67,7 @@ class RenderAopClass
         return $this->classLoaderMap;
     }
 
+    public function setUserFilter(callable $filter){
+        $this->clsLoadUserFilterCB = $filter;
+    }
 }
