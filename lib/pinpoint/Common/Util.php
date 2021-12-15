@@ -41,7 +41,7 @@ class Util
     {
         $splLoaders = spl_autoload_functions();
         foreach ($splLoaders as &$loader) {
-            
+
             if ( is_array($loader) && $loader[0] instanceof VendorAdaptorClassLoader) {
                 $address = $loader[0]->findFile($class);
                 if($address){
@@ -98,7 +98,7 @@ class Util
         file_exists(static::U_INDEX_FILE_PATH);
     }
 
-    public static function getCachedClass():array {
+    public static function loadCachedClass():array {
         if(file_exists(static::U_INDEX_FILE_PATH)){
             return unserialize(file_get_contents(static::U_INDEX_FILE_PATH));
         }else{

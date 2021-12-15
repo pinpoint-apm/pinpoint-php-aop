@@ -80,7 +80,7 @@ class PinpointDriver
         /// checking the cached file exist, if exist load it
         if(Util::checkCacheReady())
         {
-            RenderAopClass::getInstance()->createFrom(Util::getCachedClass());
+            RenderAopClass::getInstance()->createFrom(Util::loadCachedClass());
             RenderAopClassLoader::start();
             return ;
         }
