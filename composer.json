@@ -11,7 +11,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "pinpoint\\": "lib/pinpoint/"
+            "Pinpoint\\": "lib/Pinpoint/"
         }
     },
     "minimum-stability": "dev",
@@ -19,6 +19,7 @@
         "phpunit/phpunit": "^7"
     },
     "require": {
+        "php": ">=7",
         "nikic/php-parser": "^4.1"
     }
 }
