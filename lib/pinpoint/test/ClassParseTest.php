@@ -6,6 +6,7 @@ use pinpoint\Common\OriginFileVisitor;
 use PHPUnit\Framework\TestCase;
 use pinpoint\Common\PinpointDriver;
 use pinpoint\Common\NamingConf;
+use pinpoint\Common\RenderAopClass;
 
 define('AOP_CACHE_DIR',__DIR__.'/Cache/');
 define('PLUGINS_DIR',__DIR__.'/Plugins/');
@@ -69,7 +70,7 @@ class ClassParseTest extends TestCase
 
         $visitor->runAllVisitor($fullpath,$info);
 
-        foreach ( PinpointDriver::getInstance()->getLoaderMap() as $class => $location)
+        foreach ( RenderAopClass::getInstance()->getLoadeMap() as $class => $location)
         {
             $exp = str_replace('Cache','Comparison',$location);
             self::assertFileEquals($exp,$location);
@@ -98,7 +99,7 @@ class ClassParseTest extends TestCase
         $visitor =  new OriginFileVisitor();
 
         $visitor->runAllVisitor($fullpath,$info,static::$naming);
-        foreach ( PinpointDriver::getInstance()->getLoaderMap() as $class => $location)
+        foreach ( RenderAopClass::getInstance()->getLoadeMap()  as $class => $location)
         {
             $exp = str_replace('Cache','Comparison',$location);
             self::assertFileEquals($exp,$location);
@@ -111,7 +112,7 @@ class ClassParseTest extends TestCase
         $fullpath =__DIR__.'/Foo.php';
         $visitor =  new OriginFileVisitor();
         $visitor->runAllVisitor($fullpath,[],static::$naming);
-        foreach ( PinpointDriver::getInstance()->getLoaderMap() as $class => $location)
+        foreach ( RenderAopClass::getInstance()->getLoadeMap()  as $class => $location)
         {
             $exp = str_replace('Cache','Comparison',$location);
             self::assertFileEquals($exp,$location);
