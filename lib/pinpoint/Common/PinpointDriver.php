@@ -115,7 +115,9 @@ class PinpointDriver
                 $visitor->runAllVisitor($fullPath,$aopFuncInfo,$naming);
             }
         }
-
+        // save render aop class into index file
+        Util::saveCachedClass(RenderAopClass::getInstance()->getLoadeMap());
+        // enable RenderAop class loader
         RenderAopClassLoader::start();
     }
 
