@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Copyright 2020-present NAVER Corp.
  *
@@ -23,22 +23,13 @@
 
 namespace pinpoint\Common;
 
+
 class PinpointDriver
 {
     protected static $instance;
     protected $clAr;
-    protected $classMap = null;
     private $iniFile='';
     protected static $pluginDir = [PLUGINS_DIR."/AutoGen/",PLUGINS_DIR."/"]; //*Plugin.php
-    public function insertLoaderMap(string $name,string $path)
-    {
-        $this->classMap->insertMapping($name,$path);
-    }
-
-    public function getLoaderMap()
-    {
-        return $this->classMap->getLoadeMap();
-    }
 
     public static function getInstance(){
 
@@ -52,7 +43,6 @@ class PinpointDriver
     final private function __construct()
     {
         $this->clAr = [];
-        $this->classMap = new AopClassMap();
         $this->iniFile = PLUGINS_DIR."/setting.ini";
     }
 
@@ -71,18 +61,18 @@ class PinpointDriver
         return $pluFiles;
     }
 
-    public function init(AopClassMap $classMap)
+    public function start()
     {
-        // get class index map
-        $this->classMap = $classMap;
 
+        VendorAdaptorClassLoader::init();
+        RenderAopClass::getInstance();
         /// checking the cached file exist, if exist load it
-        if($this->classMap->useCache())
+        if(Util::checkCacheReady())
         {
-            PinpointClassLoader::init($classMap);
+            RenderAopClass::getInstance()->createFrom(Util::loadCachedClass());
+            RenderAopClassLoader::start();
             return ;
         }
-
 
         $pluFiles = static::getAutoGenPlugins();
         foreach ($pluFiles as $file)
@@ -104,39 +94,29 @@ class PinpointDriver
                     $fullPath = Util::findFile($class);
                     if(!$fullPath)
                         continue;
-                    try
-                    {
-                        $visitor =  new OriginFileVisitor();
-                        $visitor->runAllVisitor($fullPath,[],$naming);
-                    }catch (\Exception $e){
-                    }
+                    $visitor =  new OriginFileVisitor();
+                    $visitor->runAllVisitor($fullPath,[],$naming);
                 }
             }
         }
 
 
-        foreach ($this->clAr as $class=> $aopFuncInfo)
+        foreach ($this->clAr as $class => $aopFuncInfo)
         {
             if(empty($class))
                 continue;
             $fullPath = Util::findFile($class);
             if(!$fullPath )
                 continue;
-            try
-            {
-                $visitor =  new OriginFileVisitor();
-                if(isset($naming['ignoreFiles']) && in_array($class,$naming['ignoreFiles'])){
-                    $visitor->runAllVisitor($fullPath,$aopFuncInfo);
-                }else{
-                    $visitor->runAllVisitor($fullPath,$aopFuncInfo,$naming);
-                }
-            }catch (\Exception $e){
-
+            $visitor =  new OriginFileVisitor();
+            if(isset($naming['ignoreFiles']) && in_array($class,$naming['ignoreFiles'])){
+                $visitor->runAllVisitor($fullPath,$aopFuncInfo);
+            }else{
+                $visitor->runAllVisitor($fullPath,$aopFuncInfo,$naming);
             }
         }
 
-        $this->classMap->persistenceClassMapping();
-        PinpointClassLoader::init($this->classMap);
+        RenderAopClassLoader::start();
     }
 
 

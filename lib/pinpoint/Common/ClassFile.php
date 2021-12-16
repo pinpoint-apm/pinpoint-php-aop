@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Copyright 2020-present NAVER Corp.
  *
@@ -25,7 +25,6 @@ namespace pinpoint\Common;
 
 use PhpParser\Node;
 use PhpParser\PrettyPrinter;
-
 /**
  * Class ClassFile
  *
@@ -133,8 +132,8 @@ abstract class ClassFile
     {
         $fullPath = AOP_CACHE_DIR.'/'.str_replace('\\','/',$loaderName).'.php';
         $context= $this->_astPrinter->prettyPrintFile($node);
-        Util::flushStr2File($context,$fullPath);
-        PinpointDriver::getInstance()->insertLoaderMap($loaderName,$fullPath);
+        RenderAopClass::getInstance()->insertMapping($loaderName,$fullPath);
+        Util::saveObj($context,$fullPath);
     }
 
     abstract function handleAfterTravers(&$nodes);

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Copyright 2020-present NAVER Corp.
  *
@@ -18,46 +18,43 @@
 
 namespace pinpoint\Common;
 
-class AopClassMap
+class RenderAopClass
 {
-    protected $index_file_path=AOP_CACHE_DIR.'__class_index_table';
-    private $cached = false;
+    private static $_instance =null;
+
     private $classLoaderMap = [];
+    // mark as private
+    private function __construct(){}
 
-    public function __construct()
-    {
+    private $clsLoadUserFilterCB = null;
 
-    }
-
-    public function useCache()
-    {
-        if( ( defined('PINPOINT_USE_CACHE') &&
-            stristr(PINPOINT_USE_CACHE,"YES") !== false ) &&
-            file_exists($this->index_file_path) )
-        {
-            $this->classLoaderMap = unserialize(file_get_contents($this->index_file_path));
-            $this->cached = true;
-            return true;
-        }else{
-            return false;
+    public static function getInstance():RenderAopClass {
+        if(self::$_instance){
+            return self::$_instance;
         }
+        self::$_instance =  new RenderAopClass();
+        return self::$_instance;
     }
 
-    public function persistenceClassMapping()
+    public function createFrom(array $clsMap)
     {
-        if(!$this->cached){
-            $context = serialize($this->classLoaderMap);
-            Util::flushStr2File($context,$this->index_file_path);
+        $this->classLoaderMap = $clsMap;
+    }
+
+    public function findFile($classFullName):string
+    {
+        if(is_callable($this->clsLoadUserFilterCB)){
+            if( call_user_func($this->clsLoadUserFilterCB,$classFullName) == true ){
+                return '';
+            }
         }
-    }
 
-    public function findFile($classFullName)
-    {
         if(isset($this->classLoaderMap[$classFullName]))
         {
             return $this->classLoaderMap[$classFullName];
         }
-        return null;
+
+        return '';
     }
 
     public  function insertMapping($cl,$file)
@@ -65,9 +62,12 @@ class AopClassMap
         $this->classLoaderMap[$cl] = $file;
     }
 
-    public function getLoadeMap()
+    public function getLoadeMap():array
     {
         return $this->classLoaderMap;
     }
 
+    public function setUserFilter(callable $filter){
+        $this->clsLoadUserFilterCB = $filter;
+    }
 }
