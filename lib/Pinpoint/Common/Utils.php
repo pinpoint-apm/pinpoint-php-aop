@@ -23,11 +23,18 @@
 
 namespace Pinpoint\Common;
 
-class Util
+class Utils
 {
     const U_Method= 1;
     const U_Function= 2;
     const U_INDEX_FILE_PATH = AOP_CACHE_DIR.'__class_index_table';
+
+    static private $loaderPatch =[null,null];
+
+    public static function addLoaderPatch(callable $start,callable $tail=null){
+        static::$loaderPatch[0] = $start;
+        static::$loaderPatch[1] = $tail;
+    }
 
     /**
      * locate a class (via  VendorAdaptorClassLoader)
@@ -36,6 +43,13 @@ class Util
      */
     public static function findFile($class):string
     {
+        if(is_callable(static::$loaderPatch[0])){
+           $files = call_user_func(static::$loaderPatch[0],$class);
+           if ($files){
+               return $files;
+           }
+        }
+
         $splLoaders = spl_autoload_functions();
         foreach ($splLoaders as &$loader) {
 
@@ -44,8 +58,17 @@ class Util
                 if($address){
                     return realpath($address);
                 }
-            }else{
-                throw new \Exception("unknown loader");
+            }
+            // keep peace with unknown loader
+//            else{
+//                throw new \Exception("unknown loader");
+//            }
+        }
+
+        if(is_callable(static::$loaderPatch[1])){
+            $files = call_user_func(static::$loaderPatch[1],$class);
+            if ($files){
+                return $files;
             }
         }
         

@@ -111,11 +111,24 @@ class VendorAdaptorClassLoader
         $loaders = spl_autoload_functions();
         foreach ($loaders as &$loader) {
             if ( is_array($loader) && is_callable($loader) ) {// common ClassLoader style
-                
+
+                try{
+                    // replace composer loader with aopclassLoader
+                    $_loader = new self($loader);
+                }catch (Exception $e){
+                    /**
+                     * if current loader not compatible, just ignore it!
+                     * why?
+                     *  1. pinpoint-php-aop only works on known framework! Exception will not expose to usr
+                     *  2. Keep this loader, as it will handled its class. (We could write patch for this loader)
+                     *  3. Pinpoint classloader is the highest priority
+                     */
+                    continue;
+                }
+
                 // unregister composer loader
                 spl_autoload_unregister($loader);
-                // replace composer loader with aopclassLoader
-                $_loader = new self($loader);
+
                 spl_autoload_register(array($_loader,'loadClass'),true,false);
             }
         }
