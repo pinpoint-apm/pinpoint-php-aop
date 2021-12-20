@@ -7,8 +7,8 @@ use App\Class2;
 use App\Class3 as FooClass;
 use App\Class4 as FooClass4;
 use Pinpoint\test\Proxied_TestClass;
-use Pinpoint\test\traitTestPlugin;
-use Pinpoint\test\burden\depress\herb\e\e\f\longNp\victim;
+use pinpoint\test\traitTestPlugin;
+use pinpoint\test\burden\depress\herb\e\e\f\longNp\victim;
 use \over;
 abstract class TestClass extends Proxied_TestClass
 {

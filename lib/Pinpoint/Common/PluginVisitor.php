@@ -44,7 +44,7 @@ class PluginVisitor extends NodeVisitorAbstract
     {
        foreach( $node->getComments() as &$doc)
        {
-            $funArray = Util::parseUserFunc(trim($doc->getText()));
+            $funArray = Utils::parseUserFunc(trim($doc->getText()));
 
             foreach ($funArray as $func)
             {

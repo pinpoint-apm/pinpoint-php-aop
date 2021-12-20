@@ -133,7 +133,7 @@ abstract class ClassFile
         $fullPath = AOP_CACHE_DIR.'/'.str_replace('\\','/',$loaderName).'.php';
         $context= $this->_astPrinter->prettyPrintFile($node);
         RenderAopClass::getInstance()->insertMapping($loaderName,$fullPath);
-        Util::saveObj($context,$fullPath);
+        Utils::saveObj($context,$fullPath);
     }
 
     abstract function handleAfterTravers(&$nodes);

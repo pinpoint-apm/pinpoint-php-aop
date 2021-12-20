@@ -17,9 +17,9 @@
 
 namespace Pinpoint\Plugins\Sys\curl;
 
-use Pinpoint\Plugins\Common\Candy;
+use Pinpoint\Plugins\Common\PinTrace;
 
-class CurlExecPlugin extends Candy
+class CurlExecPlugin extends PinTrace
 {
 
     function onBefore()

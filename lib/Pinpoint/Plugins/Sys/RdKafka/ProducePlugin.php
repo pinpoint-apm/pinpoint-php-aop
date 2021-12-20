@@ -8,9 +8,9 @@
 namespace Pinpoint\Plugins\Sys\RdKafka;
 
 
-use Pinpoint\Plugins\Common\Candy;
+use Pinpoint\Plugins\Common\PinTrace;
 
-class ProducePlugin extends Candy
+class ProducePlugin extends PinTrace
 {
 
     function onBefore()

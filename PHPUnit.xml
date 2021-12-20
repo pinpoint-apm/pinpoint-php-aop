@@ -7,11 +7,10 @@
      convertNoticesToExceptions="true"
      convertWarningsToExceptions="true"
      processIsolation="false"
-     stopOnFailure="false"
-     syntaxCheck="false">
+     stopOnFailure="true">
     <testsuites>
         <testsuite name="pinpoint">
-            <directory>lib/pinpoint/test</directory>
+            <directory>lib/Pinpoint/test</directory>
         </testsuite>
     </testsuites>
     <filter>

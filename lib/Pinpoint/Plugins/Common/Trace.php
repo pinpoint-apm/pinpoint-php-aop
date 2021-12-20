@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /******************************************************************************
  * Copyright 2020 NAVER Corp.                                                 *
  *                                                                            *
@@ -14,17 +14,34 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
+/*
+ * User: eeliu
+ * Date: 12/20/21
+ * Time: 5:12 PM
+ */
+
 namespace Pinpoint\Plugins\Common;
 
-class Trace{
 
-    public static function generateSpanID()
+class Trace
+{
+    protected $apId;
+    protected $who;
+    protected $args;
+    protected $ret=null;
+
+    public function __construct($apId,$who,&...$args)
     {
-        try {
-            return mt_rand();
-        } catch (\Exception $e) {
-            return rand();
-        }
+        $this->apId = $apId;
+        $this->who =  $who;
+        $this->args = &$args;
     }
 
+    public function __destruct(){}
+
+    function onBefore(){}
+
+    function onEnd(&$ret){}
+
+    public function onException($e) {}
 }

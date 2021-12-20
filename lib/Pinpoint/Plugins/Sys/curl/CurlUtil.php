@@ -15,7 +15,7 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 namespace Pinpoint\Plugins\Sys\curl;
-use Pinpoint\Plugins\Common\Trace;
+use Pinpoint\Plugins\Common\TraceHelper;
 
 class CurlUtil
 {
@@ -46,7 +46,7 @@ class CurlUtil
             return ["Pinpoint-Sampled:s0"];
         }
 
-        $nsid = Trace::generateSpanID();
+        $nsid = TraceHelper::generateSpanID();
         $header = [
             'Pinpoint-Sampled:s1',
             'Pinpoint-Flags:0',
@@ -68,7 +68,7 @@ class CurlUtil
             return ["Pinpoint-Sampled"=>"s0"];
         }
 
-        $nsid = Trace::generateSpanID();
+        $nsid = TraceHelper::generateSpanID();
         $header = [
             'Pinpoint-Sampled'=>'s1',
             'Pinpoint-Flags'=>'0',

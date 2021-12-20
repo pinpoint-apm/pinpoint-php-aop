@@ -17,4 +17,4 @@ jobs:
           tools: composer:v2
       - run: |
           composer install --prefer-dist
-          php vendor/bin/phpunit --configuration PHPUnit.xml --testsuit pinpoint --testdox
+          vendor/bin/phpunit --configuration PHPUnit.xml --testsuit pinpoint --testdox
