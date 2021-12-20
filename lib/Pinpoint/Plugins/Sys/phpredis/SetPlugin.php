@@ -8,9 +8,9 @@
 namespace Pinpoint\Plugins\Sys\phpredis;
 
 
-use Pinpoint\Plugins\Common\Candy;
+use Pinpoint\Plugins\Common\PinTrace;
 
-class SetPlugin extends Candy
+class SetPlugin extends PinTrace
 {
 
     function onBefore()

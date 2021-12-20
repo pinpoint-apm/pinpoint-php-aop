@@ -16,11 +16,11 @@
  ******************************************************************************/
 namespace Pinpoint\Plugins\AutoGen\GuzzleHttp;
 
-use Pinpoint\Plugins\Common\Candy;
+use Pinpoint\Plugins\Common\PinTrace;
 use Pinpoint\Plugins\Sys\curl\CurlUtil;
 
 ///@hook:GuzzleHttp\Client::request
-class GuzzlePlugin extends Candy
+class GuzzlePlugin extends PinTrace
 {
     ///@hook:GuzzleHttp\Psr7\Request::__construct
     function onBefore()

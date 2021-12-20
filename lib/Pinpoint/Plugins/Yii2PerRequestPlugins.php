@@ -15,23 +15,35 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Pinpoint\Plugins\Common;
+namespace Pinpoint\Plugins;
 
-class CommonPlugin extends PinTrace
+use Yii;
+use Pinpoint\Common\Utils;
+use Pinpoint\Plugins\PerRequestPlugins;
+
+class Yii2PerRequestPlugins extends PerRequestPlugins
 {
-    ///@hook:app\DBcontrol::connectDb
-    public function onBefore(){
-        pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP_METHOD);
-        pinpoint_add_clues(PP_PHP_ARGS,"--placeholder---");
+    protected function __construct()
+    {
+        parent::__construct();
+        // enable findFile patch
+        Utils::addLoaderPatch(array($this,'findFileInYii'),null);
     }
 
-    ///@hook:app\DBcontrol::getData1 app\DBcontrol::\array_push
-    public function onEnd(&$ret){
-        pinpoint_add_clues(PP_PHP_RETURN,"--placeholder---");
+    public function findFileInYii($className):string {
+        if (isset(Yii::$classMap[$className])) {
+            $classFile = Yii::$classMap[$className];
+            if (strpos($classFile, '@') === 0) {
+                return  Yii::getAlias($classFile);
+            }
+        } elseif (strpos($className, '\\') !== false) {
+            $classFile = Yii::getAlias('@' . str_replace('\\', '/', $className) . '.php', false);
+            if ($classFile === false || !is_file($classFile)) {
+                return "";
+            }
+            return $classFile;
+        }
+        return "";
     }
 
-    ///@hook:app\DBcontrol::getData2
-    public function onException($e){
-        pinpoint_add_clue(PP_ADD_EXCEPTION,$e->getMessage());
-    }
 }

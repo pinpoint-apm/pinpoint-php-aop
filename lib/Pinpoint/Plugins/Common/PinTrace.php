@@ -26,7 +26,7 @@
 namespace Pinpoint\Plugins\Common;
 require_once "PluginsDefines.php";
 
-abstract class Candy
+abstract class PinTrace
 {
     protected $apId;
     protected $who;

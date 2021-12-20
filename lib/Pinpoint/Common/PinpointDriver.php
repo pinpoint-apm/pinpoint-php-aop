@@ -45,7 +45,7 @@ class PinpointDriver
     {
     }
 
-    public static function getAutoGenFiles()
+    private static function getAutoGenFiles()
     {
         $files = [];
 
@@ -53,7 +53,7 @@ class PinpointDriver
         {
             if(is_dir($dir))
             {
-                Util::scanDir($dir,"/Plugin.php$/",$files);
+                Utils::scanDir($dir,"/Plugin.php$/",$files);
             }
         }
 
@@ -65,12 +65,13 @@ class PinpointDriver
 
         RenderAopClass::getInstance();
         /// checking the cached file exist, if exist load it
-        if(Util::checkCacheReady())
+        if(Utils::checkCacheReady())
         {
-            RenderAopClass::getInstance()->createFrom(Util::loadCachedClass());
+            RenderAopClass::getInstance()->createFrom(Utils::loadCachedClass());
             RenderAopClassLoader::start();
             return ;
         }
+
         VendorAdaptorClassLoader::enable();
         $pluFiles = static::getAutoGenFiles();
         foreach ($pluFiles as $file)
@@ -89,7 +90,7 @@ class PinpointDriver
             {
                 foreach ($naming['appendFiles'] as $class)
                 {
-                    $fullPath = Util::findFile($class);
+                    $fullPath = Utils::findFile($class);
                     if(!$fullPath)
                         continue;
                     $visitor =  new OriginFileVisitor();
@@ -103,7 +104,7 @@ class PinpointDriver
         {
             if(empty($class))
                 continue;
-            $fullPath = Util::findFile($class);
+            $fullPath = Utils::findFile($class);
             if(!$fullPath )
                 continue;
             $visitor =  new OriginFileVisitor();
@@ -114,10 +115,17 @@ class PinpointDriver
             }
         }
         // save render aop class into index file
-        Util::saveCachedClass(RenderAopClass::getInstance()->getLoadeMap());
+        Utils::saveCachedClass(RenderAopClass::getInstance()->getLoadeMap());
         // enable RenderAop class loader
         RenderAopClassLoader::start();
     }
 
-
+    /**
+     * start /tail are the spl_autoload_functions checking order
+     * @param callable $start
+     * @param callable $tail
+     */
+    public function addClassFinderHelper(callable $start, callable $tail){
+        Utils::addLoaderPatch($start,$tail);
+    }
 }

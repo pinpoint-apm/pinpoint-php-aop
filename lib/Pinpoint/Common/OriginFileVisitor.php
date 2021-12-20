@@ -41,7 +41,6 @@ class OriginFileVisitor
         $code = file_get_contents($fullPath);
         $stmts = $this->phpFileParser->parse($code);
         $this->traverser->traverse($stmts);
-
     }
 
     private function getVisitor(string& $fullPath,array& $aopFuncInfo=[], array& $naming=[])
