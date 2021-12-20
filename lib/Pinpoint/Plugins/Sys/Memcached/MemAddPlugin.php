@@ -18,9 +18,9 @@
 namespace Pinpoint\Plugins\Sys\Memcached;
 
 
-use Pinpoint\Plugins\Common\Candy;
+use Pinpoint\Plugins\Common\PinTrace;
 
-class MemAddPlugin extends Candy
+class MemAddPlugin extends PinTrace
 {
 
     function onBefore()

@@ -2,10 +2,10 @@
 
 namespace Pinpoint\test;
 require_once 'bootstrap.php';
-use Pinpoint\Common\OriginFileVisitor;
 use PHPUnit\Framework\TestCase;
-use Pinpoint\Common\PinpointDriver;
+use Pinpoint\Common\OriginFileVisitor;
 use Pinpoint\Common\NamingConf;
+use Pinpoint\Common\Utils;
 use Pinpoint\Common\RenderAopClass;
 
 define('AOP_CACHE_DIR',__DIR__.'/Cache/');
@@ -73,7 +73,9 @@ class ClassParseTest extends TestCase
         foreach ( RenderAopClass::getInstance()->getLoadeMap() as $class => $location)
         {
             $exp = str_replace('Cache','Comparison',$location);
-            self::assertFileEquals($exp,$location);
+            self::assertFileExists($exp);
+            self::assertFileExists($location);
+            self::assertFileEquals($exp,$location,"$exp!=$location");
         }
     }
 
@@ -102,6 +104,8 @@ class ClassParseTest extends TestCase
         foreach ( RenderAopClass::getInstance()->getLoadeMap()  as $class => $location)
         {
             $exp = str_replace('Cache','Comparison',$location);
+            self::assertFileExists($exp);
+            self::assertFileExists($location);
             self::assertFileEquals($exp,$location);
         }
 
@@ -115,6 +119,8 @@ class ClassParseTest extends TestCase
         foreach ( RenderAopClass::getInstance()->getLoadeMap()  as $class => $location)
         {
             $exp = str_replace('Cache','Comparison',$location);
+            self::assertFileExists($location);
+            self::assertFileExists($exp);
             self::assertFileEquals($exp,$location);
         }
     }

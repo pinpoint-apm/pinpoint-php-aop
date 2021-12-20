@@ -17,9 +17,9 @@
 namespace Pinpoint\Plugins\Sys\mysqli;
 
 
-use Pinpoint\Plugins\Common\Candy;
+use Pinpoint\Plugins\Common\PinTrace;
 
-class MysqliQueryPlugin extends Candy
+class MysqliQueryPlugin extends PinTrace
 {
 
     function onBefore()

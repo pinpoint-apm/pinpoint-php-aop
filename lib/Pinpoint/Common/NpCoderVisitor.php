@@ -77,7 +77,10 @@ class NpCoderVisitor extends NodeVisitorAbstract
         }
         elseif ($node instanceof Node\Expr\ClassConstFetch){
             return $this->proxiedClassFile->handleEnterClassConstFetch($node);
-        }elseif ($node instanceof  Node\Expr\New_){
+        }
+        elseif ($node instanceof Node\Name\FullyQualified) {
+            return $this->proxiedClassFile->handleFullyQualifiedNode($node);
+        }elseif ($node instanceof  Node\Expr\New_) {
             return $this->proxiedClassFile->handleEnterNew_($node);
         }elseif ($node instanceof Node\Expr\FuncCall){
             return $this->proxiedClassFile->handleEnterFuncCall($node);

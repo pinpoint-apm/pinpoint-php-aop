@@ -8,14 +8,14 @@
 namespace Pinpoint\Plugins\Sys\mysqli;
 
 
-use Pinpoint\Plugins\Common\Candy;
+use Pinpoint\Plugins\Common\PinTrace;
 
 /**
  * Class StmtExecutePlugin
  * record the function execute env
  * @package Plugins\Sys\mysqli
  */
-class StmtExecutePlugin extends Candy
+class StmtExecutePlugin extends PinTrace
 {
 
     function onBefore()

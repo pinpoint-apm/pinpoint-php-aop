@@ -71,6 +71,7 @@ class PinpointDriver
             RenderAopClassLoader::start();
             return ;
         }
+
         VendorAdaptorClassLoader::enable();
         $pluFiles = static::getAutoGenFiles();
         foreach ($pluFiles as $file)

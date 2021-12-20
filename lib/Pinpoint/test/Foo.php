@@ -14,7 +14,7 @@ use App\A\LONG\NAME as ShortName;
 use A\B\C;
 
 
-class Foo
+class Foo extends \PDO
 {
     public function __construct($str,type1 $one,\test\type2 $two, type03 $three)
     {

@@ -113,8 +113,8 @@ class GenProxiedClassFileHelper extends ClassFile
         assert($node instanceof Node\Expr\New_);
         $node->class =  $this->renderClassName($node->class,$this->t_covertCls);
         return $node;
-
     }
+
     public function handleEnterClassConstFetch(&$node)
     {
         assert($node instanceof Node\Expr\ClassConstFetch);
@@ -194,10 +194,12 @@ class GenProxiedClassFileHelper extends ClassFile
     public function handleFullyQualifiedNode(&$node)
     {
         assert($node instanceof Node\Name\FullyQualified);
-
-        $newNode = new Node\Name($node->toString());
-
-        return $newNode;
+        $name = $node->toString();
+        if( isset($this->t_covertCls[$name]) ) {
+           return new Node\Name\FullyQualified($this->t_covertCls[$name]);
+        }else{
+            return $node;
+        }
     }
 
     public function addRequiredFile($fullName)

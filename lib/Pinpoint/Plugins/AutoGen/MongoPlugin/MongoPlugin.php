@@ -17,9 +17,9 @@
 
 
 namespace Pinpoint\Plugins;
-use Pinpoint\Plugins\Common\Candy;
+use Pinpoint\Plugins\Common\PinTrace;
 
-class MongoPlugin extends Candy
+class MongoPlugin extends PinTrace
 {
 
     /**

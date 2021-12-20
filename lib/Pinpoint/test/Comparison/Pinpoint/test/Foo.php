@@ -2,18 +2,18 @@
 
 namespace Pinpoint\test;
 
-use Pinpoint\Plugins\app\curl_init_01;
-use Pinpoint\Plugins\test\curl;
-use Pinpoint\Plugins\test\type1;
-use Pinpoint\Plugins\type03;
+use plugins\app\curl_init_01;
+use plugins\test\curl;
+use plugins\test\type1;
+use plugins\type03;
 use function plugins\app\foo\curl_02 as curl_02;
 use function plugins\app\foo\curl_03;
-use Pinpoint\Plugins\PDO;
-use Pinpoint\Plugins\PDO as TPDO;
-use Pinpoint\Plugins\A\B;
+use plugins\PDO;
+use plugins\PDO as TPDO;
+use plugins\A\B;
 use App\A\LONG\NAME as ShortName;
 use A\B\C;
-class Foo
+class Foo extends \plugins\PDO
 {
     public function __construct($str, type1 $one, \test\type2 $two, type03 $three)
     {
@@ -22,9 +22,9 @@ class Foo
         $curl_01 = new curl_init_01();
         $curl_02 = new \plugins\app\curl_init_01();
         $a = new \plugins\app\ClassA();
-        print_r('pinpoint\\test\\Foo');
+        print_r('Pinpoint\\test\\Foo');
         print_r(27);
-        print_r('pinpoint\\test\\Foo::__construct');
+        print_r('Pinpoint\\test\\Foo::__construct');
         print_r(23);
     }
     public function testPDO()
