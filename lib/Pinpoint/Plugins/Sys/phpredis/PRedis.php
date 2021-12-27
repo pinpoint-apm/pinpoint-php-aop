@@ -8,7 +8,7 @@
 namespace Pinpoint\Plugins\Sys\phpredis;
 
 
-class Redis extends \Redis
+class PRedis extends \Redis
 {
     public function connect( $host, $port = 6379, $timeout = 0.0, $reserved = null, $retry_interval = 0 )
     {
