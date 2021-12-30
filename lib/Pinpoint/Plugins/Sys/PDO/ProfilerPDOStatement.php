@@ -18,7 +18,6 @@
 
 
 namespace Pinpoint\Plugins\Sys\PDO;
-use function GuzzleHttp\Psr7\normalize_header;
 use PDO;
 
 class ProfilerPDOStatement extends \PDOStatement
@@ -98,11 +97,11 @@ class ProfilerPDOStatement extends \PDOStatement
         $args = \pinpoint_get_func_ref_args();
         return $this->profiler(__FUNCTION__,$args);
     }
-
-    public function fetchAll($how = PDO::FETCH_CLASS, $class_name = null, $ctor_args = null)
+    // not support php5 any more
+    public function fetchAll(int $mode = PDO::FETCH_DEFAULT, mixed ...$args)
     {
-        $args = \pinpoint_get_func_ref_args();
-        return $this->profiler(__FUNCTION__,$args);
+        $_args = \pinpoint_get_func_ref_args();
+        return $this->profiler(__FUNCTION__,$_args);
     }
 
     public function fetchColumn($column_number = 0)
@@ -147,7 +146,7 @@ class ProfilerPDOStatement extends \PDOStatement
        return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function setFetchMode($mode,$parames=null)
+    public function setFetchMode($mode,mixed ...$args)
     {
        $args = \pinpoint_get_func_ref_args();
        return $this->profiler(__FUNCTION__,$args);
