@@ -14,24 +14,19 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
+namespace Pinpoint\Plugins\Sys\mysqli7;
 
-require_once __DIR__."/Common/PluginsDefines.php";
-// intercept all date_xxxx, part of php core
-require_once __DIR__."/Sys/date/date.php";
-
-// intercept all curl_xxxx, if curl extension is available
-if (function_exists('curl_exec'))
+class ProfilerMysqliResult
 {
-    require_once __DIR__."/Sys/curl/curl.php";
-}
-
-if (function_exists('mysqli_connect'))
-{
-    if(version_compare(phpversion(), '8.0.0', '<')){
-        require_once __DIR__."/Sys/mysqli7/Mysqli.php";
-    }elseif(version_compare(phpversion(), '8.0.0', '>=')){
-        require_once __DIR__."/Sys/mysqli/Mysqli.php";
-    }elseif(version_compare(phpversion(), '7.0.0', '<')){
-        throw new \Exception("not support php5+");
+    protected $_instance;
+    public function __construct(&$instance)
+    {
+        $this->_instance = &$instance;
     }
+
+    public function __call($name, $arguments)
+    {
+        return call_user_func_array([&$this->_instance,$name],$arguments);
+    }
+
 }
