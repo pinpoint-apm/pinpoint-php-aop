@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Pinpoint\Plugins\Sys\PDO;
+namespace Pinpoint\Plugins\Sys\PDO8;
 
-use Pinpoint\Plugins\Common\Candy;
+use Pinpoint\Plugins\Common\PinTrace;
 
-class PDOExec extends Candy
+class PDOExec extends PinTrace
 {
 
     function onBefore()

@@ -14,25 +14,43 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Pinpoint\Plugins\Sys\PDO;
+namespace Pinpoint\Plugins\Sys\PDO8;
 
-use Pinpoint\Plugins\Common\Candy;
+use Pinpoint\Plugins\Common\PinTrace;
+use Pinpoint\Plugins\Sys\PDO\ProfilerPDOStatement;
+class PDOGlueStatement extends PinTrace
 
-class PDOExec extends Candy
 {
-
     function onBefore()
     {
-        pinpoint_add_clues(PP_PHP_ARGS, sprintf("%s",$this->args[0][0]));
+        // todo stp, should follow the dsn
+        $dbInfo = $this->parseDb($this->who->dsn);
+        pinpoint_add_clue(PP_SERVER_TYPE,PP_MYSQL);
+        pinpoint_add_clue(PP_SQL_FORMAT, sprintf("%s",$this->args[0]));
+        pinpoint_add_clue(PP_DESTINATION,$dbInfo['host']);
     }
-
     function onEnd(&$ret)
     {
-        pinpoint_add_clues(PP_PHP_RETURN,"$ret");
+        $origin = $ret;
+        $ret = new ProfilerPDOStatement($origin);
     }
 
     function onException($e)
     {
-        // TODO: Implement onException() method.
+        pinpoint_add_clue(PP_ADD_EXCEPTION,$e->getMessage());
+    }
+
+    function parseDb($dsn){
+
+        $db_url =  parse_url($dsn);
+        parse_str(str_replace(';','&',$db_url['path']),$dbInfo);
+
+        if($db_url['scheme'] == 'sqlite'){ // treat sqllite as mysql
+            $dbInfo['host'] = 'localhost-sqlite';
+        }
+
+        $dbInfo['scheme']= $db_url['scheme'];
+
+        return $dbInfo;
     }
 }
