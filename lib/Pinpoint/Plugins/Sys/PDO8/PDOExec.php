@@ -14,24 +14,25 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
+namespace Pinpoint\Plugins\Sys\PDO8;
 
-require_once __DIR__."/Common/PluginsDefines.php";
-// intercept all date_xxxx, part of php core
-require_once __DIR__."/Sys/date/date.php";
+use Pinpoint\Plugins\Common\PinTrace;
 
-// intercept all curl_xxxx, if curl extension is available
-if (function_exists('curl_exec'))
+class PDOExec extends PinTrace
 {
-    require_once __DIR__."/Sys/curl/curl.php";
-}
 
-if (function_exists('mysqli_connect'))
-{
-    if(version_compare(phpversion(), '8.0.0', '<')){
-        require_once __DIR__."/Sys/mysqli/Mysqli.php";
-    }elseif(version_compare(phpversion(), '8.0.0', '>=')){
-        require_once __DIR__."/Sys/mysqli8/Mysqli8.php";
-    }elseif(version_compare(phpversion(), '7.0.0', '<')){
-        throw new \Exception("not support php5+");
+    function onBefore()
+    {
+        pinpoint_add_clues(PP_PHP_ARGS, sprintf("%s",$this->args[0][0]));
+    }
+
+    function onEnd(&$ret)
+    {
+        pinpoint_add_clues(PP_PHP_RETURN,"$ret");
+    }
+
+    function onException($e)
+    {
+        // TODO: Implement onException() method.
     }
 }

@@ -14,24 +14,43 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
+namespace Pinpoint\Plugins\Sys\PDO8;
 
-require_once __DIR__."/Common/PluginsDefines.php";
-// intercept all date_xxxx, part of php core
-require_once __DIR__."/Sys/date/date.php";
+use Pinpoint\Plugins\Common\PinTrace;
+use Pinpoint\Plugins\Sys\PDO\ProfilerPDOStatement;
+class PDOGlueStatement extends PinTrace
 
-// intercept all curl_xxxx, if curl extension is available
-if (function_exists('curl_exec'))
 {
-    require_once __DIR__."/Sys/curl/curl.php";
-}
+    function onBefore()
+    {
+        // todo stp, should follow the dsn
+        $dbInfo = $this->parseDb($this->who->dsn);
+        pinpoint_add_clue(PP_SERVER_TYPE,PP_MYSQL);
+        pinpoint_add_clue(PP_SQL_FORMAT, sprintf("%s",$this->args[0]));
+        pinpoint_add_clue(PP_DESTINATION,$dbInfo['host']);
+    }
+    function onEnd(&$ret)
+    {
+        $origin = $ret;
+        $ret = new ProfilerPDOStatement($origin);
+    }
 
-if (function_exists('mysqli_connect'))
-{
-    if(version_compare(phpversion(), '8.0.0', '<')){
-        require_once __DIR__."/Sys/mysqli/Mysqli.php";
-    }elseif(version_compare(phpversion(), '8.0.0', '>=')){
-        require_once __DIR__."/Sys/mysqli8/Mysqli8.php";
-    }elseif(version_compare(phpversion(), '7.0.0', '<')){
-        throw new \Exception("not support php5+");
+    function onException($e)
+    {
+        pinpoint_add_clue(PP_ADD_EXCEPTION,$e->getMessage());
+    }
+
+    function parseDb($dsn){
+
+        $db_url =  parse_url($dsn);
+        parse_str(str_replace(';','&',$db_url['path']),$dbInfo);
+
+        if($db_url['scheme'] == 'sqlite'){ // treat sqllite as mysql
+            $dbInfo['host'] = 'localhost-sqlite';
+        }
+
+        $dbInfo['scheme']= $db_url['scheme'];
+
+        return $dbInfo;
     }
 }
