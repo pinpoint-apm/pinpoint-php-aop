@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Pinpoint\Plugins\Sys\PDO;
+namespace Pinpoint\Plugins\Sys\PDO7;
 
 class PDO extends \PDO
 {
@@ -26,7 +26,7 @@ class PDO extends \PDO
         parent::__construct($dsn, $username, $passwd, $options);
     }
 
-    public function query(string $query, ?int $fetchMode = null, mixed ...$fetchModeArgs): \PDOStatement|false
+    private function doPDOQuery($statement, $mode = \PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = array())
     {
         $args = \pinpoint_get_func_ref_args();
         $var = new PreparePlugin("PDO::query",$this,...$args);
@@ -39,10 +39,16 @@ class PDO extends \PDO
             $var->onException($e);
             throw new \Exception($e);
         }
+
+    }
+
+    public function query()
+    {
+        return $this->doPDOQuery(...\pinpoint_get_func_ref_args());
     }
 
 
-    public function exec(string $statement): int|false
+    public function exec($statement)
     {
         $var = new PDOExec("PDO::exec",$this,$statement);
         try{
@@ -57,12 +63,12 @@ class PDO extends \PDO
     }
 
 
-    public function prepare(string $query, array $options = []): \PDOStatement|false
+    public function prepare($statement,  $driver_options = array())
     {
-        $var = new PreparePlugin("PDO::prepare",$this,$query,$options);
+        $var = new PreparePlugin("PDO::prepare",$this,$statement,$driver_options);
         try{
             $var->onBefore();
-            $ret = parent::prepare($query,$options);
+            $ret = parent::prepare($statement,$driver_options);
             $var->onEnd($ret);
             return $ret;
         }catch (\Exception $e){
@@ -70,4 +76,5 @@ class PDO extends \PDO
             throw new \Exception($e);
         }
     }
+
 }

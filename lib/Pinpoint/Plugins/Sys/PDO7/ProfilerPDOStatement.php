@@ -17,7 +17,8 @@
 
 
 
-namespace Pinpoint\Plugins\Sys\PDO;
+namespace Pinpoint\Plugins\Sys\PDO7;
+use function GuzzleHttp\Psr7\normalize_header;
 use PDO;
 
 class ProfilerPDOStatement extends \PDOStatement
@@ -50,116 +51,116 @@ class ProfilerPDOStatement extends \PDOStatement
     }
 
 
-    public function bindValue(string|int $param, mixed $value, int $type = PDO::PARAM_STR): bool
+    public function bindValue($parameter, $value, $data_type = PDO::PARAM_STR)
     {
         $args = \pinpoint_get_func_ref_args();
         return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function closeCursor(): bool
+    public function closeCursor()
     {
         $args = \pinpoint_get_func_ref_args();
         return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function columnCount(): int
+    public function columnCount()
     {
        $args = \pinpoint_get_func_ref_args();
        return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function debugDumpParams(): ?bool
+    public function debugDumpParams()
     {
        $args = \pinpoint_get_func_ref_args();
        return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function errorCode(): ?string
+    public function errorCode()
     {
        $args = \pinpoint_get_func_ref_args();
        return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function errorInfo(): array
+    public function errorInfo()
     {
        $args = \pinpoint_get_func_ref_args();
        return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function execute(?array $params = null): bool
+    public function execute($input_parameters = null)
     {
         $args = \pinpoint_get_func_ref_args();
         return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function fetch(int $mode = PDO::FETCH_DEFAULT, int $cursorOrientation = PDO::FETCH_ORI_NEXT, int $cursorOffset = 0): mixed
+    public function fetch($fetch_style = null, $cursor_orientation = PDO::FETCH_ORI_NEXT, $cursor_offset = 0)
     {
         $args = \pinpoint_get_func_ref_args();
         return $this->profiler(__FUNCTION__,$args);
     }
-    // not support php5 any more
-    public function fetchAll(int $mode = PDO::FETCH_DEFAULT, mixed ...$args): array
+
+    public function fetchAll($how = PDO::FETCH_CLASS, $class_name = null, $ctor_args = null)
     {
-        $_args = \pinpoint_get_func_ref_args();
-        return $this->profiler(__FUNCTION__,$_args);
+        $args = \pinpoint_get_func_ref_args();
+        return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function fetchColumn(int $column = 0): mixed
-    {
-       $args = \pinpoint_get_func_ref_args();
-       return $this->profiler(__FUNCTION__,$args);
-    }
-
-    public function fetchObject(?string $class = "stdClass", array $constructorArgs = []): object|false
+    public function fetchColumn($column_number = 0)
     {
        $args = \pinpoint_get_func_ref_args();
        return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function getAttribute(int $name): mixed
+    public function fetchObject($class_name = "stdClass", $ctor_args = null)
     {
        $args = \pinpoint_get_func_ref_args();
        return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function getColumnMeta(int $column): array|false
+    public function getAttribute($attribute)
     {
        $args = \pinpoint_get_func_ref_args();
        return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function nextRowset(): bool
+    public function getColumnMeta($column)
     {
        $args = \pinpoint_get_func_ref_args();
        return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function rowCount(): int
+    public function nextRowset()
     {
        $args = \pinpoint_get_func_ref_args();
        return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function setAttribute(int $attribute, mixed $value): bool
+    public function rowCount()
     {
        $args = \pinpoint_get_func_ref_args();
        return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function setFetchMode($mode,mixed ...$args)
+    public function setAttribute($attribute, $value)
+    {
+       $args = \pinpoint_get_func_ref_args();
+       return $this->profiler(__FUNCTION__,$args);
+    }
+
+    public function setFetchMode($mode,$parames=null)
     {
        $args = \pinpoint_get_func_ref_args();
        return $this->profiler(__FUNCTION__,$args);
     }
 
 
-    public function bindParam (string|int $param, mixed &$var, int $type = PDO::PARAM_STR, int $maxLength = 0, mixed $driverOptions = null): bool
+    public function bindParam ($parameter, &$variable, $data_type = PDO::PARAM_STR, $length = null, $driver_options = null)
     {
        $args = \pinpoint_get_func_ref_args();
        return $this->profiler(__FUNCTION__,$args);
     }
 
-    public function bindColumn (string|int $column, mixed &$var, int $type = PDO::PARAM_STR, int $maxLength = 0, mixed $driverOptions = null): bool
+    public function bindColumn ($column, &$param, $type = null, $maxlen = null, $driverdata = null)
     {
        $args = \pinpoint_get_func_ref_args();
        return $this->profiler(__FUNCTION__,$args);
