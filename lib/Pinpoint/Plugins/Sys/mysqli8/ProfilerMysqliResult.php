@@ -14,41 +14,19 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Pinpoint\Plugins\Sys\mysqli;
+namespace Pinpoint\Plugins\Sys\mysqli8;
 
-class Mysqli extends \mysqli
+class ProfilerMysqliResult
 {
-    public function prepare ($query)
+    protected $_instance;
+    public function __construct(&$instance)
     {
-        $plugin = new MysqliPreparePlugin("Mysqli::prepare",$this,$query);
-        try{
-            $plugin->onBefore();
-            $ret = parent::prepare($query);
-            $plugin->onEnd($ret);
-            return $ret;
-
-        }catch (\Exception $e)
-        {
-            $plugin->onException($e);
-        }
+        $this->_instance = &$instance;
     }
 
-    public function query ($query, $resultmode = NULL) 
+    public function __call($name, $arguments)
     {
-        $plugin = new MysqliQueryPlugin("Mysqli::query",$this,$query, $resultmode);
-        try{
-            $plugin->onBefore();
-            $ret = parent::query($query,$resultmode);
-            $plugin->onEnd($ret);
-            return $ret;
-
-        }catch (\Exception $e)
-        {
-            $plugin->onException($e);
-        }
+        return call_user_func_array([&$this->_instance,$name],$arguments);
     }
-}
 
-function mysqli_init() {
-    return new Mysqli();
 }

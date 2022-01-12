@@ -14,41 +14,24 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Pinpoint\Plugins\Sys\mysqli;
+namespace Pinpoint\Plugins\Sys\mysqli8;
 
-class Mysqli extends \mysqli
+
+use Pinpoint\Plugins\Common\PinTrace;
+
+class MysqliPreparePlugin extends PinTrace
 {
-    public function prepare ($query)
+    function onBefore()
     {
-        $plugin = new MysqliPreparePlugin("Mysqli::prepare",$this,$query);
-        try{
-            $plugin->onBefore();
-            $ret = parent::prepare($query);
-            $plugin->onEnd($ret);
-            return $ret;
-
-        }catch (\Exception $e)
-        {
-            $plugin->onException($e);
-        }
+        $myqli = $this->who;
+        pinpoint_add_clue(PP_SERVER_TYPE,PP_MYSQL);
+        pinpoint_add_clue(PP_SQL_FORMAT, $this->args[0]);
+        pinpoint_add_clue(PP_DESTINATION,$myqli->host_info);
     }
 
-    public function query ($query, $resultmode = NULL) 
+    function onEnd(&$ret)
     {
-        $plugin = new MysqliQueryPlugin("Mysqli::query",$this,$query, $resultmode);
-        try{
-            $plugin->onBefore();
-            $ret = parent::query($query,$resultmode);
-            $plugin->onEnd($ret);
-            return $ret;
-
-        }catch (\Exception $e)
-        {
-            $plugin->onException($e);
-        }
+        $origin = $ret;
+        $ret = new ProfilerMysqli_Stmt($origin);
     }
-}
-
-function mysqli_init() {
-    return new Mysqli();
 }

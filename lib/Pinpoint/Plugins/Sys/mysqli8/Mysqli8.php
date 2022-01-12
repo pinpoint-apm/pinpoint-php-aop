@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Pinpoint\Plugins\Sys\mysqli;
+namespace Pinpoint\Plugins\Sys\mysqli8;
 
-class Mysqli extends \mysqli
+class Mysqli8 extends \mysqli
 {
-    public function prepare ($query)
+    public function prepare (string $query):\mysqli_stmt|false
     {
         $plugin = new MysqliPreparePlugin("Mysqli::prepare",$this,$query);
         try{
@@ -33,7 +33,7 @@ class Mysqli extends \mysqli
         }
     }
 
-    public function query ($query, $resultmode = NULL) 
+    public function query (string $query, int $resultmode = MYSQLI_STORE_RESULT):\mysqli_result|bool
     {
         $plugin = new MysqliQueryPlugin("Mysqli::query",$this,$query, $resultmode);
         try{
@@ -50,5 +50,5 @@ class Mysqli extends \mysqli
 }
 
 function mysqli_init() {
-    return new Mysqli();
+    return new Mysqli8();
 }

@@ -27,5 +27,11 @@ if (function_exists('curl_exec'))
 
 if (function_exists('mysqli_connect'))
 {
-    require_once __DIR__."/Sys/mysqli/Mysqli.php";
+    if(version_compare(phpversion(), '8.0.0', '<')){
+        require_once __DIR__."/Sys/mysqli/Mysqli.php";
+    }elseif(version_compare(phpversion(), '8.0.0', '>=')){
+        require_once __DIR__."/Sys/mysqli8/Mysqli.php";
+    }elseif(version_compare(phpversion(), '7.0.0', '<')){
+        throw new \Exception("not support php5+");
+    }
 }
