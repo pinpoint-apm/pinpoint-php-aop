@@ -6,7 +6,7 @@
  * changes: 2022-1-11: php8.1, the only way is extends all function
  */
 
-namespace Pinpoint\Plugins\Sys\mysqli;
+namespace Pinpoint\Plugins\Sys\mysqli8;
 
 
 class ProfilerMysqli_Stmt extends \mysqli_stmt
@@ -17,17 +17,17 @@ class ProfilerMysqli_Stmt extends \mysqli_stmt
         $this->_instance = &$instance;
     }
 
-    public function bind_result (&...$vars): bool
+    public function bind_result (mixed &...$vars): bool
     {
         return $this->_instance->bind_result(...$vars);
     }
 
-    public function execute(?array $params = null):bool
+    public function execute(?array $params = null): bool
     {
         $plugin = new StmtExecutePlugin("Stmt::execute",$this);
         try{
             $plugin->onBefore();
-            $ret =  call_user_func([$this->_instance,'execute']);
+            $ret =  call_user_func([$this->_instance,'execute'],$params);
             $plugin->onEnd($ret);
             return $ret;
 
@@ -37,17 +37,17 @@ class ProfilerMysqli_Stmt extends \mysqli_stmt
         }
     }
 
-    public function attr_get( $attribute): int
+    public function attr_get(int $attribute): int
     {
         return call_user_func([$this->_instance,'attr_get'],$attribute);
     }
 
-    public function attr_set( $attribute,  $value): bool
+    public function attr_set(int $attribute, int $value): bool
     {
         return call_user_func([$this->_instance,'attr_set'],$attribute,$value);
     }
 
-    public function bind_param( $types,  &...$vars): bool
+    public function bind_param(string $types, mixed &...$vars): bool
     {
         return $this->_instance->bind_param($types,$vars);
     }
@@ -56,7 +56,7 @@ class ProfilerMysqli_Stmt extends \mysqli_stmt
     {
         return $this->_instance->close();
     }
-    public function data_seek($offset): void
+    public function data_seek(int $offset): void
     {
         $this->_instance->data_seek($offset);
     }
@@ -70,12 +70,12 @@ class ProfilerMysqli_Stmt extends \mysqli_stmt
         $this->_instance->free_result();
     }
 
-    public function get_result(): \mysqli_result
+    public function get_result(): \mysqli_result|false
     {
         return $this->_instance->get_result();
     }
 
-    public function get_warnings(): \mysqli_warning
+    public function get_warnings(): \mysqli_warning|false
     {
         return $this->_instance->get_warnings();
     }
@@ -88,11 +88,11 @@ class ProfilerMysqli_Stmt extends \mysqli_stmt
     {
         return $this->_instance->next_result();
     }
-    public function num_rows(): int
+    public function num_rows(): int|string
     {
         return $this->_instance->num_rows();
     }
-    public function prepare($query): bool
+    public function prepare(string $query): bool
     {
         return $this->_instance->prepare($query);
     }
@@ -100,12 +100,12 @@ class ProfilerMysqli_Stmt extends \mysqli_stmt
     {
         return $this->_instance->reset();
     }
-    public function result_metadata(): \mysqli_result
+    public function result_metadata(): \mysqli_result|false
     {
         return $this->_instance->result_metadata();
     }
 
-    public function send_long_data( $param_num,  $data): bool
+    public function send_long_data(int $param_num, string $data): bool
     {
         return $this->_instance->send_long_data($param_num,$data);
     }
