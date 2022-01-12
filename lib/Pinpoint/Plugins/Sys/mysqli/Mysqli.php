@@ -33,7 +33,7 @@ class Mysqli extends \mysqli
         }
     }
 
-    public function query ($query, $resultmode = MYSQLI_STORE_RESULT)
+    public function query ($query, $resultmode = NULL) 
     {
         $plugin = new MysqliQueryPlugin("Mysqli::query",$this,$query, $resultmode);
         try{
