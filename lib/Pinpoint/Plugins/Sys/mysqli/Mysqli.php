@@ -18,7 +18,7 @@ namespace Pinpoint\Plugins\Sys\mysqli;
 
 class Mysqli extends \mysqli
 {
-    public function prepare ($query)
+    public function prepare (string $query):\mysqli_stmt|false
     {
         $plugin = new MysqliPreparePlugin("Mysqli::prepare",$this,$query);
         try{
@@ -33,7 +33,7 @@ class Mysqli extends \mysqli
         }
     }
 
-    public function query ($query, $resultmode = MYSQLI_STORE_RESULT)
+    public function query (string $query, int $resultmode = MYSQLI_STORE_RESULT):\mysqli_result|bool
     {
         $plugin = new MysqliQueryPlugin("Mysqli::query",$this,$query, $resultmode);
         try{
