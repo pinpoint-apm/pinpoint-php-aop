@@ -16,9 +16,9 @@
  ******************************************************************************/
 namespace Pinpoint\Plugins\Sys\PDO;
 
-use Pinpoint\Plugins\Common\Candy;
+use Pinpoint\Plugins\Common\PinTrace;
 use Pinpoint\Plugins\Sys\PDO\ProfilerPDOStatement;
-class PDOGlueStatement extends Candy
+class PDOGlueStatement extends PinTrace
 
 {
     function onBefore()

@@ -16,9 +16,9 @@
  ******************************************************************************/
 namespace Pinpoint\Plugins\Sys\PDO;
 
-use Pinpoint\Plugins\Common\Candy;
+use Pinpoint\Plugins\Common\PinTrace;
 
-class PDOExec extends Candy
+class PDOExec extends PinTrace
 {
 
     function onBefore()
