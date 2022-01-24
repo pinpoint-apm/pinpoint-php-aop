@@ -26,7 +26,7 @@ class GuzzlePlugin extends PinTrace
     function onBefore()
     {
         if(strpos($this->apId, "Request::__construct") !== false){
-            pinpoint_add_clue(PP_DESTINATION,CurlUtil::getHostFromURL($this->args[1]->getHost()));
+            pinpoint_add_clue(PP_DESTINATION,CurlUtil::getHostFromURL((string)($this->args[1])));
             pinpoint_add_clues(PP_HTTP_URL,$this->args[1]);
             pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP_REMOTE);
 
