@@ -105,11 +105,6 @@ class CurlUtil
             $retUrl.=$urlAr['host'];
         }
 
-        if(isset($urlAr['path']))
-        {
-            $retUrl.= $urlAr['path'];
-        }
-
         if(isset($urlAr['port'])) // an optional setting
         {
             $retUrl .= ":".$urlAr['port'];
