@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /**
  * Copyright 2020-present NAVER Corp.
  *
@@ -23,99 +25,68 @@
 
 namespace Pinpoint\Common;
 
+use Exception;
+use Pinpoint\Plugins\PerRequestPlugins;
 
 class PinpointDriver
 {
     protected static $instance;
     protected $clAr = [];
-    private $settingIni=PLUGINS_DIR."/setting.ini";
-    // user autoGen class and internal autoGen class
-    private static $autoGenDirs = [PLUGINS_DIR."/AutoGen/" , __DIR__."/../Plugins/AutoGen"]; //*Plugin.php
 
-    public static function getInstance(){
+    private I_PerRequest $reqInst;
 
+    public static function getInstance()
+    {
         if (!self::$instance) {
             self::$instance = new static();
         }
-
         return self::$instance;
     }
 
     final private function __construct()
     {
+        if (defined('PP_REQ_PLUGINS')  && class_exists(PP_REQ_PLUGINS)) {
+            $userPerRequestClass = PP_REQ_PLUGINS;
+            $this->reqInst = new $userPerRequestClass();
+            assertInstanceOf('I_PerRequest', $this->reqInst);
+        } else {
+            $this->reqInst = new PerRequestDefault();
+        }
     }
 
-    private static function getAutoGenFiles()
+    public function getRequestInst()
     {
-        $files = [];
-
-        foreach (static::$autoGenDirs as $dir)
-        {
-            if(is_dir($dir))
-            {
-                Utils::scanDir($dir,"/Plugin.php$/",$files);
-            }
-        }
-
-        return $files;
+        return $this->reqInst;
     }
 
     public function start()
     {
+        $joinedClass = $this->reqInst->joinedClass();
+        if (empty($joinedClass)) {
+            return;
+        }
 
         RenderAopClass::getInstance();
         /// checking the cached file exist, if exist load it
-        if(Utils::checkCacheReady())
-        {
+        if (Utils::checkCacheReady()) {
             RenderAopClass::getInstance()->createFrom(Utils::loadCachedClass());
             RenderAopClassLoader::start();
-            return ;
+            return;
         }
-
         VendorAdaptorClassLoader::enable();
-        $pluFiles = static::getAutoGenFiles();
-        foreach ($pluFiles as $file)
-        {
-            new PluginParser($file,$this->clAr);
-        }
-        /// there hidden a duplicated visit, class locates in @hook and appendFiles.
-        /// while, it's safe to visit a class/file in appendfiles and @hook order
-        $naming = [];
-        if(file_exists($this->settingIni))
-        {
-            $nConf = new NamingConf($this->settingIni);
-            $naming = $nConf->getConf();
-
-            if(isset($naming['appendFiles']))
-            {
-                foreach ($naming['appendFiles'] as $class)
-                {
-                    $fullPath = Utils::findFile($class);
-                    if(!$fullPath)
-                        continue;
-                    $visitor =  new OriginFileVisitor();
-                    $visitor->runAllVisitor($fullPath,[],$naming);
-                }
-            }
-        }
-
-
-        foreach ($this->clAr as $class => $aopFuncInfo)
-        {
-            if(empty($class))
+        foreach ($joinedClass as $fullClassName => $junction) {
+            if (empty($fullClassName))
                 continue;
-            $fullPath = Utils::findFile($class);
-            if(!$fullPath )
-                continue;
-            $visitor =  new OriginFileVisitor();
-            if(isset($naming['ignoreFiles']) && in_array($class,$naming['ignoreFiles'])){
-                $visitor->runAllVisitor($fullPath,$aopFuncInfo);
-            }else{
-                $visitor->runAllVisitor($fullPath,$aopFuncInfo,$naming);
-            }
+            $fullPath = Utils::findFile($fullClassName);
+            // Please DO NOT CHEAT ME
+            assertFileExists($fullPath, "'$fullPath' must exist");
+            assertInstanceOf("\Pinpoint\Common\Pinpoint\JoinClass", $junction);
+            
+            $visitor = new OriginFileVisitor();
+            $visitor->runAllVisitor($fullPath, $junction);
         }
         // save render aop class into index file
-        Utils::saveCachedClass(RenderAopClass::getInstance()->getLoadeMap());
+        Utils::saveCachedClass(RenderAopClass::getInstance()->getJointClassMap());
         // enable RenderAop class loader
         RenderAopClassLoader::start();
     }
@@ -125,7 +96,8 @@ class PinpointDriver
      * @param callable $start
      * @param callable $tail
      */
-    public function addClassFinderHelper(callable $start, callable $tail){
-        Utils::addLoaderPatch($start,$tail);
+    public function addClassFinderHelper(callable $start, callable $tail)
+    {
+        Utils::addLoaderPatch($start, $tail);
     }
 }

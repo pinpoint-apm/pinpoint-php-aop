@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /**
  * Copyright 2020-present NAVER Corp.
  *
@@ -25,15 +27,17 @@ namespace Pinpoint\Common;
 
 class Utils
 {
-    const U_Method= 1;
-    const U_Function= 2;
-    const U_INDEX_FILE_PATH = AOP_CACHE_DIR.'__class_index_table';
 
-    static private $loaderPatch =[null,null];
 
-    public static function addLoaderPatch(callable $start,callable $tail=null){
-        static::$loaderPatch[0] = $start;
-        static::$loaderPatch[1] = $tail;
+    const U_INDEX_FILE_PATH = AOP_CACHE_DIR . '__class_index_table';
+
+    static private $beforeClassLoaderCb = null;
+    static private $endClassLoaderCb = null;
+
+    public static function addLoaderPatch(callable $start, callable $tail = null)
+    {
+        static::$beforeClassLoaderCb = $start;
+        static::$endClassLoaderCb = $tail;
     }
 
     /**
@@ -41,48 +45,45 @@ class Utils
      * @param $class
      * @return bool|string
      */
-    public static function findFile($class):string
+    public static function findFile(string $className): string
     {
-        if(is_callable(static::$loaderPatch[0])){
-           $files = call_user_func(static::$loaderPatch[0],$class);
-           if ($files){
-               return $files;
-           }
+        if (is_callable(static::$beforeClassLoaderCb)) {
+            $files = call_user_func(static::$beforeClassLoaderCb, $className);
+            if ($files) {
+                return $files;
+            }
         }
 
         $splLoaders = spl_autoload_functions();
         foreach ($splLoaders as &$loader) {
 
-            if ( is_array($loader) && $loader[0] instanceof VendorAdaptorClassLoader) {
-                $address = $loader[0]->findFile($class);
-                if($address){
+            if (is_array($loader) && $loader[0] instanceof VendorAdaptorClassLoader) {
+                $address = $loader[0]->findFile($className);
+                if ($address) {
                     return realpath($address);
                 }
             }
             // keep peace with unknown loader
-//            else{
-//                throw new \Exception("unknown loader");
-//            }
         }
 
-        if(is_callable(static::$loaderPatch[1])){
-            $files = call_user_func(static::$loaderPatch[1],$class);
-            if ($files){
+        if (is_callable(static::$endClassLoaderCb)) {
+            $files = call_user_func(static::$endClassLoaderCb, $className);
+            if ($files) {
                 return $files;
             }
         }
-        
+
         return '';
     }
 
     public static function parseUserFunc($str)
     {
-        preg_match_all('#(?<=@hook:).*#', $str,$matched);
+        preg_match_all('#(?<=@hook:).*#', $str, $matched);
 
-        if($matched){
+        if ($matched) {
             $func = [];
-            foreach ($matched[0] as $str){
-                $func =array_merge($func , preg_split("# |\|#",$str,-1,PREG_SPLIT_NO_EMPTY));
+            foreach ($matched[0] as $str) {
+                $func = array_merge($func, preg_split("# |\|#", $str, -1, PREG_SPLIT_NO_EMPTY));
             }
             return $func;
         }
@@ -100,36 +101,36 @@ class Utils
     }
 
 
-    public static function scanDir($dir,$pattern,&$tree)
+    public static function scanDir($dir, $pattern, &$tree)
     {
-        foreach (glob($dir.'/*') as $loc)
-        {
-            if(is_dir($loc)){
-                static::scanDir($loc,$pattern,$tree);
-            }elseif (preg_match($pattern,$loc)){
-                $tree[]=realpath($loc);
+        foreach (glob($dir . '/*') as $loc) {
+            if (is_dir($loc)) {
+                static::scanDir($loc, $pattern, $tree);
+            } elseif (preg_match($pattern, $loc)) {
+                $tree[] = realpath($loc);
             }
         }
     }
 
-    public static function checkCacheReady():bool {
+    public static function checkCacheReady(): bool
+    {
         return (defined('PINPOINT_USE_CACHE') &&
-        stristr(PINPOINT_USE_CACHE,"YES") !== false ) &&
-        file_exists(static::U_INDEX_FILE_PATH);
+            stristr(PINPOINT_USE_CACHE, "YES") !== false) &&
+            file_exists(static::U_INDEX_FILE_PATH);
     }
 
-    public static function loadCachedClass():array {
-        if(file_exists(static::U_INDEX_FILE_PATH)){
+    public static function loadCachedClass(): array
+    {
+        if (file_exists(static::U_INDEX_FILE_PATH)) {
             return unserialize(file_get_contents(static::U_INDEX_FILE_PATH));
-        }else{
+        } else {
             return null;
         }
     }
 
-    public static function saveCachedClass(array $class){
+    public static function saveCachedClass(array $class)
+    {
         $context = serialize($class);
-        static::saveObj($context,static::U_INDEX_FILE_PATH);
+        static::saveObj($context, static::U_INDEX_FILE_PATH);
     }
-
-
 }

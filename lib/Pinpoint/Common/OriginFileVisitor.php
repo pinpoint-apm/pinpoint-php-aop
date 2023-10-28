@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /**
  * Copyright 2020-present NAVER Corp.
  *
@@ -30,30 +32,25 @@ class OriginFileVisitor
         $this->phpFileParser = (new ParserFactory())->create(ParserFactory::ONLY_PHP7);
     }
 
-    public function runAllVisitor(string $fullPath,array $aopFuncInfo=[], array $naming=[])
+    public function runAllVisitor(string $fullPath, JoinClass $joinClass)
     {
-        if(!file_exists($fullPath))
-        {
-            throw new \Exception("$fullPath not found");
-        }
-
-        $this->traverser->addVisitor($this->getVisitor($fullPath,$aopFuncInfo,$naming));
+        $this->traverser->addVisitor($this->getVisitor($joinClass));
         $code = file_get_contents($fullPath);
         $stmts = $this->phpFileParser->parse($code);
         $this->traverser->traverse($stmts);
     }
 
-    private function getVisitor(string& $fullPath,array& $aopFuncInfo=[], array& $naming=[])
+    private function getVisitor(JoinClass $joinClass)
     {
-        if(empty($aopFuncInfo)){
-            $proxyClassFile = new GenProxiedClassFileHelper($fullPath,"",$naming);
-            $codeVisitor = new NpCoderVisitor($proxyClassFile);
-        }else{
-            $proxyClassFile = new GenProxiedClassFileHelper($fullPath,CLASS_PREFIX,$naming,$aopFuncInfo);
-            $originClassFile =  new GenOriginClassFileHelper($aopFuncInfo,CLASS_PREFIX);
-            $codeVisitor = new CodeVisitor($originClassFile ,$proxyClassFile);
+        $classPrefix = "";
+        $visitors = [];
+        if (!empty($joinClass->getMethodJoinPoints())) {
+            $classPrefix = CLASS_PREFIX;
+            $visitors[] = new GenProxyClassTemplateHelper($joinClass, $classPrefix);
         }
+
+        $visitors[] = new GenOriginClassTemplateHelper($joinClass, $classPrefix);
+        $codeVisitor = new CodeVisitor($visitors);
         return $codeVisitor;
     }
-
 }

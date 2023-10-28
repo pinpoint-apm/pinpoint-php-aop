@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /**
  * Copyright 2020-present NAVER Corp.
  *
@@ -25,6 +27,7 @@ namespace Pinpoint\Common;
 
 use PhpParser\Node;
 use PhpParser\PrettyPrinter;
+
 /**
  * Class ClassFile
  *
@@ -40,19 +43,19 @@ abstract class ClassFile
 {
     public $appendingFile = array();
 
-    public $node;
+    public $newAstNode;
 
-    protected $prefix;
+    protected $newNamePrefix;
 
     public $npStr;
 
-    public $className=''; /// Foo\A Foo\B
+    public $className = ''; /// Foo\A Foo\B
 
-    public $traitName=''; /// trait Foo {}
+    public $traitName = ''; /// trait Foo {}
 
-    public $fileName='';  /// output file Name
+    public $fileName = '';  /// output file Name
 
-    public $myLoaderName='';      /// output name
+    public $myLoaderName = '';      /// output name
 
     public $classMethod;
 
@@ -66,32 +69,31 @@ abstract class ClassFile
 
     protected $_astPrinter;
 
-    public $namespace='';
+    public $namespace = '';
 
-    public function __construct($prefix)
+    public function __construct($_newNamePrefix)
     {
-        $this->prefix = $prefix;
+        $this->newNamePrefix = $_newNamePrefix;
         $this->_astPrinter = new PrettyPrinter\Standard();
     }
 
-    public function getNode()
-    {
-        return $this->node;
-    }
+    // public function getNode()
+    // {
+    //     return $this->node;
+    // }
 
-    public function handleEnterNamespaceNode(&$node)
+    public function handleEnterNamespaceNode($node)
     {
         assert($node instanceof Node\Stmt\Namespace_);
         $this->namespace = trim($node->name->toString());
     }
 
-    public function handleEnterClassNode(&$node)
+    public function handleEnterClassNode($node)
     {
         assert($node instanceof Node\Stmt\Class_);
-        if($this->namespace)
-        {
-            $this->className = trim($this->namespace.'\\'.$node->name->toString());
-        }else{
+        if ($this->namespace) {
+            $this->className = trim($this->namespace . '\\' . $node->name->toString());
+        } else {
             $this->className = trim($node->name->toString());
         }
     }
@@ -99,8 +101,8 @@ abstract class ClassFile
     public function handleEnterTraitNode(&$node)
     {
         assert($node instanceof Node\Stmt\Trait_);
-        if($this->namespace)
-            $this->traitName = trim($this->namespace.'\\'.$node->name->toString());
+        if ($this->namespace)
+            $this->traitName = trim($this->namespace . '\\' . $node->name->toString());
         else
             $this->traitName = trim($node->name->toString());
     }
@@ -109,34 +111,37 @@ abstract class ClassFile
     {
         assert($node instanceof Node\Stmt\ClassMethod);
         $this->funcName = $node->name->toString();
-        $this->classMethod =$this->className.'::'.$this->funcName;
+        $this->classMethod = $this->className . '::' . $this->funcName;
         $this->hasRet = false;
     }
 
-    abstract function handleLeaveMethodNode(&$node);
-
     public function markHasReturn(&$node)
     {
-        if(isset($node->expr))
-        {
+        if (isset($node->expr)) {
             $this->hasRet = true;
         }
     }
 
-    public function markHasYield(&$node)
+    public function markHasYield()
     {
         $this->hasRet = true;
     }
 
-    public function fileNodeDoneCB(&$node, $loaderName)
+    public function done()
     {
-        $fullPath = AOP_CACHE_DIR.'/'.str_replace('\\','/',$loaderName).'.php';
-        $context= $this->_astPrinter->prettyPrintFile($node);
-        RenderAopClass::getInstance()->insertMapping($loaderName,$fullPath);
-        Utils::saveObj($context,$fullPath);
+        $fullPath = AOP_CACHE_DIR . '/' . str_replace('\\', '/', $this->className) . '.php';
+        $context = $this->_astPrinter->prettyPrintFile($this->newAstNode);
+        RenderAopClass::getInstance()->insertMapping($this->className, $fullPath);
+        Utils::saveObj($context, $fullPath);
     }
 
-    abstract function handleAfterTravers(&$nodes);
-    abstract function handleLeaveNamespace(&$nodes);
-    abstract function handlerUseNode(&$node);
+    abstract function handleAfterTraverse($nodes);
+    abstract function handleLeaveNamespace($nodes);
+    abstract function handlerUseNode($node);
+    abstract function handleMagicConstNode($node);
+    abstract function handleLeaveMethodNode($node);
+    abstract function handleEnterClassConstFetch($node);
+    abstract function handleEnterNew($node);
+    abstract function handleEnterFuncCall($node);
+    abstract function handleLeaveClassNode($node);
 }
