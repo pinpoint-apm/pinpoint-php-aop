@@ -7,7 +7,7 @@ require_once './bootstrap.php';
 use PDO;
 use PhpParser\ParserFactory;
 use PhpParser\PrettyPrinter;
-$filename='Foo.php';
+$filename='Cache/Pinpoint/test/Bear.php';
 $code = file_get_contents($filename);
 
 

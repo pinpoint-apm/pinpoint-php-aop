@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /**
  * Copyright 2020-present NAVER Corp.
  *
@@ -20,16 +22,19 @@ namespace Pinpoint\Common;
 
 class RenderAopClass
 {
-    private static $_instance =null;
+    private static $_instance = null;
 
     private $classLoaderMap = [];
     // mark as private
-    private function __construct(){}
+    private function __construct()
+    {
+    }
 
     private $clsLoadUserFilterCB = null;
 
-    public static function getInstance():RenderAopClass {
-        if(self::$_instance){
+    public static function getInstance(): RenderAopClass
+    {
+        if (self::$_instance) {
             return self::$_instance;
         }
         self::$_instance =  new RenderAopClass();
@@ -41,33 +46,33 @@ class RenderAopClass
         $this->classLoaderMap = $clsMap;
     }
 
-    public function findFile($classFullName):string
+    public function findFile($classFullName): string
     {
-        if(is_callable($this->clsLoadUserFilterCB)){
-            if( call_user_func($this->clsLoadUserFilterCB,$classFullName) == true ){
+        if (is_callable($this->clsLoadUserFilterCB)) {
+            if (call_user_func($this->clsLoadUserFilterCB, $classFullName) == true) {
                 return '';
             }
         }
 
-        if(isset($this->classLoaderMap[$classFullName]))
-        {
+        if (isset($this->classLoaderMap[$classFullName])) {
             return $this->classLoaderMap[$classFullName];
         }
 
         return '';
     }
 
-    public  function insertMapping($cl,$file)
+    public  function insertMapping($cl, $file)
     {
         $this->classLoaderMap[$cl] = $file;
     }
 
-    public function getLoadeMap():array
+    public function getJointClassMap(): array
     {
         return $this->classLoaderMap;
     }
 
-    public function setUserFilter(callable $filter){
+    public function setUserFilter(callable $filter)
+    {
         $this->clsLoadUserFilterCB = $filter;
     }
 }

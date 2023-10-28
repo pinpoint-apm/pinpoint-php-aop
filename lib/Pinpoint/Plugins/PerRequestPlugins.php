@@ -1,4 +1,5 @@
 <?php
+
 /******************************************************************************
  * Copyright 2020 NAVER Corp.                                                 *
  *                                                                            *
@@ -17,11 +18,10 @@
 
 namespace Pinpoint\Plugins;
 
-require_once __DIR__."/__init__.php";
+require_once __DIR__ . "/__init__.php";
 
 class PerRequestPlugins
 {
-    public static $_instance = null;
     public $tid = null;
     public $sid = null;
     public $psid = null;
@@ -39,39 +39,31 @@ class PerRequestPlugins
         return $this->isLimit;
     }
 
-    public static function instance()
-    {
-        if (static::$_instance == null) {
-            static::$_instance = new static();
-        }
-        return static::$_instance;
-    }
-
     protected function __construct()
     {
-        if(defined('PP_REPORT_MEMORY_USAGE') && PP_REPORT_MEMORY_USAGE === '1') {
+        if (defined('PP_REPORT_MEMORY_USAGE') && PP_REPORT_MEMORY_USAGE === '1') {
             $this->mem_start = memory_get_usage();
         }
 
         pinpoint_start_trace();
         pinpoint_add_clue(PP_SERVER_TYPE, PP_PHP);
         // Handle web request and CLI request
-        pinpoint_add_clue(PP_INTERCEPTOR_NAME, "PHP Request: ". php_sapi_name());
+        pinpoint_add_clue(PP_INTERCEPTOR_NAME, "PHP Request: " . php_sapi_name());
 
-        if(isset($_SERVER['REQUEST_URI'])) {
+        if (isset($_SERVER['REQUEST_URI'])) {
             pinpoint_add_clue(PP_REQ_URI, $_SERVER['REQUEST_URI']);
-        } elseif(isset($_SERVER['argv'])) {
+        } elseif (isset($_SERVER['argv'])) {
             pinpoint_add_clue(PP_REQ_URI, implode(" ", $_SERVER['argv']));
         }
 
-        if(isset($_SERVER['REMOTE_ADDR'])) {
+        if (isset($_SERVER['REMOTE_ADDR'])) {
             pinpoint_add_clue(PP_REQ_CLIENT, $_SERVER["REMOTE_ADDR"]);
         }
 
-        if(isset($_SERVER['HTTP_HOST'])) {
+        if (isset($_SERVER['HTTP_HOST'])) {
             pinpoint_add_clue(PP_REQ_SERVER, $_SERVER["HTTP_HOST"]);
-        } elseif(($hostname = gethostname()) !== false) {
-            if(($pid = getmypid()) !== false) {
+        } elseif (($hostname = gethostname()) !== false) {
+            if (($pid = getmypid()) !== false) {
                 $hostname .= sprintf("[pid:%d]", $pid);
             }
             pinpoint_add_clue(PP_REQ_SERVER, $hostname);
@@ -141,7 +133,7 @@ class PerRequestPlugins
     {
         // reset limit
         $this->isLimit = false;
-        if(defined('PP_REPORT_MEMORY_USAGE') && PP_REPORT_MEMORY_USAGE === '1') {
+        if (defined('PP_REPORT_MEMORY_USAGE') && PP_REPORT_MEMORY_USAGE === '1') {
             $memory_usage = (memory_get_peak_usage() - $this->mem_start) / 1024;
             pinpoint_add_clues(PP_MEMORY_USAGE, "$memory_usage KB");
         }
@@ -149,9 +141,10 @@ class PerRequestPlugins
         //https://github.com/pinpoint-apm/pinpoint-c-agent/commit/851d4ea275c5220a61fdd699e9ca9a7e31321264 
         if (is_int($http_response_code = http_response_code())) {
             pinpoint_add_clues(PP_HTTP_STATUS_CODE, $http_response_code);
-            if (strpos($http_response_code, '5') === 0
-                && function_exists('pinpoint_mark_as_error'))
-            {
+            if (
+                strpos($http_response_code, '5') === 0
+                && function_exists('pinpoint_mark_as_error')
+            ) {
                 pinpoint_mark_as_error('Internal server error', __FILE__);
             }
         }

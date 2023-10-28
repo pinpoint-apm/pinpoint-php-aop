@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /**
  * Copyright 2020-present NAVER Corp.
  *
@@ -25,111 +27,110 @@ namespace Pinpoint\Common;
 
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node;
-use PhpParser\NodeTraverser;
-//use Pinpoint\Common\GenRequiredBIFileHelper;
 
 class CodeVisitor extends NodeVisitorAbstract
 {
 
-    protected $ospIns;
-    private $curNamespace;
-    private $curName;
-    public $originClassFile;
-    public $proxiedClassFile;
+    public $visitors = [];
 
-    protected $builtInAr = []; // curl_init PDO
+    protected $builtInAr = [];
 
-    public function __construct(GenOriginClassFileHelper $originClassFile,GenProxiedClassFileHelper $proxiedClassFile)
+    public function __construct(array $_visitors)
     {
-        $this->originClassFile = $originClassFile;
-        $this->proxiedClassFile = $proxiedClassFile;
+        $this->visitors = $_visitors;
     }
 
     public function enterNode(Node $node)
     {
-        if($node instanceof Node\Stmt\Namespace_)
-        {
-            $this->curNamespace = $node->name->toString();
-            /// set namespace
-            $this->originClassFile->handleEnterNamespaceNode($node);
-            $this->proxiedClassFile->handleEnterNamespaceNode($node);
-        }
-        elseif ($node instanceof Node\Stmt\Use_){
-            $this->proxiedClassFile->handlerUseNode($node);
-            $this->originClassFile->handlerUseNode($node);
-        }
-        elseif ($node instanceof Node\Stmt\Class_){
-            if(empty($node->name->toString())){
+        if ($node instanceof Node\Stmt\Namespace_) {
+            foreach ($this->visitors as $visitor) {
+                assert($visitor instanceof  ClassFile);
+                $visitor->handleEnterNamespaceNode($node);
+            }
+        } elseif ($node instanceof Node\Stmt\Use_) {
+            foreach ($this->visitors as $visitor) {
+                $visitor->handlerUseNode($node);
+            }
+        } elseif ($node instanceof Node\Stmt\Class_) {
+            if (empty($node->name->toString())) {
                 throw new \Exception("can't AOP an anonymous class");
             }
-            $this->curName = empty($this->curNamespace) ? ($node->name->toString()):($this->curNamespace.'\\'.$node->name->toString());
-            $this->originClassFile->handleEnterClassNode($node);
-            $this->proxiedClassFile->handleEnterClassNode($node);
-        }
-        elseif( $node instanceof Node\Stmt\Trait_){
-            if(empty($node->name->toString())){
+
+            // $this->className = empty($this->classNamespace) ? ($node->name->toString()) : ($this->classNamespace . '\\' . $node->name->toString());
+
+            foreach ($this->visitors as $visitor) {
+                $visitor->handleEnterClassNode($node);
+            }
+        } elseif ($node instanceof Node\Stmt\Trait_) {
+            if (empty($node->name->toString())) {
                 throw new \Exception("can't AOP an anonymous trait");
             }
-            $this->curName = empty($this->curNamespace) ? ($node->name->toString()):($this->curNamespace.'\\'.$node->name->toString());
+            // $this->className = empty($this->classNamespace) ? ($node->name->toString()) : ($this->classNamespace . '\\' . $node->name->toString());
 
-            $this->proxiedClassFile->handleEnterTraitNode($node);
-            $this->originClassFile->handleEnterTraitNode($node);
-        }elseif ($node instanceof Node\Stmt\ClassMethod)
-        {
-            $this->originClassFile->handleClassEnterMethodNode($node);
-            $this->proxiedClassFile->handleClassEnterMethodNode($node);
-        }
-        elseif ( $node instanceof Node\Stmt\Return_)
-        {
-            $this->originClassFile->markHasReturn($node);
-        }
-        elseif ($node instanceof Node\Expr\Yield_){
-            $this->originClassFile->markHasYield($node);
-        }
-        elseif ($node instanceof Node\Expr\ClassConstFetch){
-            return $this->proxiedClassFile->handleEnterClassConstFetch($node);
-        }elseif ($node instanceof  Node\Expr\New_){
-            return $this->proxiedClassFile->handleEnterNew_($node);
-        }elseif ($node instanceof Node\Expr\FuncCall){
-            return $this->proxiedClassFile->handleEnterFuncCall($node);
+            foreach ($this->visitors as $visitor) {
+                $visitor->handleEnterTraitNode($node);
+            }
+        } elseif ($node instanceof Node\Stmt\ClassMethod) {
+            foreach ($this->visitors as $visitor) {
+                $visitor->handleClassEnterMethodNode($node);
+            }
+        } elseif ($node instanceof Node\Stmt\Return_) {
+            foreach ($this->visitors as $visitor) {
+                $visitor->markHasReturn($node);
+            }
+        } elseif ($node instanceof Node\Expr\Yield_) {
+            foreach ($this->visitors as $visitor) {
+                $visitor->markHasYield();
+            }
+        } elseif ($node instanceof Node\Expr\ClassConstFetch) {
+            foreach ($this->visitors as $visitor) {
+                $visitor->handleEnterClassConstFetch($node);
+            }
+        } elseif ($node instanceof  Node\Expr\New_) {
+            foreach ($this->visitors as $visitor) {
+                $visitor->handleEnterNew($node);
+            }
+        } elseif ($node instanceof Node\Expr\FuncCall) {
+            foreach ($this->visitors as $visitor) {
+                $visitor->handleEnterFuncCall($node);
+            }
         }
     }
 
 
     public function leaveNode(Node $node)
     {
-        if ($node instanceof Node\Stmt\ClassMethod){
-            $this->originClassFile->handleLeaveMethodNode($node);
-            $this->proxiedClassFile->handleLeaveMethodNode($node);
-        }elseif ($node instanceof Node\Name\FullyQualified){
-        }
-        elseif ($node instanceof Node\Scalar\MagicConst){
-            return $this->proxiedClassFile->handleMagicConstNode($node);
-        }elseif ($node instanceof Node\Stmt\Namespace_){
-            return $this->proxiedClassFile->handleLeaveNamespace($node);
-        }
-        elseif ($node instanceof Node\Stmt\Class_) {
-            $this->proxiedClassFile->handleLeaveClassNode($node);
-        }elseif ($node instanceof Node\Stmt\Trait_){
+        if ($node instanceof Node\Stmt\ClassMethod) {
+            foreach ($this->visitors as $visitor) {
+                $visitor->handleLeaveMethodNode($node);
+            }
+        } elseif ($node instanceof Node\Scalar\MagicConst) {
+            foreach ($this->visitors as $visitor) {
+                $visitor->handleMagicConstNode($node);
+            }
+        } elseif ($node instanceof Node\Stmt\Namespace_) {
+            foreach ($this->visitors as $visitor) {
+                $visitor->handleLeaveNamespace($node);
+            }
+        } elseif ($node instanceof Node\Stmt\Class_) {
+            foreach ($this->visitors as $visitor) {
+                $visitor->handleLeaveClassNode($node);
+            }
+        } elseif ($node instanceof Node\Stmt\Trait_) {
 
-            $this->proxiedClassFile->handleLeaveTraitNode($node);
+            foreach ($this->visitors as $visitor) {
+                $visitor->handleLeaveTraitNode($node);
+            }
         }
-        elseif ($node instanceof Node\Stmt\UseUse){
 
-            return $node;
-        }
+        return $node;
     }
 
     public function afterTraverse(array $nodes)
     {
-        $node = $this->proxiedClassFile->handleAfterTravers($nodes);
-
-        $this->proxiedClassFile->fileNodeDoneCB($node,$this->proxiedClassFile->myLoaderName);
-
-        $node = $this->originClassFile->handleAfterTravers($nodes);
-
-        $this->originClassFile->fileNodeDoneCB($node,$this->originClassFile->fileName);
-
+        foreach ($this->visitors as $visitor) {
+            $visitor->handleAfterTraverse($nodes);
+            $visitor->done();
+        }
     }
-
 }

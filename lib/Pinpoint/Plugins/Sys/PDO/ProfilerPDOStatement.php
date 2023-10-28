@@ -18,7 +18,6 @@
 
 
 namespace Pinpoint\Plugins\Sys\PDO;
-use function GuzzleHttp\Psr7\normalize_header;
 use PDO;
 
 class ProfilerPDOStatement extends \PDOStatement
