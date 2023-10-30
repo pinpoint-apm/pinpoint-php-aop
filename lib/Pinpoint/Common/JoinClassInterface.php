@@ -19,21 +19,7 @@ declare(strict_types=1);
 
 namespace Pinpoint\Common;
 
-abstract class Monitor
+interface  JoinClassInterface
 {
-    protected $monitor_name;
-    protected $who;
-    protected $args;
-    public function __construct($name, $who, &...$args)
-    {
-        $this->monitor_name = $name;
-        $this->who = $who;
-        $this->args = &$args;
-    }
-
-    abstract function onBefore();
-
-    abstract function onEnd(&$ret);
-
-    abstract function onException($e);
+    public function joinedClass(): array;
 }

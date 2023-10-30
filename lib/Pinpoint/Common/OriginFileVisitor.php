@@ -32,24 +32,24 @@ class OriginFileVisitor
         $this->phpFileParser = (new ParserFactory())->create(ParserFactory::ONLY_PHP7);
     }
 
-    public function runAllVisitor(string $fullPath, JoinClass $joinClass)
+    public function runAllVisitor(string $fullPath, AspectClassHandle $classHandler)
     {
-        $this->traverser->addVisitor($this->getVisitor($joinClass));
+        $this->traverser->addVisitor($this->getVisitor($classHandler));
         $code = file_get_contents($fullPath);
         $stmts = $this->phpFileParser->parse($code);
         $this->traverser->traverse($stmts);
     }
 
-    private function getVisitor(JoinClass $joinClass)
+    private function getVisitor(AspectClassHandle $classHandler)
     {
         $classPrefix = "";
         $visitors = [];
-        if (!empty($joinClass->getMethodJoinPoints())) {
+        if (!empty($classHandler->getMethodJoinPoints())) {
             $classPrefix = CLASS_PREFIX;
-            $visitors[] = new GenProxyClassTemplateHelper($joinClass, $classPrefix);
+            $visitors[] = new GenProxyClassTemplateHelper($classHandler, $classPrefix);
         }
 
-        $visitors[] = new GenOriginClassTemplateHelper($joinClass, $classPrefix);
+        $visitors[] = new GenOriginClassTemplateHelper($classHandler, $classPrefix);
         $codeVisitor = new CodeVisitor($visitors);
         return $codeVisitor;
     }

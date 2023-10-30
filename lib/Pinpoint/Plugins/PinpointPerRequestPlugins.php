@@ -20,7 +20,7 @@ namespace Pinpoint\Plugins;
 
 require_once __DIR__ . "/__init__.php";
 
-class PerRequestPlugins
+class PinpointPerRequestPlugins
 {
     public $tid = null;
     public $sid = null;
