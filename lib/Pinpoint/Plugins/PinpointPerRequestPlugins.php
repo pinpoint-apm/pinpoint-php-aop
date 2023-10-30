@@ -39,7 +39,7 @@ class PinpointPerRequestPlugins
         return $this->isLimit;
     }
 
-    protected function __construct()
+    public function __construct()
     {
         if (defined('PP_REPORT_MEMORY_USAGE') && PP_REPORT_MEMORY_USAGE === '1') {
             $this->mem_start = memory_get_usage();
