@@ -20,7 +20,7 @@ declare(strict_types=1);
 namespace Pinpoint\Common;
 
 
-class JoinClass
+class AspectClassHandle
 {
     public string $name;
     public $methodJoinPoints = array();

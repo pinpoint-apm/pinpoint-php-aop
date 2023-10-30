@@ -2,9 +2,9 @@
 
 namespace Pinpoint\test;
 
-use Pinpoint\Common\Monitor;
+use Pinpoint\Common\AbstractMonitor;
 
-class OutputMonitor extends Monitor
+class OutputMonitor extends AbstractMonitor
 {
     function onBefore()
     {
@@ -12,7 +12,6 @@ class OutputMonitor extends Monitor
 
     function onEnd(&$ret)
     {
-        return 1011;
     }
 
     function onException($e)

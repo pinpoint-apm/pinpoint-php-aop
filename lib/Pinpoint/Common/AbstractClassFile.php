@@ -29,7 +29,7 @@ use PhpParser\Node;
 use PhpParser\PrettyPrinter;
 
 /**
- * Class ClassFile
+ * Class AbstractClassFile
  *
  * A abstract php-parse node
  *      namespace node
@@ -39,7 +39,7 @@ use PhpParser\PrettyPrinter;
  *
  * @package pinpoint\Common
  */
-abstract class ClassFile
+abstract class AbstractClassFile
 {
     public $appendingFile = array();
 

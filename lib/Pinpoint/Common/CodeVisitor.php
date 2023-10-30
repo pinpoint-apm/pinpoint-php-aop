@@ -44,7 +44,7 @@ class CodeVisitor extends NodeVisitorAbstract
     {
         if ($node instanceof Node\Stmt\Namespace_) {
             foreach ($this->visitors as $visitor) {
-                assert($visitor instanceof  ClassFile);
+                assert($visitor instanceof  AbstractClassFile);
                 $visitor->handleEnterNamespaceNode($node);
             }
         } elseif ($node instanceof Node\Stmt\Use_) {

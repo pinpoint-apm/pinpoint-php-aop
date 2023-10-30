@@ -25,15 +25,13 @@ declare(strict_types=1);
 
 namespace Pinpoint\Common;
 
-use Exception;
-use Pinpoint\Plugins\PerRequestPlugins;
 
 class PinpointDriver
 {
     protected static $instance;
     protected $clAr = [];
 
-    private I_PerRequest $reqInst;
+    private JoinClassInterface $reqInst;
 
     public static function getInstance()
     {
@@ -48,7 +46,7 @@ class PinpointDriver
         if (defined('PP_REQ_PLUGINS')  && class_exists(PP_REQ_PLUGINS)) {
             $userPerRequestClass = PP_REQ_PLUGINS;
             $this->reqInst = new $userPerRequestClass();
-            assertInstanceOf('I_PerRequest', $this->reqInst);
+            assertInstanceOf('JoinClassInterface', $this->reqInst);
         } else {
             $this->reqInst = new PerRequestDefault();
         }
@@ -80,8 +78,8 @@ class PinpointDriver
             $fullPath = Utils::findFile($fullClassName);
             // Please DO NOT CHEAT ME
             assertFileExists($fullPath, "'$fullPath' must exist");
-            assertInstanceOf("\Pinpoint\Common\Pinpoint\JoinClass", $junction);
-            
+            assertInstanceOf("\Pinpoint\Common\Pinpoint\AspectClassHandle", $junction);
+
             $visitor = new OriginFileVisitor();
             $visitor->runAllVisitor($fullPath, $junction);
         }
