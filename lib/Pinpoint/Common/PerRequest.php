@@ -21,7 +21,7 @@ namespace Pinpoint\Common;
 
 class PerRequestDefault implements JoinClassInterface
 {
-    public function joinedClass(): array
+    public function joinedClassSet(): array
     {
         return [];
     }

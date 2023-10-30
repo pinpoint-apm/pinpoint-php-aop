@@ -1,7 +1,6 @@
 <?php
 
 declare(strict_types=1);
-
 /******************************************************************************
  * Copyright 2020 NAVER Corp.                                                 *
  *                                                                            *
@@ -18,9 +17,26 @@ declare(strict_types=1);
  * limitations under the License.                                             *
  ******************************************************************************/
 
-namespace Pinpoint;
+namespace Pinpoint\Plugins\yii2;
 
-use Pinpoint\Common\PinpointDriver;
+use Pinpoint\Common\AbstractMonitor;
 
-define('CLASS_PREFIX', 'Proxied_');
-PinpointDriver::getInstance()->start();
+class UrlRule extends AbstractMonitor
+{
+    function onBefore()
+    {
+    }
+
+    function onEnd($ret)
+    {
+        if (!is_bool($ret) && sizeof($ret) == 2) {
+            $route = $ret[0];
+            $request = $this->args[1];
+            $request->__pinpoint__route = $route;
+        }
+    }
+
+    function onException($e)
+    {
+    }
+}

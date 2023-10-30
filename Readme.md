@@ -61,8 +61,6 @@ require_once __DIR__."/../vendor/autoload.php";
 
 // A writable path for caching AOP code
 define('AOP_CACHE_DIR',__DIR__.'/../Cache/');                       
-// Your plugins directory: All plugins must have a suffix "Plugin.php",as "CommonPlugin.php mysqlPlugin.php RPCPlugin.php"
-define('PLUGINS_DIR',__DIR__.'/../Plugins/');
 // since 0.2.5+ PINPOINT_USE_CACHE = N, auto_pinpointed.php will generate Cache/* on every request. 
 define('PINPOINT_USE_CACHE','YES');
 // Use pinpoint-php-aop auto_pinpointed.php instead of vendor/autoload.php

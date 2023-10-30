@@ -41,7 +41,7 @@ class GenOriginClassTemplateHelper extends AbstractClassFile
     public function __construct(AspectClassHandle $classHandler, string $namePrefix)
     {
         parent::__construct($namePrefix);
-        $path = Utils::findFile($classHandler->name);
+        $path = Utils::findFile($classHandler->aspClassName);
 
         $this->originClassFileDir = dirname($path);
         $this->originClassFilePath = $path;

@@ -22,10 +22,11 @@ use Yii;
 use Pinpoint\Common\Utils;
 use Pinpoint\Plugins\PinpointPerRequestPlugins;
 use Pinpoint\Common\JoinClassInterface;
+use Pinpoint\Common\AspectClassHandle;
 
 class Yii2PerRequestPlugins extends PinpointPerRequestPlugins implements JoinClassInterface
 {
-    protected function __construct()
+    public function __construct()
     {
         parent::__construct();
         // enable findFile patch
@@ -49,8 +50,13 @@ class Yii2PerRequestPlugins extends PinpointPerRequestPlugins implements JoinCla
         return "";
     }
 
-    public function joinedClass(): array
+    public function joinedClassSet(): array
     {
-        return [];
+        $cls = [];
+        $classHandler = new AspectClassHandle(\yii\web\UrlRule::class);
+        $classHandler->addJoinPoint('parseRequest', yii2\UrlRule::class);
+
+        $cls[] = $classHandler;
+        return $cls;
     }
 }
