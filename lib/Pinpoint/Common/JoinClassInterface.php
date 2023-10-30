@@ -21,5 +21,5 @@ namespace Pinpoint\Common;
 
 interface  JoinClassInterface
 {
-    public function joinedClass(): array;
+    public function joinedClassSet(): array;
 }

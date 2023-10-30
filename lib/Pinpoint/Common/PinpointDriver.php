@@ -46,7 +46,7 @@ class PinpointDriver
         if (defined('PP_REQ_PLUGINS')  && class_exists(PP_REQ_PLUGINS)) {
             $userPerRequestClass = PP_REQ_PLUGINS;
             $this->reqInst = new $userPerRequestClass();
-            assertInstanceOf('JoinClassInterface', $this->reqInst);
+            assert(is_a($this->reqInst, 'Pinpoint\Common\JoinClassInterface'));
         } else {
             $this->reqInst = new PerRequestDefault();
         }
@@ -59,29 +59,34 @@ class PinpointDriver
 
     public function start()
     {
-        $joinedClass = $this->reqInst->joinedClass();
-        if (empty($joinedClass)) {
-            return;
-        }
-
         RenderAopClass::getInstance();
         /// checking the cached file exist, if exist load it
         if (Utils::checkCacheReady()) {
             RenderAopClass::getInstance()->createFrom(Utils::loadCachedClass());
+            VendorAdaptorClassLoader::enable();
             RenderAopClassLoader::start();
             return;
         }
         VendorAdaptorClassLoader::enable();
-        foreach ($joinedClass as $fullClassName => $junction) {
-            if (empty($fullClassName))
+
+        $joinedClassSet = $this->reqInst->joinedClassSet();
+        if (empty($joinedClassSet)) {
+            return;
+        }
+
+        foreach ($joinedClassSet as $aspClassHandler) {
+            assert(is_a($aspClassHandler, '\Pinpoint\Common\AspectClassHandle'));
+            $fullClassName = $aspClassHandler->aspClassName;
+            if (empty($fullClassName)) {
                 continue;
+            }
+
             $fullPath = Utils::findFile($fullClassName);
             // Please DO NOT CHEAT ME
-            assertFileExists($fullPath, "'$fullPath' must exist");
-            assertInstanceOf("\Pinpoint\Common\Pinpoint\AspectClassHandle", $junction);
+            assert(file_exists($fullPath), " '$fullClassName' ->'$fullPath' must exist");
 
             $visitor = new OriginFileVisitor();
-            $visitor->runAllVisitor($fullPath, $junction);
+            $visitor->runAllVisitor($fullPath, $aspClassHandler);
         }
         // save render aop class into index file
         Utils::saveCachedClass(RenderAopClass::getInstance()->getJointClassMap());
