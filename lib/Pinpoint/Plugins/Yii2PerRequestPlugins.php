@@ -1,4 +1,5 @@
 <?php
+
 /******************************************************************************
  * Copyright 2020 NAVER Corp.                                                 *
  *                                                                            *
@@ -19,18 +20,20 @@ namespace Pinpoint\Plugins;
 
 use Yii;
 use Pinpoint\Common\Utils;
-use Pinpoint\Plugins\PerRequestPlugins;
+use Pinpoint\Plugins\PinpointPerRequestPlugins;
+use Pinpoint\Common\JoinClassInterface;
 
-class Yii2PerRequestPlugins extends PerRequestPlugins
+class Yii2PerRequestPlugins extends PinpointPerRequestPlugins implements JoinClassInterface
 {
     protected function __construct()
     {
         parent::__construct();
         // enable findFile patch
-        Utils::addLoaderPatch(array($this,'findFileInYii'),null);
+        Utils::addLoaderPatch(array($this, 'findFileInYii'), null);
     }
 
-    public function findFileInYii($className):string {
+    public function findFileInYii($className): string
+    {
         if (isset(Yii::$classMap[$className])) {
             $classFile = Yii::$classMap[$className];
             if (strpos($classFile, '@') === 0) {
@@ -46,4 +49,8 @@ class Yii2PerRequestPlugins extends PerRequestPlugins
         return "";
     }
 
+    public function joinedClass(): array
+    {
+        return [];
+    }
 }

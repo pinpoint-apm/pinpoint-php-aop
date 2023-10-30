@@ -26,9 +26,9 @@ declare(strict_types=1);
 namespace Pinpoint\Common;
 
 use PhpParser\Node;
-use Pinpoint\Common\ClassFile;
+use Pinpoint\Common\AbstractClassFile;
 
-class GenOriginClassTemplateHelper extends ClassFile
+class GenOriginClassTemplateHelper extends AbstractClassFile
 {
     protected $originClassFileDir;
     protected $originClassFilePath;
@@ -37,18 +37,18 @@ class GenOriginClassTemplateHelper extends ClassFile
     protected $funcAlias = [];
     protected $suffix_use = [];
     protected $methodJoint;
-    // private $joinClass;
-    public function __construct(JoinClass $joinClass, string $namePrefix)
+    // private $classHandler;
+    public function __construct(AspectClassHandle $classHandler, string $namePrefix)
     {
         parent::__construct($namePrefix);
-        $path = Utils::findFile($joinClass->name);
+        $path = Utils::findFile($classHandler->name);
 
         $this->originClassFileDir = dirname($path);
         $this->originClassFilePath = $path;
-        // $this->joinClass = $joinClass;
-        $this->classAliasSet  = $joinClass->classAlias;
-        $this->funcAlias = $joinClass->funcAlias;
-        $this->methodJoint = $joinClass->methodJoinPoints;
+        // $this->classHandler = $classHandler;
+        $this->classAliasSet  = $classHandler->classAlias;
+        $this->funcAlias = $classHandler->funcAlias;
+        $this->methodJoint = $classHandler->methodJoinPoints;
     }
 
     private function getRealNp($node)

@@ -25,12 +25,12 @@ declare(strict_types=1);
 
 namespace Pinpoint\Common;
 
-use Pinpoint\Common\ClassFile;
+use Pinpoint\Common\AbstractClassFile;
 use PhpParser\BuilderFactory;
 use PhpParser\Node;
 use Pinpoint\Common\PluginParser;
 
-class GenProxyClassTemplateHelper extends ClassFile
+class GenProxyClassTemplateHelper extends AbstractClassFile
 {
     private $factory;
 
@@ -47,11 +47,11 @@ class GenProxyClassTemplateHelper extends ClassFile
     private $handleEndTraverseCb = [];
     public $methodJoinPoints = [];
 
-    public function __construct(JoinClass $joinClass, $prefix)
+    public function __construct(AspectClassHandle $classHandler, $prefix)
     {
         parent::__construct($prefix);
         $this->factory = new BuilderFactory();
-        $this->methodJoinPoints = $joinClass->methodJoinPoints;
+        $this->methodJoinPoints = $classHandler->methodJoinPoints;
     }
 
 
@@ -168,7 +168,7 @@ class GenProxyClassTemplateHelper extends ClassFile
         /// $_pinpoint_method_var = new pinpoint\Plugins\CommonPlugins(__FUNCTION__,self,$p);
         $newPluginsStm = new Node\Stmt\Expression(new Node\Expr\Assign(
             new Node\Expr\Variable($varName),
-            $this->factory->new(new Node\Name\FullyQualified($monitorClassFullName) , $methodParams)
+            $this->factory->new(new Node\Name\FullyQualified($monitorClassFullName), $methodParams)
         ));
 
         $thisMethod->addStmt($newPluginsStm);
@@ -540,7 +540,7 @@ class GenProxyClassTemplateHelper extends ClassFile
     {
     }
 
-    function handleLeaveClassNode($node){
-
+    function handleLeaveClassNode($node)
+    {
     }
 }

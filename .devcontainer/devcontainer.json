@@ -8,7 +8,9 @@
                 "streetsidesoftware.code-spell-checker",
                 "recca0120.vscode-phpunit",
                 "donjayamanne.githistory",
-                "adam-bender.commit-message-editor"
+                "adam-bender.commit-message-editor",
+                "bmewburn.vscode-intelephense-client",
+                "xdebug.php-debug"
             ]
         }
     }
