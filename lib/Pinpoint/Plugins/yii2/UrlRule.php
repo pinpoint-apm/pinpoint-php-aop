@@ -20,6 +20,7 @@ declare(strict_types=1);
 namespace Pinpoint\Plugins\yii2;
 
 use Pinpoint\Common\AbstractMonitor;
+use Pinpoint\Common\Logger;
 
 class UrlRule extends AbstractMonitor
 {
@@ -27,16 +28,20 @@ class UrlRule extends AbstractMonitor
     {
     }
 
-    function onEnd($ret)
+    function onEnd(&$ret)
     {
         if (!is_bool($ret) && sizeof($ret) == 2) {
             $route = $ret[0];
-            $request = $this->args[1];
-            $request->__pinpoint__route = $route;
+            // $request = $this->args[1];
+            // $request->__pinpoint__route = $route;
+            Logger::Inst()->debug("found route:'$route'");
+            pinpoint_set_context("__pinpoint__route", $route);
         }
+        // return $ret;
     }
 
     function onException($e)
     {
+        Logger::Inst()->debug(__CLASS__ . "onException '$e'");
     }
 }

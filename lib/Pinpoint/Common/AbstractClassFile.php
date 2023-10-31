@@ -132,6 +132,7 @@ abstract class AbstractClassFile
         $fullPath = AOP_CACHE_DIR . '/' . str_replace('\\', '/', $this->className) . '.php';
         $context = $this->_astPrinter->prettyPrintFile($this->newAstNode);
         RenderAopClass::getInstance()->insertMapping($this->className, $fullPath);
+        Logger::Inst()->debug("map/save new class '$this->className' to '$fullPath' ");
         Utils::saveObj($context, $fullPath);
     }
 

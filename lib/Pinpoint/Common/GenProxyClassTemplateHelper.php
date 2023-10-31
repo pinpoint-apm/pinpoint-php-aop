@@ -120,7 +120,7 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
 
         // 1. make a new method overriding parent's
         $originMethodName = $node->name->toString();
-
+        Logger::Inst()->debug("generate pinpoint code block for '$originMethodName'");
         $funcVar = new Node\Arg(new Node\Scalar\MagicConst\Method());
 
         $thisMethod = $this->factory->method($originMethodName);
@@ -131,11 +131,11 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
         }
 
         if ($node->flags & Node\Stmt\Class_::MODIFIER_PRIVATE) {
+            Logger::Inst()->debug("'$originMethodName' is a private, changes to protected");
             $thisMethod->makeProtected();
         }
 
         if ($node->flags & Node\Stmt\Class_::MODIFIER_ABSTRACT) {
-
             $thisMethod->makeAbstract();
         }
 
@@ -151,6 +151,7 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
         if ($node->flags & Node\Stmt\Class_::MODIFIER_STATIC) {
             $thisMethod->makeStatic();
             $selfVar = new Node\Arg(new Node\Expr\ConstFetch(new Node\Name('null')));
+            Logger::Inst()->debug("'$originMethodName' is a static function");
         } else {
             $selfVar = new Node\Arg(new Node\Expr\Variable('this'));
         }
@@ -188,6 +189,7 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
         );
 
         if ($this->hasRet) {
+            Logger::Inst()->debug("'$originMethodName' has return value ");
             /// $ret = paraent::$originMethodName();
             $tryBlock[] = new Node\Stmt\Expression(new Node\Expr\Assign(
                 new Node\Expr\Variable($retName),
