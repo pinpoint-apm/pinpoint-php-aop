@@ -48,14 +48,17 @@ class RenderAopClass
 
     public function findFile($classFullName): string
     {
+        Logger::Inst()->debug("try to findFile:'$classFullName'");
         if (is_callable($this->clsLoadUserFilterCB)) {
             if (call_user_func($this->clsLoadUserFilterCB, $classFullName) == true) {
                 return '';
             }
         }
 
-        if (isset($this->classLoaderMap[$classFullName])) {
-            return $this->classLoaderMap[$classFullName];
+        $classFile = $this->classLoaderMap[$classFullName];
+        if (isset($classFile)) {
+            Logger::Inst()->debug("findFile:'$classFullName' -> $classFile'");
+            return $classFile;
         }
 
         return '';

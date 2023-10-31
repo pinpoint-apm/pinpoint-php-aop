@@ -98,6 +98,7 @@ class Utils
             mkdir($dir, 0777, true);
         }
         file_put_contents($fullPath, $context);
+        
     }
 
 
@@ -132,5 +133,7 @@ class Utils
     {
         $context = serialize($class);
         static::saveObj($context, static::U_INDEX_FILE_PATH);
+        $size = sizeof($class);
+        Logger::Inst()->debug("saveCachedClass size= '$size'");
     }
 }

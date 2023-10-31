@@ -10,7 +10,8 @@
                 "donjayamanne.githistory",
                 "adam-bender.commit-message-editor",
                 "bmewburn.vscode-intelephense-client",
-                "xdebug.php-debug"
+                "xdebug.php-debug",
+                "streetsidesoftware.code-spell-checker"
             ]
         }
     }

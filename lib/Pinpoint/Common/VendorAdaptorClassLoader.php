@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /**
  * Copyright 2020-present NAVER Corp.
  *
@@ -26,63 +28,45 @@ use Exception;
  *  findFile
  *  loadClass
  */
+
 class VendorAdaptorClassLoader
 {
-    protected $callOrgFindFile;
+    protected $originClassLoaderFunc;
     protected $vendor_load_class_func;
 
-    protected function __construct(array $orgLoader)
+    protected function __construct(array &$orgLoader, UserClassLoaderInterface $userLoader = null)
     {
 
-        $this->vendor_load_class_func =  function (string $clsFullName) use (&$orgLoader){
-            return call_user_func($orgLoader,$clsFullName);
+        $this->vendor_load_class_func =  function (string $clsFullName) use (&$orgLoader) {
+            return call_user_func($orgLoader, $clsFullName);
         };
 
-        // check loader is ClassLoader
-        if($orgLoader[0] instanceof ClassLoader)
-        {
+        // it's a common ClassLoader
+        if ($orgLoader[0] instanceof ClassLoader) {
 
-            $this->callOrgFindFile = function (string $clsFullName) use (&$orgLoader){
+            $this->originClassLoaderFunc = function (string $clsFullName) use (&$orgLoader) {
                 return $orgLoader[0]->findFile($clsFullName);
             };
-
-        }else if( is_callable($orgLoader) && count($orgLoader) >=2 ){
-            /**
-             * here hide a case: what if the findFile is private
-             * [0]: maybe the class name
-             * [1]：maybe the static function name
-             * 
-             * 1. check [0] , there is findFile function
-             */
-
-            if(!method_exists($orgLoader[0],'findFile')){
-                throw new Exception("ClassLoader not compatible: no findFile method");
-            }
-
-            $this->callOrgFindFile = function (string $clsFullName)  use (&$orgLoader){
-                $_loader = new $orgLoader[0];
-                $callfindFile = function($name) {
-                        return $this->findFile($name);
-                };
-                return $callfindFile->call($_loader,$clsFullName);
-            };
-
-        }else{
-            throw new Exception("ClassLoader not compatible: classLoader unknow");
+            return;
         }
 
-        assert($this->callOrgFindFile);
+        //check is `findFile` classLoader
+        if ($userLoader != null) {
+            $this->originClassLoaderFunc = $userLoader->userClassLoader($orgLoader);
+            assert(is_callable($this->originClassLoaderFunc));
+            return;
+        }
 
+        throw new Exception("unknown classLoader:'$orgLoader'");
     }
 
-    public function findFile(string $classFullName):string
+    public function findFile(string $classFullName): string
     {
-        
-        if( is_callable($this->callOrgFindFile) )
-        {
-            $file = call_user_func($this->callOrgFindFile,$classFullName);
-            if ( $file !== false )
-            {
+        Logger::Inst()->debug("try to VendorAdaptorClassLoader->findFile:'$classFullName' ");
+        if (is_callable($this->originClassLoaderFunc)) {
+            $file = call_user_func($this->originClassLoaderFunc, $classFullName);
+            if ($file !== false) {
+                Logger::Inst()->debug("VendorAdaptorClassLoader->findFile:'$classFullName' ->'$file' ");
                 return realpath($file) ?: $file;
             }
         }
@@ -96,8 +80,8 @@ class VendorAdaptorClassLoader
      */
     public function loadClass($class)
     {
-        if(is_callable($this->vendor_load_class_func)){
-            return call_user_func($this->vendor_load_class_func,$class);
+        if (is_callable($this->vendor_load_class_func)) {
+            return call_user_func($this->vendor_load_class_func, $class);
         }
     }
 
@@ -106,16 +90,18 @@ class VendorAdaptorClassLoader
      * @param $classIndex
      * @return bool
      */
-    public static function enable()
+    public static function enable(UserClassLoaderInterface $u_classLoader = null)
     {
         $loaders = spl_autoload_functions();
-        foreach ($loaders as &$loader) {
-            if ( is_array($loader) && is_callable($loader) ) {// common ClassLoader style
-
-                try{
+        foreach ($loaders as &$olderLoader) {
+            if (is_array($olderLoader) && is_callable($olderLoader)) {
+                try {
                     // replace composer loader with aopclassLoader
-                    $_loader = new self($loader);
-                }catch (Exception $e){
+                    $newLoader = new VendorAdaptorClassLoader($olderLoader, $u_classLoader);
+                    // unregister composer loader
+                    spl_autoload_unregister($olderLoader);
+                    spl_autoload_register(array($newLoader, 'loadClass'), true, false);
+                } catch (Exception $e) {
                     /**
                      * if current loader not compatible, just ignore it!
                      * why?
@@ -123,15 +109,9 @@ class VendorAdaptorClassLoader
                      *  2. Keep this loader, as it will handled its class. (We could write patch for this loader)
                      *  3. Pinpoint classloader is the highest priority
                      */
-                    continue;
+                    Logger::Inst()->debug(" re-register pinpointloader failed '$e' ");
                 }
-
-                // unregister composer loader
-                spl_autoload_unregister($loader);
-
-                spl_autoload_register(array($_loader,'loadClass'),true,false);
             }
         }
     }
-
 }

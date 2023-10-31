@@ -19,19 +19,7 @@ declare(strict_types=1);
 
 namespace Pinpoint\Common;
 
-use Monolog\Logger as mlogger;
-use Monolog\Handler\StreamHandler;
-
-class PerRequestDefault implements JoinClassInterface
+interface UserClassLoaderInterface
 {
-    public function __construct()
-    {
-        $log = new mlogger('name');
-        $log->pushHandler(new StreamHandler('php://stdout', Logger::WARNING));
-        Logger::Inst()->setLogger($log);
-    }
-    public function joinedClassSet(): array
-    {
-        return [];
-    }
+    public function userClassLoader(&$loader): callable;
 }
