@@ -33,7 +33,7 @@ abstract class AbstractMonitor
 
     abstract function onBefore();
 
-    abstract function onEnd($ret);
+    abstract function onEnd(&$ret);
 
     abstract function onException($e);
 }

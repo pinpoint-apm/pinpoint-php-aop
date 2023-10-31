@@ -23,6 +23,11 @@ use Pinpoint\Common\Utils;
 use Pinpoint\Plugins\PinpointPerRequestPlugins;
 use Pinpoint\Common\JoinClassInterface;
 use Pinpoint\Common\AspectClassHandle;
+use Pinpoint\Common\Logger;
+
+use Monolog\Logger as mLogger;
+use Monolog\Handler\StreamHandler;
+
 
 class Yii2PerRequestPlugins extends PinpointPerRequestPlugins implements JoinClassInterface
 {
@@ -31,6 +36,9 @@ class Yii2PerRequestPlugins extends PinpointPerRequestPlugins implements JoinCla
         parent::__construct();
         // enable findFile patch
         Utils::addLoaderPatch(array($this, 'findFileInYii'), null);
+        $log = new mLogger('Yii2PerRequestPlugins');
+        $log->pushHandler(new StreamHandler('php://stdout', mLogger::DEBUG));
+        Logger::Inst()->setLogger($log);
     }
 
     public function findFileInYii($className): string

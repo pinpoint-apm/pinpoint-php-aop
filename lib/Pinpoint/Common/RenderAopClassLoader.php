@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /*
  * User: eeliu
  * Date: 12/15/21
@@ -12,7 +14,7 @@ class RenderAopClassLoader
     public static function loadClass($class)
     {
         $file = RenderAopClass::getInstance()->findFile($class);
-        if($file != ''){
+        if ($file != '') {
             require $file;
             return true;
         }
@@ -20,6 +22,7 @@ class RenderAopClassLoader
 
     public static function start()
     {
-        spl_autoload_register( [__NAMESPACE__.'\RenderAopClassLoader','loadClass'],true,true);
+        spl_autoload_register([__NAMESPACE__ . '\RenderAopClassLoader', 'loadClass'], true, true);
+        Logger::Inst()->debug("register RenderAopClassLoader");
     }
 }

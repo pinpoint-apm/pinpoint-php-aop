@@ -242,6 +242,7 @@ class GenOriginClassTemplateHelper extends AbstractClassFile
                 }
             }
             if (!empty($hiddenClassAlias)) {
+                Logger::Inst()->debug("found hiddenClassAlias:'$hiddenClassAlias'");
                 $this->classAliasSet += $hiddenClassAlias;
             }
             return;
@@ -278,12 +279,14 @@ class GenOriginClassTemplateHelper extends AbstractClassFile
                 if (array_key_exists($fullName, $this->funcAlias)) {
                     $newName = new Node\Name($this->funcAlias[$fullName]);
                     $uses->name = $newName;
+                    Logger::Inst()->debug("found funcAlias:'$fullName' -> '$this->funcAlias[$fullName]' ");
                 }
             } else {
                 // use ABC\Math;
                 if (array_key_exists($fullName, $this->classAliasSet)) {
                     $newName = new Node\Name($this->classAliasSet[$fullName]);
                     $uses->name = $newName;
+                    Logger::Inst()->debug("found classAlias:'$fullName' -> '$this->classAliasSet[$fullName]' ");
                 }
             }
         }

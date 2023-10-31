@@ -45,6 +45,7 @@ class OriginFileVisitor
         $classPrefix = "";
         $visitors = [];
         if (!empty($classHandler->getMethodJoinPoints())) {
+            Logger::Inst()->debug("found methodJoinPoints ");
             $classPrefix = CLASS_PREFIX;
             $visitors[] = new GenProxyClassTemplateHelper($classHandler, $classPrefix);
         }

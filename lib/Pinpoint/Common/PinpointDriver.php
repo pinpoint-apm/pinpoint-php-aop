@@ -62,11 +62,13 @@ class PinpointDriver
         RenderAopClass::getInstance();
         /// checking the cached file exist, if exist load it
         if (Utils::checkCacheReady()) {
+            Logger::Inst()->debug("found cache");
             RenderAopClass::getInstance()->createFrom(Utils::loadCachedClass());
             VendorAdaptorClassLoader::enable();
             RenderAopClassLoader::start();
             return;
         }
+
         VendorAdaptorClassLoader::enable();
 
         $joinedClassSet = $this->reqInst->joinedClassSet();
@@ -80,10 +82,10 @@ class PinpointDriver
             if (empty($fullClassName)) {
                 continue;
             }
-
             $fullPath = Utils::findFile($fullClassName);
+            Logger::Inst()->debug("found aspectClass '$fullClassName' -> '$fullPath' ");
             // Please DO NOT CHEAT ME
-            assert(file_exists($fullPath), " '$fullClassName' ->'$fullPath' must exist");
+            assert(file_exists($fullPath), "'$fullClassName' ->'$fullPath' must exist");
 
             $visitor = new OriginFileVisitor();
             $visitor->runAllVisitor($fullPath, $aspClassHandler);
