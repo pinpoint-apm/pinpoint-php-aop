@@ -20,6 +20,8 @@ namespace Pinpoint\Plugins;
 
 require_once __DIR__ . "/__init__.php";
 
+use Pinpoint\Common\Logger;
+
 class PinpointPerRequestPlugins
 {
     public $tid = null;
@@ -148,7 +150,11 @@ class PinpointPerRequestPlugins
                 pinpoint_mark_as_error('Internal server error', __FILE__);
             }
         }
-
+        $urlTemplateUrl = pinpoint_get_context(PP_ROUTE_KEY);
+        if ($urlTemplateUrl != false && !empty($urlTemplateUrl)) {
+            pinpoint_add_clue(UT, $urlTemplateUrl);
+            Logger::Inst()->debug("add ut '$urlTemplateUrl'");
+        }
         pinpoint_end_trace();
     }
 
