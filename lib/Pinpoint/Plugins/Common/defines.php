@@ -89,3 +89,4 @@ define("PP_SAMPLED", "s1");
 # key for support UT
 # https://github.com/pinpoint-apm/pinpoint-c-agent/issues/534
 define("PP_ROUTE_KEY", '__pinpoint__route');
+define("UT", 'UT');
