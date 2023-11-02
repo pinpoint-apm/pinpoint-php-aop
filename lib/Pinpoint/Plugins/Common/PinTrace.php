@@ -1,4 +1,5 @@
 <?php
+
 /******************************************************************************
  * Copyright 2020 NAVER Corp.                                                 *
  *                                                                            *
@@ -24,23 +25,18 @@
  */
 
 namespace Pinpoint\Plugins\Common;
-require_once "PluginsDefines.php";
 
-abstract class PinTrace
+require_once __DIR__ . "/defines.php";
+
+
+class PinTrace extends Trace
 {
-    protected $apId;
-    protected $who;
-    protected $args;
-    protected $ret=null;
 
-    public function __construct($apId,$who,&...$args)
+    public function __construct($monitorName, $who, &...$args)
     {
-        /// todo start_this_aspect_trace
-        $this->apId = $apId;
-        $this->who =  $who;
-        $this->args = &$args;
+        parent::__construct($monitorName, $who, $args);
         pinpoint_start_trace();
-        pinpoint_add_clue(PP_INTERCEPTOR_NAME,$apId);
+        pinpoint_add_clue(PP_INTERCEPTOR_NAME, $monitorName);
     }
 
     public function __destruct()
@@ -48,12 +44,8 @@ abstract class PinTrace
         pinpoint_end_trace();
     }
 
-    abstract function onBefore();
-
-    abstract function onEnd(&$ret);
-
     public function onException($e)
     {
-        pinpoint_add_clue(PP_ADD_EXCEPTION,$e->getMessage());
+        pinpoint_add_clue(PP_ADD_EXCEPTION, $e->getMessage());
     }
 }

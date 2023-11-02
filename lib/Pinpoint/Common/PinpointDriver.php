@@ -31,7 +31,7 @@ class PinpointDriver
     protected static $instance;
     protected $clAr = [];
 
-    private JoinClassInterface $reqInst;
+    private UserFrameworkInterface $reqInst;
 
     public static function getInstance()
     {
@@ -46,7 +46,7 @@ class PinpointDriver
         if (defined('PP_REQ_PLUGINS')  && class_exists(PP_REQ_PLUGINS)) {
             $userPerRequestClass = PP_REQ_PLUGINS;
             $this->reqInst = new $userPerRequestClass();
-            assert(is_a($this->reqInst, 'Pinpoint\Common\JoinClassInterface'));
+            assert(is_a($this->reqInst, 'Pinpoint\Common\UserFrameworkInterface'));
         } else {
             $this->reqInst = new PerRequestDefault();
         }
@@ -59,17 +59,15 @@ class PinpointDriver
 
     public function start()
     {
-        RenderAopClass::getInstance();
-        /// checking the cached file exist, if exist load it
         if (Utils::checkCacheReady()) {
             Logger::Inst()->debug("found cache");
-            RenderAopClass::getInstance()->createFrom(Utils::loadCachedClass());
-            VendorAdaptorClassLoader::enable();
-            RenderAopClassLoader::start();
+            MonitorClass::getInstance()->createFrom(Utils::loadCachedClass());
+            MonitorClassLoader::start();
             return;
         }
-
-        VendorAdaptorClassLoader::enable();
+        Logger::Inst()->debug("no found cache, try to generate joinclass");
+        VendorClassLoaderAdaptor::Inst()->setUserFindClass($this->reqInst);
+        VendorClassLoaderAdaptor::Inst()->start();
 
         $joinedClassSet = $this->reqInst->joinedClassSet();
         if (empty($joinedClassSet)) {
@@ -82,7 +80,7 @@ class PinpointDriver
             if (empty($fullClassName)) {
                 continue;
             }
-            $fullPath = Utils::findFile($fullClassName);
+            $fullPath = VendorClassLoaderAdaptor::Inst()->findFileViaSpl($fullClassName);
             Logger::Inst()->debug("found aspectClass '$fullClassName' -> '$fullPath' ");
             // Please DO NOT CHEAT ME
             assert(file_exists($fullPath), "'$fullClassName' ->'$fullPath' must exist");
@@ -91,18 +89,8 @@ class PinpointDriver
             $visitor->runAllVisitor($fullPath, $aspClassHandler);
         }
         // save render aop class into index file
-        Utils::saveCachedClass(RenderAopClass::getInstance()->getJointClassMap());
+        Utils::saveCachedClass(MonitorClass::getInstance()->getJointClassMap());
         // enable RenderAop class loader
-        RenderAopClassLoader::start();
-    }
-
-    /**
-     * start /tail are the spl_autoload_functions checking order
-     * @param callable $start
-     * @param callable $tail
-     */
-    public function addClassFinderHelper(callable $start, callable $tail)
-    {
-        Utils::addLoaderPatch($start, $tail);
+        // MonitorClassLoader::start();
     }
 }

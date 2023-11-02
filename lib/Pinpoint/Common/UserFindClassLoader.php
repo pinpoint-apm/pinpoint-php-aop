@@ -19,19 +19,16 @@ declare(strict_types=1);
 
 namespace Pinpoint\Common;
 
-use Monolog\Logger as mlogger;
-use Monolog\Handler\StreamHandler;
 
-class PerRequestDefault implements JoinClassInterface
+class UserFindClassLoader extends StanderClassLoader
 {
-    public function __construct()
+    public function __construct(array &$orgLoader, UserFrameworkInterface $userFindClass)
     {
-        $log = new mlogger('name');
-        $log->pushHandler(new StreamHandler('php://stdout', Logger::WARNING));
-        Logger::Inst()->setLogger($log);
-    }
-    public function joinedClassSet(): array
-    {
-        return [];
+        Logger::Inst()->debug(" create a UserFindClassLoader");
+        parent::__construct($orgLoader);
+        if (is_callable($userFindClass)) {
+            $this->findClassFunc = $userFindClass->userFindClass($orgLoader);
+            assert(is_callable($this->findClassFunc));
+        }
     }
 }

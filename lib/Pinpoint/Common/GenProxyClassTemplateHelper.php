@@ -28,30 +28,32 @@ namespace Pinpoint\Common;
 use Pinpoint\Common\AbstractClassFile;
 use PhpParser\BuilderFactory;
 use PhpParser\Node;
-use Pinpoint\Common\PluginParser;
+
+const _originNamePrefix_ = "__pinpoint__";
 
 class GenProxyClassTemplateHelper extends AbstractClassFile
 {
-    private $factory;
-
-    private $mClassNode = null; // class { }
-    private $mTraitNode = null;
-
-    private $extendTraitName;
-
+    private BuilderFactory $factory;
     private $useBlockAr = [];
-
-    private $trailUseAsArray = [];
-
     private $handleLeaveMethodCb = [];
-    private $handleEndTraverseCb = [];
     public $methodJoinPoints = [];
+    private $newMethodsStmts = [];
 
-    public function __construct(AspectClassHandle $classHandler, $prefix)
+    protected $originClassFileDir;
+    protected $originClassFilePath;
+    protected $suffix_use = [];
+    protected $classAliasSet = [];
+    protected $funcAlias = [];
+    protected $methodJoint;
+
+    public function __construct(AspectClassHandle $classHandler)
     {
-        parent::__construct($prefix);
+        parent::__construct();
         $this->factory = new BuilderFactory();
         $this->methodJoinPoints = $classHandler->methodJoinPoints;
+        $this->classAliasSet  = $classHandler->classAlias;
+        $this->funcAlias = $classHandler->funcAlias;
+        $this->methodJoint = $classHandler->methodJoinPoints;
     }
 
 
@@ -60,43 +62,79 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
         parent::handleEnterNamespaceNode($node);
     }
 
+    private function getRealNp($node)
+    {
+
+        if ($node instanceof Node\Name\FullyQualified)         // Use directly access
+        {
+            return $node->toString();
+        } elseif ($node instanceof Node\Expr\Variable) { //#16 support new a variable
+            return $node->name;
+        } elseif ($node instanceof Node\Name) {    // Use namespace suggestion
+            $prefixNm = $node->getFirst();
+            if (isset($this->suffix_use[$prefixNm])) {
+                $namePrefix = $this->suffix_use[$prefixNm];
+                $nm =  $namePrefix . "\\" . $node->toString();
+                return $nm;
+            } else {
+                return $node->toString();
+            }
+        }
+    }
+
+    private function renderClassName($node, $filer)
+    {
+        $classFullName = $this->getRealNp($node);
+
+        if (isset($filer[$classFullName])) {
+            $methodNewName = $filer[$classFullName];
+            return new Node\Name\FullyQualified($methodNewName);
+        }
+        return $node;
+    }
+
+    public function handleEnterNew($node)
+    {
+        assert($node instanceof Node\Expr\New_);
+        $node->class =  $this->renderClassName($node->class, $this->classAliasSet);
+        return $node;
+    }
+
+    public function handleEnterClassConstFetch($node)
+    {
+        assert($node instanceof Node\Expr\ClassConstFetch);
+        $node->class =  $this->renderClassName($node->class, $this->classAliasSet);
+        return $node;
+    }
+
+    public function handleEnterFuncCall($node)
+    {
+        assert($node instanceof Node\Expr\FuncCall);
+        if ($node->name instanceof Node\Expr\Variable) {
+            // not support anonymous function
+        } else {
+            $node->name =  $this->renderFunName($node->name, $this->funcAlias);
+        }
+        return $node;
+    }
+
+
     public function handleEnterClassNode($node)
     {
         assert($node instanceof Node\Stmt\Class_);
         parent::handleEnterClassNode($node);
 
-        $extendClass = $this->newNamePrefix . $node->name->toString();
-        $this->mClassNode  = $this->factory->class(trim($node->name->toString()))->extend($extendClass);
-        if (!empty($this->namespace)) {
-            // if the proxy_class has namespace, add into use
-            // if not, just ignore it . support for yii1
-            $fullName = $this->namespace . '\\' . $extendClass;
-            $this->useBlockAr[] = array($fullName, null);
-        }
-
-        switch ($node->flags) {
-            case Node\Stmt\Class_::MODIFIER_FINAL:
-                $this->mClassNode->makeFinal();
-                break;
-            case Node\Stmt\Class_::MODIFIER_ABSTRACT:
-                $this->mClassNode->makeAbstract();
-                break;
-            default:
-                break;
-        }
-
         $this->handleLeaveMethodCb = array($this, 'handleClassLeaveMethodNode');
-        $this->handleEndTraverseCb = array($this, 'handleAfterTraverseClass');
     }
 
     public function handleEnterTraitNode(&$node)
     {
         assert($node instanceof Node\Stmt\Trait_);
-        parent::handleEnterTraitNode($node);
-        $this->mTraitNode  = $this->factory->trait(trim($node->name->toString()));
-        $this->extendTraitName = $this->newNamePrefix . $node->name->toString();
-        $this->handleLeaveMethodCb = array($this, 'handleTraitLeaveMethodNode');
-        $this->handleEndTraverseCb = array($this, 'handleAfterTraverseTrait');
+        // parent::handleEnterTraitNode($node);
+        // $this->mTraitNode  = $this->factory->trait(trim($node->name->toString()));
+        // $this->extendTraitName = $this->newNamePrefix . $node->name->toString();
+        // $this->handleLeaveMethodCb = array($this, 'handleTraitLeaveMethodNode');
+        // $this->handleEndTraverseCb = array($this, 'handleAfterTraverseTrait');
     }
 
     public static function convertParamsName2Arg($params)
@@ -120,36 +158,47 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
 
         // 1. make a new method overriding parent's
         $originMethodName = $node->name->toString();
+        $newMethodName = $this->methodNewName($originMethodName);
+        $node->name = new Node\Name\FullyQualified($newMethodName);
+
         Logger::Inst()->debug("generate pinpoint code block for '$originMethodName'");
         $funcVar = new Node\Arg(new Node\Scalar\MagicConst\Method());
 
-        $thisMethod = $this->factory->method($originMethodName);
+        $jointMethod = $this->factory->method($originMethodName);
 
+        $docComments = <<<EOD
+        /*
+        * $originMethodName auto-generated by pinpoint-apm/pinpoint-php-aop
+        */
+        EOD;
+        $jointMethod->setDocComment($docComments);
         // 1.1 public/protect/private/
         if ($node->flags & Node\Stmt\Class_::MODIFIER_PUBLIC) {
-            $thisMethod->makePublic();
+            $jointMethod->makePublic();
         }
 
         if ($node->flags & Node\Stmt\Class_::MODIFIER_PRIVATE) {
-            Logger::Inst()->debug("'$originMethodName' is a private, changes to protected");
-            $thisMethod->makeProtected();
+            Logger::Inst()->debug("'$originMethodName' is a private");
+            $jointMethod->makePrivate();
         }
 
         if ($node->flags & Node\Stmt\Class_::MODIFIER_ABSTRACT) {
-            $thisMethod->makeAbstract();
+            $jointMethod->makeAbstract();
         }
 
         if ($node->flags & Node\Stmt\Class_::MODIFIER_FINAL) {
-            $thisMethod->makeFinal();
+            $jointMethod->makeFinal();
         }
 
         if ($node->flags & Node\Stmt\Class_::MODIFIER_PROTECTED) {
-            $thisMethod->makeProtected();
+            $jointMethod->makeProtected();
         }
 
         //1.2 gen $this->
+        $isStatic = false;
         if ($node->flags & Node\Stmt\Class_::MODIFIER_STATIC) {
-            $thisMethod->makeStatic();
+            $isStatic = true;
+            $jointMethod->makeStatic();
             $selfVar = new Node\Arg(new Node\Expr\ConstFetch(new Node\Name('null')));
             Logger::Inst()->debug("'$originMethodName' is a static function");
         } else {
@@ -158,9 +207,9 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
 
         $methodParams  = array_merge([$funcVar, $selfVar], GenProxyClassTemplateHelper::convertParamsName2Arg($node->params));
 
-        $thisMethod->addParams($node->params);
+        $jointMethod->addParams($node->params);
         if ($node->returnType) {
-            $thisMethod->setReturnType($node->returnType);
+            $jointMethod->setReturnType($node->returnType);
         }
 
         $varName = '_pinpoint_' . $originMethodName . '_var';
@@ -172,13 +221,13 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
             $this->factory->new(new Node\Name\FullyQualified($monitorClassFullName), $methodParams)
         ));
 
-        $thisMethod->addStmt($newPluginsStm);
+        $jointMethod->addStmt($newPluginsStm);
         // $var = null;
         $newVar = new Node\Stmt\Expression(new Node\Expr\Assign(
             new Node\Expr\Variable($retName),
             new Node\Expr\ConstFetch(new Node\Name('null'))
         ));
-        $thisMethod->addStmt($newVar);
+        $jointMethod->addStmt($newVar);
 
         $tryBlock = [];
         $catchNode = [];
@@ -190,15 +239,28 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
 
         if ($this->hasRet) {
             Logger::Inst()->debug("'$originMethodName' has return value ");
-            /// $ret = paraent::$originMethodName();
-            $tryBlock[] = new Node\Stmt\Expression(new Node\Expr\Assign(
-                new Node\Expr\Variable($retName),
-                new Node\Expr\StaticCall(
-                    new Node\Name("parent"),
-                    new Node\Identifier($originMethodName),
-                    GenProxyClassTemplateHelper::convertParamsName2Arg($node->params)
-                )
-            ));
+
+            if ($isStatic) {
+                /// $ret = self::newMethodName();
+                $tryBlock[] = new Node\Stmt\Expression(new Node\Expr\Assign(
+                    new Node\Expr\Variable($retName),
+                    new Node\Expr\StaticCall(
+                        new Node\Name("self"),
+                        new Node\Identifier($newMethodName),
+                        GenProxyClassTemplateHelper::convertParamsName2Arg($node->params)
+                    )
+                ));
+            } else {
+                /// $ret = $this->$newMethodName();
+                $tryBlock[] = new Node\Stmt\Expression(new Node\Expr\Assign(
+                    new Node\Expr\Variable($retName),
+                    new Node\Expr\MethodCall(
+                        new Node\Expr\Variable("this"),
+                        new Node\Identifier($newMethodName),
+                        GenProxyClassTemplateHelper::convertParamsName2Arg($node->params)
+                    )
+                ));
+            }
 
             /// $var->onEnd($ret);
             $tryBlock[] = new Node\Stmt\Expression(
@@ -214,11 +276,25 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
         } else {
             /// paraent::$originMethodName();
 
-            $tryBlock[] = new Node\Stmt\Expression($this->factory->staticCall(
-                new Node\Name("parent"),
-                new Node\Identifier($originMethodName),
-                GenProxyClassTemplateHelper::convertParamsName2Arg($node->params)
-            ));
+            if ($isStatic) {
+                /// $ret = self::newMethodName();
+                $tryBlock[] = new Node\Stmt\Expression(
+                    new Node\Expr\StaticCall(
+                        new Node\Name("self"),
+                        new Node\Identifier($newMethodName),
+                        GenProxyClassTemplateHelper::convertParamsName2Arg($node->params)
+                    )
+                );
+            } else {
+                /// $ret = $this->$newMethodName();
+                $tryBlock[] = new Node\Stmt\Expression(
+                    new Node\Expr\MethodCall(
+                        new Node\Expr\Variable("this"),
+                        new Node\Identifier($newMethodName),
+                        GenProxyClassTemplateHelper::convertParamsName2Arg($node->params)
+                    )
+                );
+            }
 
             /// $var->onEnd($ret);
             $tryBlock[] = new Node\Stmt\Expression(
@@ -252,9 +328,9 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
 
         $tryCatchFinallyNode = new Node\Stmt\TryCatch($tryBlock, $catchNode);
 
-        $thisMethod->addStmt($tryCatchFinallyNode);
+        $jointMethod->addStmt($tryCatchFinallyNode);
 
-        $this->mClassNode->addStmt($thisMethod);
+        $this->newMethodsStmts[] = $jointMethod->getNode();
     }
 
     public static function itemInArray($ar, $v)
@@ -268,175 +344,16 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
         return !empty($new);
     }
 
-    public function handleTraitLeaveMethodNode($node, $info)
+    private function methodNewName($olderName): string
     {
-        /// todo this methodName looks ugly
-
-        /// - check use , add  use Proxied_Foo { }
-        /// - insert alias use Proxied_Foo::xxx as Foo_xxxx
-        /// - new function xxxx
-
-        assert($node instanceof Node\Stmt\ClassMethod);
-
-        list($mode, $namespace, $className) = $info;
-
-        // foo_1
-        $originMethodName = $node->name->toString();
-
-        $np = empty($namespace) ? $className  : $namespace . '\\' . $className;
-        $np_ar = [$np, null];
-        // use CommonPlugins\Plugins;
-        if (!static::itemInArray($this->useBlockAr, $np_ar)) {
-            $this->useBlockAr[] = $np_ar;
-        }
-
-        // $this->extendTraitName::$originMethodName as $this->extendTraitName_$originMethodName;
-        $this->trailUseAsArray[] = $originMethodName;
-        $extendMethodName = $this->extendTraitName . '_' . $originMethodName;
-
-
-        $funcVar = new Node\Arg(new Node\Scalar\MagicConst\Method());
-
-        // public function funcName(){}
-        $thisMethod = $this->factory->method($originMethodName);
-
-        if ($node->flags & Node\Stmt\Class_::MODIFIER_PUBLIC) {
-            $thisMethod->makePublic();
-        }
-
-        if ($node->flags & Node\Stmt\Class_::MODIFIER_PRIVATE) {
-            $thisMethod->makePrivate();
-        }
-
-        if ($node->flags & Node\Stmt\Class_::MODIFIER_ABSTRACT) {
-
-            $thisMethod->makeAbstract();
-        }
-
-        if ($node->flags & Node\Stmt\Class_::MODIFIER_FINAL) {
-            $thisMethod->makeFinal();
-        }
-
-        if ($node->flags & Node\Stmt\Class_::MODIFIER_PROTECTED) {
-            $thisMethod->makeProtected();
-        }
-
-        if ($node->flags & Node\Stmt\Class_::MODIFIER_STATIC) {
-            $thisMethod->makeStatic();
-            $selfVar = new Node\Arg(new Node\Expr\ConstFetch(new Node\Name('null')));
-        } else {
-            $selfVar = new Node\Arg(new Node\Expr\Variable('this'));
-        }
-
-        $methodParams  = array_merge([$funcVar, $selfVar], GenProxyClassTemplateHelper::convertParamsName2Arg($node->params));
-
-        $thisMethod->addParams($node->params);
-        if ($node->returnType) {
-            $thisMethod->setReturnType($node->returnType);
-        }
-
-        $varName = $className . '_' . $originMethodName . '_var';
-        $retName = $className . '_' . $originMethodName . '_ret';
-
-        /// $var = new CommonPlugins(__FUNCTION__,self,$p);
-        $newPluginsStm = new Node\Stmt\Expression(new Node\Expr\Assign(
-            new Node\Expr\Variable($varName),
-            $this->factory->new($className, $methodParams)
-        ));
-
-        $thisMethod->addStmt($newPluginsStm);
-        // $var = null;
-        $newVar = new Node\Stmt\Expression(new Node\Expr\Assign(
-            new Node\Expr\Variable($retName),
-            new Node\Expr\ConstFetch(new Node\Name('null'))
-        ));
-        $thisMethod->addStmt($newVar);
-
-        $tryBlock = [];
-        $catchNode = [];
-
-        // $plugin->onBefore();
-        $tryBlock[] = new Node\Stmt\Expression(
-            $this->factory->methodCall(new Node\Expr\Variable($varName), "onBefore")
-        );
-
-        if ($this->hasRet) {
-            /// $ret = $this->method(&...$args);
-            $tryBlock[] = new Node\Stmt\Expression(new Node\Expr\Assign(
-                new Node\Expr\Variable($retName),
-                new Node\Expr\MethodCall(
-                    new Node\Expr\Variable("this"),
-                    new Node\Identifier($extendMethodName),
-                    GenProxyClassTemplateHelper::convertParamsName2Arg($node->params)
-                )
-            ));
-
-            /// $var->onEnd($ret);
-            if ($mode & PluginParser::END) {
-                $tryBlock[] = new Node\Stmt\Expression(
-                    $this->factory->methodCall(
-                        new Node\Expr\Variable($varName),
-                        "onEnd",
-                        [new Node\Expr\Variable($retName)]
-                    )
-                );
-            }
-
-            /// return $var;
-            $tryBlock[] = new Node\Stmt\Return_(new Node\Expr\Variable($retName));
-        } else {
-            /// $this->>$originMethodName();
-            $tryBlock[] = new Node\Stmt\Expression(new Node\Expr\MethodCall(
-                new Node\Expr\Variable("this"),
-                new Node\Identifier($extendMethodName),
-                GenProxyClassTemplateHelper::convertParamsName2Arg($node->params)
-            ));
-
-            /// $var->onEnd($ret);
-            if ($mode & PluginParser::END) {
-                $tryBlock[] = new Node\Stmt\Expression(
-                    $this->factory->methodCall(
-                        new Node\Expr\Variable($varName),
-                        "onEnd",
-                        [new Node\Expr\Variable($retName)]
-                    )
-                );
-            }
-        }
-
-        $expArgs = [];
-        $expArgs[] = new Node\Arg(new Node\Expr\Variable('e'));
-
-        if ($mode & PluginParser::EXCEPTION) {
-
-            $catchBlock[] = new Node\Stmt\Expression(
-                $this->factory->methodCall(
-                    new Node\Expr\Variable($varName),
-                    "onException",
-                    $expArgs
-                )
-            );
-        }
-
-        $catchBlock[] = new Node\Stmt\Throw_(new Node\Expr\Variable("e"));
-
-        $catchNode[] = new Node\Stmt\Catch_(
-            [new Node\Name('\Exception')],
-            new Node\Expr\Variable('e'),
-            $catchBlock
-        );
-
-        $tryCatchFinallyNode = new Node\Stmt\TryCatch($tryBlock, $catchNode);
-
-        $thisMethod->addStmt($tryCatchFinallyNode);
-
-        $this->mTraitNode->addStmt($thisMethod);
+        return _originNamePrefix_ . $olderName;
     }
 
     public function handleLeaveMethodNode($node)
     {
         $methodName = trim($node->name->toString());
         if (array_key_exists($methodName, $this->methodJoinPoints)) {
+            // rename method name
             call_user_func_array(
                 $this->handleLeaveMethodCb,
                 [
@@ -447,86 +364,46 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
         }
     }
 
-    public function handleAfterTraverseClass()
+    public function renderFunName(&$node, $filer)
     {
-        $useNodes = [];
-        $this->fileName = $this->className;
-
-        $this->useBlockArToNodes($useNodes);
-        if (!empty($this->namespace)) {
-            $this->fileNode = $this->factory->namespace($this->namespace);
-            if (count($useNodes) > 0) {
-                $this->fileNode->addStmts($useNodes);
-            }
-            $this->fileNode->addStmt($this->mClassNode);
-            return array($this->fileNode->getNode());
-        } else {
-            $this->fileNode = []; //$this->factory->namespace($this->namespace);
-            foreach ($useNodes as $node) {
-                $this->fileNode[] = $node->getNode();
-            }
-            $this->fileNode[] = $this->mClassNode->getNode();
-            return $this->fileNode;
+        $classFullName = $node->toString();
+        if (isset($filer[$classFullName])) {
+            $methodNewName = $filer[$classFullName];
+            return new Node\Name\FullyQualified($methodNewName);
         }
+        return $node;
     }
 
-    private function useBlockArToNodes(&$stmNode)
+
+    /** rename the class Proxied_foo
+     * @param $node
+     */
+    public function handleLeaveClassNode($node)
     {
-
-        foreach ($this->useBlockAr as $var) {
-
-            if (isset($var[1])) { // the second must be alias : use class as foo
-                $node = $this->factory->use($var[0])->as($var[1]);
-            } else { //== 1
-                $node = $this->factory->use($var[0]);
-            }
-
-            $stmNode[] = $node;
-        }
-    }
-
-    public function handleAfterTraverseTrait()
-    {
-        $useNodes = [];
-        $this->useBlockArToNodes($useNodes);
-
-        // use Proxied_Foo{}
-        $useTraitNode = $this->factory->useTrait($this->extendTraitName);
-
-        foreach ($this->trailUseAsArray as $alias) {
-            // $extendMethodName::thisfuncName as $this->extendTraitName.'_'.$originMethodName;
-            $useTraitNode->with($this->factory->traitUseAdaptation($this->extendTraitName, $alias)->as($this->extendTraitName . '_' . $alias));
-        }
-
-        $this->mTraitNode->addStmt($useTraitNode);
-        // todo does need to handle trait without any namespace
-        $this->fileNode = $this->factory->namespace($this->namespace)
-            ->addStmts($useNodes)
-            ->addStmt($this->mTraitNode);
-
-        $this->fileName = $this->traitName;
-
-        return array($this->fileNode->getNode());
+        assert($node instanceof Node\Stmt\Class_);
+        array_push($node->stmts, ...$this->newMethodsStmts);
     }
 
     public function handleAfterTraverse($nodes)
     {
-        $this->newAstNode = call_user_func_array($this->handleEndTraverseCb, []);
+        $this->newAstNode = $nodes;
     }
 
-    function handleLeaveNamespace($nodes)
+    public function handleLeaveNamespace($nodes)
     {
-        // do nothing
+        return $nodes;
     }
 
-    function handleEnterClassConstFetch($node)
+
+    public function handleFullyQualifiedNode(&$node)
     {
-    }
-    function handleEnterNew($node)
-    {
-    }
-    function handleEnterFuncCall($node)
-    {
+        assert($node instanceof Node\Name\FullyQualified);
+        $name = $node->toString();
+        if (isset($this->classAliasSet[$name])) {
+            return new Node\Name\FullyQualified($this->classAliasSet[$name]);
+        } else {
+            return $node;
+        }
     }
 
     function handlerUseNode($node)
@@ -535,14 +412,66 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
         foreach ($node->uses as $uses) {
             $this->useBlockAr[] = array($uses->name->toString(), $uses->alias ?  $uses->alias->name : null);
         }
+
+        //rename the nodes
+        assert($node instanceof Node\Stmt\Use_);
+        $type = $node->type;
+        if ($type == Node\Stmt\Use_::TYPE_CONSTANT) {
+            return;
+        }
+
+        // replace the exactly match
+        // use A/B/C; -> Plugins/A/B/C
+        foreach ($node->uses as &$uses) {
+            $fullName = trim($uses->name->toString(), "\ \\");
+
+            if ($type == Node\Stmt\Use_::TYPE_FUNCTION) {
+                // use function Math\{add, subtract};
+                if (array_key_exists($fullName, $this->funcAlias)) {
+                    $methodNewName = new Node\Name($this->funcAlias[$fullName]);
+                    $uses->name = $methodNewName;
+                    Logger::Inst()->debug("found funcAlias:'$fullName' -> '$this->funcAlias[$fullName]' ");
+                }
+            } else {
+                // use ABC\Math;
+                if (array_key_exists($fullName, $this->classAliasSet)) {
+                    $methodNewName = new Node\Name($this->classAliasSet[$fullName]);
+                    $uses->name = $methodNewName;
+                    Logger::Inst()->debug("found classAlias:'$fullName' -> '$this->classAliasSet[$fullName]' ");
+                }
+            }
+        }
     }
 
 
-    function handleMagicConstNode($node)
+    function handlerUseUseNode(&$node)
     {
-    }
+        assert($node instanceof  Node\Stmt\UseUse);
 
-    function handleLeaveClassNode($node)
-    {
+        // parse use A\B\C as ABC;
+        // here , A\B\C is hidden by ABC
+        // so re-add ABC
+        if ($node->alias) {
+            $namespaceAlias = $node->alias->name;
+            $hiddenClassAlias = [];
+            $methodNewName = trim($node->name->toString(), "\ \\");
+            foreach ($this->classAliasSet as $clName => $classAlias) {
+                if (strpos($clName, $methodNewName) === 0) {
+                    $classNewName = str_replace($methodNewName, $namespaceAlias, $clName);
+                    $hiddenClassAlias[$classNewName] = $classAlias;
+                }
+            }
+            if (!empty($hiddenClassAlias)) {
+                Logger::Inst()->debug("found hiddenClassAlias:'$hiddenClassAlias'");
+                $this->classAliasSet += $hiddenClassAlias;
+            }
+            return;
+        }
+
+        // parse use A/B/C, but the nm_ is A/B/C/D
+        $suffixNm = $node->name->getLast();
+        if (!$node->name->isUnqualified()) {
+            $this->suffix_use[$suffixNm] = $node->name->slice(0, -1)->toString();
+        }
     }
 }

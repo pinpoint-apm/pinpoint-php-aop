@@ -1,4 +1,5 @@
 <?php
+
 /******************************************************************************
  * Copyright 2020 NAVER Corp.                                                 *
  *                                                                            *
@@ -19,19 +20,19 @@ namespace Pinpoint\Plugins\Common;
 
 class CommonPlugin extends PinTrace
 {
-    ///@hook:app\DBcontrol::connectDb
-    public function onBefore(){
-        pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP_METHOD);
-        pinpoint_add_clues(PP_PHP_ARGS,"--placeholder---");
+    public function onBefore()
+    {
+        pinpoint_add_clue(PP_SERVER_TYPE, PP_PHP_METHOD);
+        pinpoint_add_clues(PP_PHP_ARGS, "--placeholder---");
     }
 
-    ///@hook:app\DBcontrol::getData1 app\DBcontrol::\array_push
-    public function onEnd(&$ret){
-        pinpoint_add_clues(PP_PHP_RETURN,"--placeholder---");
+    public function onEnd(&$ret)
+    {
+        pinpoint_add_clues(PP_PHP_RETURN, "--placeholder---");
     }
 
-    ///@hook:app\DBcontrol::getData2
-    public function onException($e){
-        pinpoint_add_clue(PP_ADD_EXCEPTION,$e->getMessage());
+    public function onException($e)
+    {
+        pinpoint_add_clue(PP_ADD_EXCEPTION, $e->getMessage());
     }
 }

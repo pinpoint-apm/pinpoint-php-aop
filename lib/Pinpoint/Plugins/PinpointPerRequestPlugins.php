@@ -26,7 +26,7 @@ class PinpointPerRequestPlugins
     public $sid = null;
     public $psid = null;
     public $pname = null;
-    public $ptype = null;
+    public $parentAppType = null;
     public $ah = null;
     public $app_name = null;
     public $app_id = null;
@@ -98,8 +98,8 @@ class PinpointPerRequestPlugins
         }
 
         if (isset($_SERVER[PP_HEADER_PAPPTYPE]) || array_key_exists(PP_HEADER_PAPPTYPE, $_SERVER)) {
-            $this->ptype = $_SERVER[PP_HEADER_PAPPTYPE];
-            pinpoint_add_clue(PP_PARENT_TYPE, $this->ptype);
+            $this->parentAppType = $_SERVER[PP_HEADER_PAPPTYPE];
+            pinpoint_add_clue(PP_PARENT_TYPE, $this->parentAppType);
         }
 
         if (isset($_SERVER[PP_HEADER_PINPOINT_HOST]) || array_key_exists(PP_HEADER_PINPOINT_HOST, $_SERVER)) {

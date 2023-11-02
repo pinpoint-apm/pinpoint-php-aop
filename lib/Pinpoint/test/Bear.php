@@ -7,20 +7,24 @@ namespace Pinpoint\test;
  */
 class Bear
 {
+    public function __construct($a, $b, $c)
+    {
+    }
+
     public $pdo;
     /**
-     * @output
+     * @output @output I'm annotation
      * @parameter: 
      * @return
      */
-    public function output(string $_1, int $_2, array &$_3)
+    public function output(string $_1, int $_2, array $_3)
     {
-
         return 1010;
     }
 
-    public function noreturn(string $_1, int $_2, array &$_3, $a, $b, $c)
+    public function noreturn(string $_1, int $_2)
     {
+        $this->output('1', 3, [4]);
     }
 
     /**
@@ -28,7 +32,7 @@ class Bear
      */
     public function pdoNamespaceAlias($driver_options = NULL)
     {
-        $this->pdo = new \PDO('dsn', 'user', 'pass', $driver_options);
+        $this->pdo = new \PDO('sqlite:/tmp/foo.db', 'user', 'pass', $driver_options);
     }
 
     /**
@@ -53,6 +57,13 @@ class Bear
 
         curl_close($ch);
     }
+
+    public function callInternal()
+    {
+        $this->checkProtected();
+        $this->checkPrivate();
+    }
+
     /**
      * test protected function
      */
@@ -67,5 +78,14 @@ class Bear
     {
         $this->checkProtected();
         return __METHOD__;
+    }
+
+    public static function staticFuncFoo(string $_1, int $_2, array $_3)
+    {
+    }
+
+    public static function callstaticFuncFoo(string $_1, int $_2, array $_3)
+    {
+        self::staticFuncFoo("1", 2, [3]);
     }
 }

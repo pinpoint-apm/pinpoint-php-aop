@@ -45,8 +45,6 @@ abstract class AbstractClassFile
 
     public $newAstNode;
 
-    protected $newNamePrefix;
-
     public $npStr;
 
     public $className = ''; /// Foo\A Foo\B
@@ -65,15 +63,13 @@ abstract class AbstractClassFile
 
     public $hasRet;
 
-    public $fileNode;
 
     protected $_astPrinter;
 
     public $namespace = '';
 
-    public function __construct($_newNamePrefix)
+    public function __construct()
     {
-        $this->newNamePrefix = $_newNamePrefix;
         $this->_astPrinter = new PrettyPrinter\Standard();
     }
 
@@ -131,7 +127,7 @@ abstract class AbstractClassFile
     {
         $fullPath = AOP_CACHE_DIR . '/' . str_replace('\\', '/', $this->className) . '.php';
         $context = $this->_astPrinter->prettyPrintFile($this->newAstNode);
-        RenderAopClass::getInstance()->insertMapping($this->className, $fullPath);
+        MonitorClass::getInstance()->insertMapping($this->className, $fullPath);
         Logger::Inst()->debug("map/save new class '$this->className' to '$fullPath' ");
         Utils::saveObj($context, $fullPath);
     }
@@ -139,7 +135,6 @@ abstract class AbstractClassFile
     abstract function handleAfterTraverse($nodes);
     abstract function handleLeaveNamespace($nodes);
     abstract function handlerUseNode($node);
-    abstract function handleMagicConstNode($node);
     abstract function handleLeaveMethodNode($node);
     abstract function handleEnterClassConstFetch($node);
     abstract function handleEnterNew($node);
