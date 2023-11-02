@@ -22,5 +22,4 @@ namespace Pinpoint;
 
 use Pinpoint\Common\PinpointDriver;
 
-define('CLASS_PREFIX', 'Proxied_');
 PinpointDriver::getInstance()->start();

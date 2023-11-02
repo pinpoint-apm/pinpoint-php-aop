@@ -1,4 +1,5 @@
 <?php
+
 /******************************************************************************
  * Copyright 2020 NAVER Corp.                                                 *
  *                                                                            *
@@ -15,23 +16,21 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-require_once __DIR__."/Common/PluginsDefines.php";
+require_once __DIR__ . "/Common/defines.php";
 // intercept all date_xxxx, part of php core
-require_once __DIR__."/Sys/date/date.php";
+require_once __DIR__ . "/Sys/date/date.php";
 
 // intercept all curl_xxxx, if curl extension is available
-if (function_exists('curl_exec'))
-{
-    require_once __DIR__."/Sys/curl/curl.php";
+if (function_exists('curl_exec')) {
+    require_once __DIR__ . "/Sys/curl/curl.php";
 }
 
-if (function_exists('mysqli_connect'))
-{
-    if(version_compare(phpversion(), '8.0.0', '<')){
-        require_once __DIR__."/Sys/mysqli/Mysqli.php";
-    }elseif(version_compare(phpversion(), '8.0.0', '>=')){
-        require_once __DIR__."/Sys/mysqli8/Mysqli8.php";
-    }elseif(version_compare(phpversion(), '7.0.0', '<')){
+if (function_exists('mysqli_connect')) {
+    if (version_compare(phpversion(), '8.0.0', '<')) {
+        require_once __DIR__ . "/Sys/mysqli/Mysqli.php";
+    } elseif (version_compare(phpversion(), '8.0.0', '>=')) {
+        require_once __DIR__ . "/Sys/mysqli8/Mysqli8.php";
+    } elseif (version_compare(phpversion(), '7.0.0', '<')) {
         throw new \Exception("not support php5+");
     }
 }

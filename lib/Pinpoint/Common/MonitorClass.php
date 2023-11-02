@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace Pinpoint\Common;
 
-class RenderAopClass
+class MonitorClass
 {
     private static $_instance = null;
 
@@ -30,14 +30,16 @@ class RenderAopClass
     {
     }
 
-    private $clsLoadUserFilterCB = null;
+    public function __destruct()
+    {
+    }
 
-    public static function getInstance(): RenderAopClass
+    public static function getInstance(): MonitorClass
     {
         if (self::$_instance) {
             return self::$_instance;
         }
-        self::$_instance =  new RenderAopClass();
+        self::$_instance =  new MonitorClass();
         return self::$_instance;
     }
 
@@ -46,18 +48,11 @@ class RenderAopClass
         $this->classLoaderMap = $clsMap;
     }
 
-    public function findFile($classFullName): string
+    public function findFile(string $classFullName): string
     {
-        Logger::Inst()->debug("try to findFile:'$classFullName'");
-        if (is_callable($this->clsLoadUserFilterCB)) {
-            if (call_user_func($this->clsLoadUserFilterCB, $classFullName) == true) {
-                return '';
-            }
-        }
-
+        Logger::Inst()->debug("try to loadclass '$classFullName'", [__CLASS__]);
         $classFile = $this->classLoaderMap[$classFullName];
         if (isset($classFile)) {
-            Logger::Inst()->debug("findFile:'$classFullName' -> $classFile'");
             return $classFile;
         }
 
@@ -72,10 +67,5 @@ class RenderAopClass
     public function getJointClassMap(): array
     {
         return $this->classLoaderMap;
-    }
-
-    public function setUserFilter(callable $filter)
-    {
-        $this->clsLoadUserFilterCB = $filter;
     }
 }
