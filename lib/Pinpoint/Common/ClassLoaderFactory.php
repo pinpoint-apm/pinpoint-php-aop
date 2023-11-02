@@ -19,7 +19,27 @@ declare(strict_types=1);
 
 namespace Pinpoint\Common;
 
-interface UserClassLoaderInterface
+use Composer\Autoload\ClassLoader;
+
+class ClassLoaderFactory
 {
-    public function userClassLoader(&$loader): callable;
+    private $_userFindClass = null;
+    public function __construct()
+    {
+    }
+
+    public function setUserFindClass(UserFrameworkInterface $userFindClass)
+    {
+        $this->_userFindClass = $userFindClass;
+    }
+
+    public function createLoader(&$originLoader): StanderClassLoader
+    {
+        $loaderClass = $originLoader[0];
+
+        if (is_a($loaderClass, ClassLoader::class))
+            return new StanderClassLoader($originLoader);
+
+        return new UserFindClassLoader($originLoader, $this->_userFindClass);
+    }
 }

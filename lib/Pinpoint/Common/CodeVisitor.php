@@ -104,10 +104,6 @@ class CodeVisitor extends NodeVisitorAbstract
             foreach ($this->visitors as $visitor) {
                 $visitor->handleLeaveMethodNode($node);
             }
-        } elseif ($node instanceof Node\Scalar\MagicConst) {
-            foreach ($this->visitors as $visitor) {
-                $visitor->handleMagicConstNode($node);
-            }
         } elseif ($node instanceof Node\Stmt\Namespace_) {
             foreach ($this->visitors as $visitor) {
                 $visitor->handleLeaveNamespace($node);

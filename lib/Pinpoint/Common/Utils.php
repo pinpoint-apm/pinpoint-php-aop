@@ -27,69 +27,7 @@ namespace Pinpoint\Common;
 
 class Utils
 {
-
-
-    const U_INDEX_FILE_PATH = AOP_CACHE_DIR . '__class_index_table';
-
-    static private $beforeClassLoaderCb = null;
-    static private $endClassLoaderCb = null;
-
-    public static function addLoaderPatch(callable $start, callable $tail = null)
-    {
-        static::$beforeClassLoaderCb = $start;
-        static::$endClassLoaderCb = $tail;
-    }
-
-    /**
-     * locate a class (via  VendorAdaptorClassLoader)
-     * @param $class
-     * @return bool|string
-     */
-    public static function findFile(string $className): string
-    {
-        if (is_callable(static::$beforeClassLoaderCb)) {
-            $files = call_user_func(static::$beforeClassLoaderCb, $className);
-            if ($files) {
-                return $files;
-            }
-        }
-
-        $splLoaders = spl_autoload_functions();
-        foreach ($splLoaders as &$loader) {
-
-            if (is_array($loader) && $loader[0] instanceof VendorAdaptorClassLoader) {
-                $address = $loader[0]->findFile($className);
-                if ($address) {
-                    return realpath($address);
-                }
-            }
-            // keep peace with unknown loader
-        }
-
-        if (is_callable(static::$endClassLoaderCb)) {
-            $files = call_user_func(static::$endClassLoaderCb, $className);
-            if ($files) {
-                return $files;
-            }
-        }
-
-        return '';
-    }
-
-    public static function parseUserFunc($str)
-    {
-        preg_match_all('#(?<=@hook:).*#', $str, $matched);
-
-        if ($matched) {
-            $func = [];
-            foreach ($matched[0] as $str) {
-                $func = array_merge($func, preg_split("# |\|#", $str, -1, PREG_SPLIT_NO_EMPTY));
-            }
-            return $func;
-        }
-
-        return [];
-    }
+    const U_INDEX_FILE_PATH = AOP_CACHE_DIR . '/.__class_index_table';
 
     public static function saveObj(&$context, $fullPath)
     {
@@ -98,7 +36,6 @@ class Utils
             mkdir($dir, 0777, true);
         }
         file_put_contents($fullPath, $context);
-        
     }
 
 
@@ -115,8 +52,11 @@ class Utils
 
     public static function checkCacheReady(): bool
     {
+        $cachePath = static::U_INDEX_FILE_PATH;
+        $useCache = defined('PINPOINT_USE_CACHE') && PINPOINT_USE_CACHE;
+        Logger::Inst()->debug("cachePath:'$cachePath' useCache '$useCache' ");
         return (defined('PINPOINT_USE_CACHE') &&
-            stristr(PINPOINT_USE_CACHE, "YES") !== false) &&
+            PINPOINT_USE_CACHE) &&
             file_exists(static::U_INDEX_FILE_PATH);
     }
 

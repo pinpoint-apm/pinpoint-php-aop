@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /******************************************************************************
  * Copyright 2020 NAVER Corp.                                                 *
  *                                                                            *
@@ -22,26 +24,28 @@
 
 namespace Pinpoint\Plugins\Common;
 
+use Pinpoint\Common\AbstractMonitor;
 
-class Trace
+class Trace extends AbstractMonitor
 {
-    protected $apId;
-    protected $who;
-    protected $args;
-    protected $ret=null;
-
-    public function __construct($apId,$who,&...$args)
+    public function __construct($apId, $who, &...$args)
     {
-        $this->apId = $apId;
-        $this->who =  $who;
-        $this->args = &$args;
+        parent::__construct($apId, $who, $args);
     }
 
-    public function __destruct(){}
+    public function __destruct()
+    {
+    }
 
-    function onBefore(){}
+    function onBefore()
+    {
+    }
 
-    function onEnd(&$ret){}
+    function onEnd(&$ret)
+    {
+    }
 
-    public function onException($e) {}
+    public function onException($e)
+    {
+    }
 }

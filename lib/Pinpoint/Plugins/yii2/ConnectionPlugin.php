@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 #-------------------------------------------------------------------------------
 # Copyright 2020 NAVER Corp
 #
@@ -15,18 +17,18 @@
 # the License.
 #-------------------------------------------------------------------------------
 
-namespace Pinpoint\Plugins\AutoGen\Yii2;
+namespace Pinpoint\Plugins\Yii2;
+
 use Pinpoint\Plugins\Common\Trace;
 use Pinpoint\Plugins\Sys\PDO\PDO;
 use Yii;
-class ConnectionPlugin extends Trace {
-    /**
-     * @hook:yii\db\Connection::createPdoInstance
-    */
+
+class ConnectionPlugin extends Trace
+{
     function onEnd(&$ret)
     {
         // god bless, the dsn,username,password,attributes is private
-        if( !$ret instanceof PDO){
+        if (!$ret instanceof PDO) {
             // after Aop rendering, only $pdoClass is PDO
             // https://github.com/yiisoft/yii2/blob/08da35e511e83b2184e6dfa46ec8232058ff4b2d/framework/db/Connection.php#L718-L723
             $con = $this->who;
@@ -37,5 +39,4 @@ class ConnectionPlugin extends Trace {
             $ret = new PDO($dsn, $con->username, $con->password, $con->attributes);
         }
     }
-
 }
