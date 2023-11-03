@@ -34,13 +34,16 @@ class UrlRule extends AbstractMonitor
             $route = $ret[0];
             // $request = $this->args[1];
             // $request->__pinpoint__route = $route;
-            Logger::Inst()->info("found route:'$route'", ['UrlRule']);
+            if (empty($route)) {
+                $route = "/";
+            }
+            Logger::Inst()->debug("found route:'$route'", ['UrlRule']);
             pinpoint_set_context(PP_ROUTE_KEY, $route);
         }
     }
 
     function onException($e)
     {
-        Logger::Inst()->info(__CLASS__ . "onException '$e'");
+        Logger::Inst()->debug(__CLASS__ . "onException '$e'");
     }
 }

@@ -19,7 +19,7 @@ define('AOP_CACHE_DIR', __DIR__ . '/Cache');
  * Test  convert user  class to dst AOP class
  * @package pinpoint\test
  */
-class OriginFileVisitor_test extends TestCase
+class TestOriginFileVisitor extends TestCase
 {
     public function setUp()
     {
