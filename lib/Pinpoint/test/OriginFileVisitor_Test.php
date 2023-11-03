@@ -21,7 +21,7 @@ define('AOP_CACHE_DIR', __DIR__ . '/Cache');
  */
 class OriginFileVisitor_Test extends TestCase
 {
-    public function setUp()
+    protected function setUp(): void
     {
         VendorClassLoaderAdaptor::Inst()->start();
         parent::setUp();
