@@ -27,6 +27,11 @@ class Logger
     {
     }
 
+    private function defaultLogger(string $message, $context)
+    {
+        error_log($message . " " . "'$context'", 0);
+    }
+
     public static function Inst()
     {
         if (!(self::$_inst instanceof self)) {
@@ -47,6 +52,8 @@ class Logger
     {
         if ($this->log != null) {
             $this->log->debug($message, $context);
+        } else {
+            $this->defaultLogger($message, $context);
         }
     }
 
@@ -54,12 +61,16 @@ class Logger
     {
         if ($this->log != null) {
             $this->log->info($message, $context);
+        } else {
+            $this->defaultLogger($message, $context);
         }
     }
     public function warning($message, array $context = [])
     {
         if ($this->log != null) {
             $this->log->warning($message, $context);
+        } else {
+            $this->defaultLogger($message, $context);
         }
     }
 }

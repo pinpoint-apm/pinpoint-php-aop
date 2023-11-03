@@ -20,7 +20,6 @@
     },
     "require": {
         "php": ">=7",
-        "nikic/php-parser": "^4.1",
-        "monolog/monolog": "2.x-dev"
+        "nikic/php-parser": "^4.1"
     }
 }

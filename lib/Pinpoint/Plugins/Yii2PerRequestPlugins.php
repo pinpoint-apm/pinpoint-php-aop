@@ -24,8 +24,7 @@ use Pinpoint\Common\UserFrameworkInterface;
 use Pinpoint\Common\AspectClassHandle;
 use Pinpoint\Common\Logger;
 
-use Monolog\Logger as mLogger;
-use Monolog\Handler\StreamHandler;
+
 
 
 class Yii2PerRequestPlugins extends PinpointPerRequestPlugins implements UserFrameworkInterface
@@ -34,10 +33,13 @@ class Yii2PerRequestPlugins extends PinpointPerRequestPlugins implements UserFra
     public function __construct()
     {
         parent::__construct();
+        // if you need logger set here
+        // use Monolog\Logger as mLogger;
+        // use Monolog\Handler\StreamHandler;
         // enable findFile patch
-        $log = new mLogger('yii2');
-        $log->pushHandler(new StreamHandler('php://stdout', mLogger::INFO));
-        Logger::Inst()->setLogger($log);
+        // $log = new mLogger('yii2');
+        // $log->pushHandler(new StreamHandler('php://stdout', mLogger::INFO));
+        // Logger::Inst()->setLogger($log);
     }
     /**
      * port from https://github.com/yiisoft/yii2/blob/6804fbeae8aa5f8ad5066b50f1864eb0b9d77849/framework/BaseYii.php#L279-L293
@@ -71,10 +73,12 @@ class Yii2PerRequestPlugins extends PinpointPerRequestPlugins implements UserFra
     public function joinedClassSet(): array
     {
         $cls = [];
-        // \yii\web\UrlRule
-        $classHandler = new AspectClassHandle(\yii\web\UrlRule::class);
+
+        // \yii\web\UrlManager
+        $classHandler = new AspectClassHandle(\yii\web\UrlManager::class);
         $classHandler->addJoinPoint('parseRequest', \Pinpoint\Plugins\yii2\UrlRule::class);
         $cls[] = $classHandler;
+
 
         // yii\db\Connection::createPdoInstance
         $classHandler = new AspectClassHandle(\yii\db\Connection::class);
