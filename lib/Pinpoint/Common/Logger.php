@@ -29,7 +29,8 @@ class Logger
 
     private function defaultLogger(string $message, $context)
     {
-        error_log($message . " " . "'$context'", 0);
+        $ctx = implode("", $context);
+        error_log($message . " " . "'$ctx'", 0);
     }
 
     public static function Inst()
