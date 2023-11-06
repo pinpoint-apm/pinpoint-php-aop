@@ -24,9 +24,6 @@ use Pinpoint\Common\UserFrameworkInterface;
 use Pinpoint\Common\AspectClassHandle;
 use Pinpoint\Common\Logger;
 
-
-
-
 class Yii2PerRequestPlugins extends PinpointPerRequestPlugins implements UserFrameworkInterface
 {
     // private $_yiiLoader = array();

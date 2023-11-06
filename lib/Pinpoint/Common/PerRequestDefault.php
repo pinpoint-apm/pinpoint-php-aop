@@ -27,6 +27,11 @@ class PerRequestDefault implements UserFrameworkInterface
     }
     public function joinedClassSet(): array
     {
+        // add your AspectClassHandle here
+        // $classHandler = new AspectClassHandle(\yii\web\UrlManager::class);
+        // $classHandler->addJoinPoint('parseRequest', \Pinpoint\Plugins\yii2\UrlRule::class);
+        // $cls[] = $classHandler;
+        // return $cls;
         return [];
     }
 

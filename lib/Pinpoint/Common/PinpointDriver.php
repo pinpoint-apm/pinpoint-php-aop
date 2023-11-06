@@ -90,7 +90,5 @@ class PinpointDriver
         }
         // save render aop class into index file
         Utils::saveCachedClass(MonitorClass::getInstance()->getJointClassMap());
-        // enable RenderAop class loader
-        // MonitorClassLoader::start();
     }
 }

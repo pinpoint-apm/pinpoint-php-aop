@@ -6,53 +6,49 @@ https://github.com/pinpoint-apm/pinpoint-c-agent/labels/php-aop
 
 ##  How to Use 
 
-### Import from packagist
+### 1. Import from packagist
 
 Add requirement into composer.json
 
 ```Json
     "require": {
-        "pinpoint-apm/pinpoint-php-aop": "dev-master"
+        "pinpoint-apm/pinpoint-php-aop": "v2.1.0"
     }
 ```
 
-### Write your plugins
-This is a plugin template for reference.
+### 2. Write your plugins
+
+> UserPlugin
 
 ```php
-/// Placing "///@hook:" here: aop on function(method) on before,end and Exception
-///@hook:app\AppDate::output
-class CommonPlugin
+use Pinpoint\Common\AbstractMonitor;
+class UserPlugin extends AbstractMonitor
 {
-    //$apId: The function(method) name
-    //$who: If watching a method, $who is that instance
-    //$args: array parameters $argv = $args[0]
-    public function __construct($apId,$who,&...$args){
-        // $this->argv = $args[0];
-        // $this->funName =$apId;
-        // $this->instance = $who;
-    }
-    // watching before
-    ///@hook:app\DBcontrol::connectDb
     public function onBefore(){
 
     }
-
-    // watching after
-    ///@hook:app\DBcontrol::getData1 app\DBcontrol::\array_push
     public function onEnd(&$ret){
 
     }
-
-    // Exception
-    ///@hook:app\DBcontrol::getData2
     public function onException($e){
     }
 }
 ```
+>eg: [OutputMonitor example](lib/Pinpoint/test/OutputMonitor.php)
 
-### Activate plugins 
-This could be found in PHP/pinpoint_php_example/app/index.php.
+### 3. Register UserPlugin on target class
+
+```php
+    use Pinpoint\Common\AspectClassHandle;
+    ...
+    $classHandler = new AspectClassHandle(\namespace\Abc::class);
+    $classHandler->addJoinPoint('parseRequest', \UserPlugin::class);
+```
+
+### Here is the example for yii framework
+
+For yii2, [Yii2PerRequestPlugins example](lib/Pinpoint/Plugins/Yii2PerRequestPlugins.php)
+
 
 ``` php
 <?php
@@ -60,30 +56,24 @@ This could be found in PHP/pinpoint_php_example/app/index.php.
 require_once __DIR__."/../vendor/autoload.php";
 
 // A writable path for caching AOP code
-define('AOP_CACHE_DIR',__DIR__.'/../Cache/');                       
-// since 0.2.5+ PINPOINT_USE_CACHE = N, auto_pinpointed.php will generate Cache/* on every request. 
-define('PINPOINT_USE_CACHE','YES');
-// Use pinpoint-php-aop auto_pinpointed.php instead of vendor/autoload.php
-require_once __DIR__. '/../vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
+define('AOP_CACHE_DIR',__DIR__.'/../Cache/');   
+// API for register your own plugins eg: \Pinpoint\Plugins\Yii2PerRequestPlugins::class
+define('PP_REQ_PLUGINS', \Pinpoint\Plugins\Yii2PerRequestPlugins::class);                    
+// require auto_pinpointed, it must located after other loads
+require_once __DIR__. '/vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
 
 ```
-#### setting.ini
-
-Namespace conversion table for special class/function
-
-> How to use?
-
-[setting.ini](lib/Pinpoint/test/setting.ini)
-
-
 
 
 ### How it works
 
 * Use `nikic/PHP-Parser` generating glue layer code
-
 * Use namespace replace to reuse plugins or hook build-in class/function
-* Intercept php classloader to redirect origin class bettween proxied class
+* Intercept php classloader to redirect origin class to new class
+
+
+### 
+
 
 
 > pinpoint-php-aop wrappers your class with an onBefore/onEnd/onException suite.
@@ -95,7 +85,9 @@ Namespace conversion table for special class/function
 More details please go to lib/pinpoint/test/Comparison/pinpoint/test
 
 
-> PS: If you found a bug, please create an issue to us without any hesitate.
+#### Needs Help/Issues
+
+[create an issue](https://github.com/pinpoint-apm/pinpoint-c-agent/issues/new?assignees=eeliu&labels=PHP-AGENT&projects=&template=-php--custom-issue-template.md&title=%5BFeat%5D+I+need+a+feature+...)
 
 
 ## Copyright

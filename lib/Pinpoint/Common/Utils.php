@@ -53,11 +53,8 @@ class Utils
     public static function checkCacheReady(): bool
     {
         $cachePath = static::U_INDEX_FILE_PATH;
-        $useCache = defined('PINPOINT_USE_CACHE') && PINPOINT_USE_CACHE;
-        Logger::Inst()->debug("cachePath:'$cachePath' useCache '$useCache' ");
-        return (defined('PINPOINT_USE_CACHE') &&
-            PINPOINT_USE_CACHE) &&
-            file_exists(static::U_INDEX_FILE_PATH);
+        Logger::Inst()->debug("cachePath:'$cachePath'");
+        return file_exists($cachePath);
     }
 
     public static function loadCachedClass(): array

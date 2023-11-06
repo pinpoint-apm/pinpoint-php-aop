@@ -1,5 +1,11 @@
 ﻿## Changes
 
+### v2.1.0
+
+* remove setting.ini
+* AspectClassHandle api
+
+
 ### v2.0.2
 * support thinkphp5.0.x
 * support all-in-one 

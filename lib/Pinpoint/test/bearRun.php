@@ -5,7 +5,6 @@ declare(strict_types=1);
 require_once './bootstrap.php';
 
 define('AOP_CACHE_DIR', __DIR__ . '/Cache');
-define('PINPOINT_USE_CACHE', true);
 define('APPLICATION_NAME', 'ci-test');
 
 require_once __DIR__ . '/../../../auto_pinpointed.php';
