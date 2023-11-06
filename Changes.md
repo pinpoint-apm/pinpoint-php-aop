@@ -4,7 +4,7 @@
 
 * remove setting.ini
 * AspectClassHandle api
-
+* remove `PINPOINT_USE_CACHE`
 
 ### v2.0.2
 * support thinkphp5.0.x

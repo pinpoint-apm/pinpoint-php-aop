@@ -51,12 +51,8 @@ class MonitorClass
     public function findFile(string $classFullName): string
     {
         Logger::Inst()->debug("try to loadclass '$classFullName'", [__CLASS__]);
-        $classFile = $this->classLoaderMap[$classFullName];
-        if (isset($classFile)) {
-            return $classFile;
-        }
-
-        return '';
+        $classFile = $this->classLoaderMap[$classFullName] ?? '';
+        return $classFile;
     }
 
     public  function insertMapping($cl, $file)
