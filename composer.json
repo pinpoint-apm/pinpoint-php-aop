@@ -20,6 +20,6 @@
     },
     "require": {
         "php": ">=7",
-        "nikic/php-parser": "^4.1"
+        "nikic/php-parser": "v4.18.0"
     }
 }
