@@ -20,58 +20,50 @@ class PDO extends \PDO
 {
     public $dsn;
 
-    public function __construct ($dsn, $username=null, $passwd=null, $options=[])
+    public function __construct($dsn, $username = null, $passwd = null, $options = [])
     {
         $this->dsn = $dsn;
         parent::__construct($dsn, $username, $passwd, $options);
     }
 
-    private function doPDOQuery($statement, $mode = \PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = array())
+    public function query($query, $fetchMode = 0)
     {
-        $args = \pinpoint_get_func_ref_args();
-        $var = new PreparePlugin("PDO::query",$this,...$args);
-        try{
+        $var = new PreparePlugin("PDO::query", $this, $query, $fetchMode);
+        try {
             $var->onBefore();
-            $ret = parent::query(...$args);
+            $ret = parent::query($query, $fetchMode);
             $var->onEnd($ret);
             return $ret;
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             $var->onException($e);
             throw new \Exception($e);
         }
-
     }
-
-    public function query()
-    {
-        return $this->doPDOQuery(...\pinpoint_get_func_ref_args());
-    }
-
 
     public function exec($statement)
     {
-        $var = new PDOExec("PDO::exec",$this,$statement);
-        try{
+        $var = new PDOExec("PDO::exec", $this, $statement);
+        try {
             $var->onBefore();
             $ret = parent::exec($statement);
             $var->onEnd($ret);
             return $ret;
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             $var->onException($e);
             throw new \Exception($e);
         }
     }
 
 
-    public function prepare($statement,  $driver_options = array())
+    public function prepare($statement, $driver_options = array())
     {
-        $var = new PreparePlugin("PDO::prepare",$this,$statement,$driver_options);
-        try{
+        $var = new PreparePlugin("PDO::prepare", $this, $statement, $driver_options);
+        try {
             $var->onBefore();
-            $ret = parent::prepare($statement,$driver_options);
+            $ret = parent::prepare($statement, $driver_options);
             $var->onEnd($ret);
             return $ret;
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             $var->onException($e);
             throw new \Exception($e);
         }
