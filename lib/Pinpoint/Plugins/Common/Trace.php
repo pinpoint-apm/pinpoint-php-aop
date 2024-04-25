@@ -28,9 +28,9 @@ use Pinpoint\Common\AbstractMonitor;
 
 class Trace extends AbstractMonitor
 {
-    public function __construct($apId, $who, &...$args)
+    public function __construct($monitor_name, $who, &...$args)
     {
-        parent::__construct($apId, $who, $args);
+        parent::__construct($monitor_name, $who, $args);
     }
 
     public function __destruct()

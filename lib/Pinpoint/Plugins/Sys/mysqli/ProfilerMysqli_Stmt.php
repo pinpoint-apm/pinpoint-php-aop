@@ -17,39 +17,38 @@ class ProfilerMysqli_Stmt extends \mysqli_stmt
         $this->_instance = &$instance;
     }
 
-    public function bind_result (&...$vars): bool
+    public function bind_result(&...$vars): bool
     {
         return $this->_instance->bind_result(...$vars);
     }
 
-    public function execute(?array $params = null):bool
+    public function execute(?array $params = null): bool
     {
-        $plugin = new StmtExecutePlugin("Stmt::execute",$this);
-        try{
+        $plugin = new StmtExecutePlugin("Stmt::execute", $this);
+        try {
             $plugin->onBefore();
-            $ret =  call_user_func([$this->_instance,'execute']);
+            $ret = call_user_func([$this->_instance, 'execute']);
             $plugin->onEnd($ret);
             return $ret;
 
-        }catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             $plugin->onException($e);
         }
     }
 
-    public function attr_get( $attribute): int
+    public function attr_get($attribute): int
     {
-        return call_user_func([$this->_instance,'attr_get'],$attribute);
+        return call_user_func([$this->_instance, 'attr_get'], $attribute);
     }
 
-    public function attr_set( $attribute,  $value): bool
+    public function attr_set($attribute, $value): bool
     {
-        return call_user_func([$this->_instance,'attr_set'],$attribute,$value);
+        return call_user_func([$this->_instance, 'attr_set'], $attribute, $value);
     }
 
-    public function bind_param( $types,  &...$vars): bool
+    public function bind_param($types, &$var, &...$vars): bool
     {
-        return $this->_instance->bind_param($types,$vars);
+        return $this->_instance->bind_param($types, $var, ...$vars);
     }
 
     public function close(): bool
@@ -63,7 +62,7 @@ class ProfilerMysqli_Stmt extends \mysqli_stmt
 
     public function fetch(): ?bool
     {
-       return $this->_instance->fetch();
+        return $this->_instance->fetch();
     }
     public function free_result(): void
     {
@@ -84,7 +83,7 @@ class ProfilerMysqli_Stmt extends \mysqli_stmt
     {
         return $this->_instance->more_results();
     }
-    public  function next_result(): bool
+    public function next_result(): bool
     {
         return $this->_instance->next_result();
     }
@@ -105,9 +104,9 @@ class ProfilerMysqli_Stmt extends \mysqli_stmt
         return $this->_instance->result_metadata();
     }
 
-    public function send_long_data( $param_num,  $data): bool
+    public function send_long_data($param_num, $data): bool
     {
-        return $this->_instance->send_long_data($param_num,$data);
+        return $this->_instance->send_long_data($param_num, $data);
     }
 
     public function store_result(): bool
