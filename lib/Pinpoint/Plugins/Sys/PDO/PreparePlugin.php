@@ -19,15 +19,14 @@ namespace Pinpoint\Plugins\Sys\PDO;
 use Pinpoint\Plugins\Common\PinTrace;
 
 class PreparePlugin extends PinTrace
-
 {
     function onBefore()
     {
         // todo stp, should follow the dsn
         $dbInfo = $this->parseDb($this->who->dsn);
-        pinpoint_add_clue(PP_SERVER_TYPE,PP_MYSQL);
-        pinpoint_add_clue(PP_SQL_FORMAT, $this->args[0]);
-        pinpoint_add_clue(PP_DESTINATION,$dbInfo['host']);
+        pinpoint_add_clue(PP_SERVER_TYPE, PP_MYSQL);
+        pinpoint_add_clue(PP_SQL_FORMAT, $this->args[0][0][0]);
+        pinpoint_add_clue(PP_DESTINATION, $dbInfo['host']);
     }
     function onEnd(&$ret)
     {
@@ -37,19 +36,20 @@ class PreparePlugin extends PinTrace
 
     function onException($e)
     {
-        pinpoint_add_clue(PP_ADD_EXCEPTION,$e->getMessage());
+        pinpoint_add_clue(PP_ADD_EXCEPTION, $e->getMessage());
     }
 
-    function parseDb($dsn){
+    function parseDb($dsn)
+    {
 
-        $db_url =  parse_url($dsn);
-        parse_str(str_replace(';','&',$db_url['path']),$dbInfo);
+        $db_url = parse_url($dsn);
+        parse_str(str_replace(';', '&', $db_url['path']), $dbInfo);
 
-        if($db_url['scheme'] == 'sqlite'){ // treat sqllite as mysql
+        if ($db_url['scheme'] == 'sqlite') { // treat sqllite as mysql
             $dbInfo['host'] = 'localhost-sqlite';
         }
 
-        $dbInfo['scheme']= $db_url['scheme'];
+        $dbInfo['scheme'] = $db_url['scheme'];
 
         return $dbInfo;
     }

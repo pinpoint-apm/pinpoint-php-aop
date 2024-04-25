@@ -23,8 +23,10 @@ class Logger
 {
     private $log = null;
     private static $_inst;
+    private $level_ = 2;
     private function __construct()
     {
+
     }
 
     private function defaultLogger(string $message, $context)
@@ -41,6 +43,11 @@ class Logger
         return self::$_inst;
     }
 
+    public function setLoggerLevel(int $level)
+    {
+        $this->level_ = $level;
+    }
+
     public function setLogger($logger)
     {
         assert(method_exists($logger, 'debug'));
@@ -51,27 +58,35 @@ class Logger
 
     public function debug($message, array $context = [])
     {
-        if ($this->log != null) {
-            $this->log->debug($message, $context);
-        } else {
-            $this->defaultLogger($message, $context);
+        if ($this->level_ <= 0) {
+            if ($this->log != null) {
+                $this->log->debug($message, $context);
+            } else {
+                $this->defaultLogger($message, $context);
+            }
         }
     }
 
     public function info($message, array $context = [])
     {
-        if ($this->log != null) {
-            $this->log->info($message, $context);
-        } else {
-            $this->defaultLogger($message, $context);
+        if ($this->level_ <= 1) {
+            if ($this->log != null) {
+                $this->log->info($message, $context);
+            } else {
+                $this->defaultLogger($message, $context);
+            }
         }
+
     }
     public function warning($message, array $context = [])
     {
-        if ($this->log != null) {
-            $this->log->warning($message, $context);
-        } else {
-            $this->defaultLogger($message, $context);
+        if ($this->level_ <= 2) {
+            if ($this->log != null) {
+                $this->log->warning($message, $context);
+            } else {
+                $this->defaultLogger($message, $context);
+            }
         }
+
     }
 }

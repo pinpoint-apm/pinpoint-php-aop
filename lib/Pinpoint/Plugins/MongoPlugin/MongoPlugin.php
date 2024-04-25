@@ -16,7 +16,8 @@
 #-------------------------------------------------------------------------------
 
 
-namespace Pinpoint\Plugins;
+namespace Pinpoint\Plugins\MongoPlugin;
+
 use Pinpoint\Plugins\Common\PinTrace;
 
 class MongoPlugin extends PinTrace
@@ -31,14 +32,14 @@ class MongoPlugin extends PinTrace
      */
     function onBefore()
     {
-        if(strpos($this->apId, "Client::__construct")) {
-            $url=$this->args[0];
-            pinpoint_add_clue(SERVER_TYPE,MONGODB_EXE_QUERY);
-            pinpoint_add_clue(DESTINATION, $url);
+        if (strpos($this->monitor_name, "Client::__construct")) {
+            $url = $this->args[0][0][0];
+            pinpoint_add_clue(PP_SERVER_TYPE, PP_MONGODB_EXE_QUERY);
+            pinpoint_add_clue(PP_DESTINATION, $url);
             return;
         }
-        pinpoint_add_clue(SERVER_TYPE,MONGODB_EXE_QUERY);
-        pinpoint_add_clues(PHP_ARGS, print_r($this->args[0],true));
+        pinpoint_add_clue(PP_SERVER_TYPE, PP_MONGODB_EXE_QUERY);
+        pinpoint_add_clues(PP_DESTINATION, print_r($this->args[0], true));
     }
 
     function onEnd(&$ret)
