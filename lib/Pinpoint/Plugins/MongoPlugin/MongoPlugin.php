@@ -19,17 +19,10 @@
 namespace Pinpoint\Plugins\MongoPlugin;
 
 use Pinpoint\Plugins\Common\PinTrace;
+use function Pinpoint\Plugins\{pinpoint_add_clue, pinpoint_add_clues};
 
 class MongoPlugin extends PinTrace
 {
-
-    /**
-     * @hook:MongoDB\Client::__construct
-     * @hook:MongoDB\Collection::insertOne
-     * @hook:MongoDB\Collection::updateOne
-     * @hook:MongoDB\Collection::deleteMany
-     * @hook:MongoDB\Collection::find
-     */
     function onBefore()
     {
         if (strpos($this->monitor_name, "Client::__construct")) {
@@ -39,7 +32,7 @@ class MongoPlugin extends PinTrace
             return;
         }
         pinpoint_add_clue(PP_SERVER_TYPE, PP_MONGODB_EXE_QUERY);
-        pinpoint_add_clues(PP_DESTINATION, print_r($this->args[0], true));
+        pinpoint_add_clues(PP_DESTINATION, json_encode($this->args[0], JSON_UNESCAPED_SLASHES));
     }
 
     function onEnd(&$ret)

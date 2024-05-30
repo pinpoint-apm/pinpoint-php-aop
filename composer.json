@@ -6,13 +6,21 @@
     "authors": [
         {
             "name": "eeliu",
-            "email": "liu.mingyi@navercorp.com"
+            "email": "dl_cd_pinpoint@navercorp.com"
         }
     ],
+    "require": {
+        "php": "^7.1 || ^8.0",
+        "ext-json": "*",
+        "ext-pinpoint-php": "^0.5.2"
+    },
     "autoload": {
         "psr-4": {
             "Pinpoint\\": "lib/Pinpoint/"
-        }
+        },
+        "files": [
+            "lib/Pinpoint/Plugins/functions.php"
+        ]
     },
     "minimum-stability": "dev",
     "require-dev": {

@@ -10,6 +10,7 @@
      stopOnFailure="true">
     <testsuites>
         <testsuite name="pinpoint">
+            <directory>lib/Pinpoint/Plugins</directory>
             <directory>lib/Pinpoint/test</directory>
         </testsuite>
     </testsuites>

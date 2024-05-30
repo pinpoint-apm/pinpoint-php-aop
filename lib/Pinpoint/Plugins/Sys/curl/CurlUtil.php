@@ -15,34 +15,14 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 namespace Pinpoint\Plugins\Sys\curl;
+
 use Pinpoint\Plugins\Common\TraceHelper;
 
 class CurlUtil
 {
-//    public static function appendPinpointHeader($ch, &$headers)
-//    {
-//        if(pinpoint_get_context('Pinpoint-Sampled')==PP_NOT_SAMPLED){
-//            $headers[] = 'Pinpoint-Sampled:s0';
-//            return ;
-//        }
-//
-//        $headers[] ='Pinpoint-Sampled:s1';
-//        $headers[] ='Pinpoint-Flags:0';
-//        $headers[] ='Pinpoint-Papptype:1500';
-//        $headers[] ='Pinpoint-Pappname:'.APPLICATION_NAME;
-//
-//        $headers[] = 'Pinpoint-Host:'.static::getHostFromURL(curl_getinfo($ch,CURLINFO_EFFECTIVE_URL));
-//
-//        $headers[] ='Pinpoint-Traceid:'.pinpoint_get_context(PP_TRANSCATION_ID);
-//        $headers[] ='Pinpoint-Pspanid:'.pinpoint_get_context(PP_SPAN_ID);
-//        $nsid =  Trace::generateSpanID();
-//        $headers[] ='Pinpoint-Spanid:'.$nsid;
-//        pinpoint_set_context(PP_NEXT_SPAN_ID, (string)$nsid);
-//    }
-
     public static function getPinpointHeader($url)
     {
-        if(pinpoint_get_context('Pinpoint-Sampled')==PP_NOT_SAMPLED){
+        if (pinpoint_get_context('Pinpoint-Sampled') == PP_NOT_SAMPLED) {
             return ["Pinpoint-Sampled:s0"];
         }
 
@@ -51,35 +31,35 @@ class CurlUtil
             'Pinpoint-Sampled:s1',
             'Pinpoint-Flags:0',
             'Pinpoint-Papptype:1500',
-            'Pinpoint-Pappname:'.APPLICATION_NAME,
-            'Pinpoint-Host:'.  static::getHostFromURL($url),
-            'Pinpoint-Traceid:'.pinpoint_get_context(PP_TRANSCATION_ID),
-            'Pinpoint-Pspanid:'.pinpoint_get_context(PP_SPAN_ID),
-            'Pinpoint-Spanid:'.$nsid
+            'Pinpoint-Pappname:' . APPLICATION_NAME,
+            'Pinpoint-Host:' . static::getHostFromURL($url),
+            'Pinpoint-Traceid:' . pinpoint_get_context(PP_TRANSCATION_ID),
+            'Pinpoint-Pspanid:' . pinpoint_get_context(PP_SPAN_ID),
+            'Pinpoint-Spanid:' . $nsid
         ];
-        pinpoint_set_context(PP_NEXT_SPAN_ID, (string)$nsid);
+        pinpoint_set_context(PP_NEXT_SPAN_ID, (string) $nsid);
         return $header;
     }
 
     // for GuzzleHttp header
     public static function getPPHeader($url)
     {
-        if(pinpoint_get_context('Pinpoint-Sampled')==PP_NOT_SAMPLED){
-            return ["Pinpoint-Sampled"=>"s0"];
+        if (pinpoint_get_context('Pinpoint-Sampled') == PP_NOT_SAMPLED) {
+            return ["Pinpoint-Sampled" => "s0"];
         }
 
         $nsid = TraceHelper::generateSpanID();
         $header = [
-            'Pinpoint-Sampled'=>'s1',
-            'Pinpoint-Flags'=>'0',
-            'Pinpoint-Papptype'=>'1500',
-            'Pinpoint-Pappname'=>APPLICATION_NAME,
-            'Pinpoint-Host'=>static::getHostFromURL($url),
-            'Pinpoint-Traceid'=>pinpoint_get_context(PP_TRANSCATION_ID),
-            'Pinpoint-Pspanid'=>pinpoint_get_context(PP_SPAN_ID),
-            'Pinpoint-Spanid'=>$nsid
+            'Pinpoint-Sampled' => 's1',
+            'Pinpoint-Flags' => '0',
+            'Pinpoint-Papptype' => '1500',
+            'Pinpoint-Pappname' => APPLICATION_NAME,
+            'Pinpoint-Host' => static::getHostFromURL($url),
+            'Pinpoint-Traceid' => pinpoint_get_context(PP_TRANSCATION_ID),
+            'Pinpoint-Pspanid' => pinpoint_get_context(PP_SPAN_ID),
+            'Pinpoint-Spanid' => $nsid
         ];
-        pinpoint_set_context(PP_NEXT_SPAN_ID, (string)$nsid);
+        pinpoint_set_context(PP_NEXT_SPAN_ID, (string) $nsid);
         return $header;
     }
 
@@ -97,17 +77,17 @@ class CurlUtil
      */
     public static function getHostFromURL(string $url)
     {
-        $urlAr   = parse_url($url);
+        $urlAr = parse_url($url);
         $retUrl = '';
 
-        if(isset($urlAr['host'])) // got the host and return
+        if (isset($urlAr['host'])) // got the host and return
         {
-            $retUrl.=$urlAr['host'];
+            $retUrl .= $urlAr['host'];
         }
 
-        if(isset($urlAr['port'])) // an optional setting
+        if (isset($urlAr['port'])) // an optional setting
         {
-            $retUrl .= ":".$urlAr['port'];
+            $retUrl .= ":" . $urlAr['port'];
         }
 
         return $retUrl;

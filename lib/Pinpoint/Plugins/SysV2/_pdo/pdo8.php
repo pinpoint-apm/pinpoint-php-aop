@@ -1,7 +1,7 @@
 <?php
 
 /******************************************************************************
- * Copyright 2020 NAVER Corp.                                                 *
+ * Copyright 2024 NAVER Corp.                                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,39 +15,26 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
+// namespace Pinpoint\Plugins\SysV2\_pdo;
 
+// use function Pinpoint\Plugins\{pinpoint_join_cut};
 
+// pinpoint_join_cut(
+//     ["PDO", "__construct"],
+//     function ($dsn, $username = null, $password = null, $options = null) {
+//         echo "on_before: $dsn \n";
+//         $pdo = pinpoint_get_this();
+//         if ($pdo instanceof PDO) {
+//             $pdo->dsn = $dsn;
+//             echo "attached dsn \n";
+//         }
+//     },
+//     function ($ret) {
+//         echo "on_end \n";
+//     },
+//     function ($e) {
+//         echo "on_exception \n";
+//     }
+// );
 
-/**pinpoint_start_trace
- * User: eeliu
- * Date: 1/4/19
- * Time: 3:23 PM
- */
-
-namespace Pinpoint\Plugins\Common;
-
-use function Pinpoint\Plugins\{pinpoint_start_trace, pinpoint_add_clue, pinpoint_end_trace};
-
-require_once __DIR__ . "/defines.php";
-
-
-class PinTrace extends Trace
-{
-
-    public function __construct($monitorName, $who, &...$args)
-    {
-        parent::__construct($monitorName, $who, $args);
-        pinpoint_start_trace();
-        pinpoint_add_clue(PP_INTERCEPTOR_NAME, $monitorName);
-    }
-
-    public function __destruct()
-    {
-        pinpoint_end_trace();
-    }
-
-    public function onException($e)
-    {
-        pinpoint_add_clue(PP_ADD_EXCEPTION, $e->getMessage());
-    }
-}
+// author: eeliu

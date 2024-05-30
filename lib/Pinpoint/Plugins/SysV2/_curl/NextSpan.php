@@ -1,7 +1,7 @@
 <?php
 
 /******************************************************************************
- * Copyright 2020 NAVER Corp.                                                 *
+ * Copyright 2024 NAVER Corp.                                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,22 +15,23 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
+namespace Pinpoint\Plugins\SysV2\_curl;
 
-require_once __DIR__ . "/Common/defines.php";
-// intercept all date_xxxx, part of php core
-require_once __DIR__ . "/Sys/date/date.php";
+use function Pinpoint\Plugins\SysV2\{genUrlNextSpan};
 
-// intercept all curl_xxxx, if curl extension is available
-if (function_exists('curl_exec')) {
-    require_once __DIR__ . "/Sys/curl/curl.php";
-}
+class NextSpan
+{
+    public string $url;
 
-if (function_exists('mysqli_connect')) {
-    if (version_compare(phpversion(), '8.0.0', '<')) {
-        require_once __DIR__ . "/Sys/mysqli/Mysqli.php";
-    } elseif (version_compare(phpversion(), '8.0.0', '>=')) {
-        require_once __DIR__ . "/Sys/mysqli8/Mysqli8.php";
-    } elseif (version_compare(phpversion(), '7.0.0', '<')) {
-        throw new \Exception("not support php5+");
+    public function __construct(string $url)
+    {
+        $this->url = $url;
+    }
+
+    public function genNextSpan(): array
+    {
+        return genUrlNextSpan($this->url);
     }
 }
+
+// author: eeliu

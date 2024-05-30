@@ -14,8 +14,10 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Pinpoint\Plugins\AutoGen\GuzzleHttp;
+namespace Pinpoint\Plugins\GuzzleHttp;
 
+use Pinpoint\Plugins\pinpoint_add_clue;
+use Pinpoint\Plugins\pinpoint_add_clues;
 use Pinpoint\Plugins\Common\PinTrace;
 use Pinpoint\Plugins\Sys\curl\CurlUtil;
 

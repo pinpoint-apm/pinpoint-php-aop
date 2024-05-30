@@ -15,6 +15,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           tools: composer:v2
+          extensions: pinpoint_php-https://github.com/eeliu/pinpoint-c-agent@feat-join-cut-5-11
       - run: |
           composer install --prefer-dist
           vendor/bin/phpunit --configuration PHPUnit.xml --testsuit pinpoint --testdox
