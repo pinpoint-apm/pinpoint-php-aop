@@ -60,6 +60,7 @@ pinpoint_join_cut(
         pinpoint_add_clue(PP_SERVER_TYPE, PP_PHP_REMOTE);
         pinpoint_add_clue(PP_NEXT_SPAN_ID, pinpoint_get_context(PP_NEXT_SPAN_ID));
         pinpoint_add_clues(PP_HTTP_URL, $url);
+        pinpoint_add_clues(PP_PHP_ARGS, "$url");
     },
     function ($ret) {
         $ch = pinpoint_get_caller_arg(0);

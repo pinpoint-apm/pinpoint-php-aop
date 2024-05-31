@@ -25,7 +25,7 @@ function make_variable_length_list_plugin(array $joinable)
 {
     $funcPlugin = new FuncPlugin($joinable);
 
-    $on_before = function ($_1 = null) use ($funcPlugin) {
+    $on_before = function (...$args) use ($funcPlugin) {
         Logger::Inst()->debug("call $funcPlugin->name on_before");
         $funcPlugin->onBefore();
     };
