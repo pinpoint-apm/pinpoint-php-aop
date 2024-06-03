@@ -22,6 +22,7 @@ if (!extension_loaded('pinpoint_php')) {
 }
 
 require_once __DIR__ . "/SysV2/functions.php";
+require_once __DIR__ . "/Common/defines.php";
 
 define("PINPOINT_ROOT_LOC", 1);
 

@@ -18,8 +18,6 @@
 
 namespace Pinpoint\Plugins;
 
-require_once __DIR__ . "/Common/defines.php";
-
 use Pinpoint\Common\Logger;
 
 class PinpointPerRequestPlugins
