@@ -95,7 +95,7 @@ function make_mysqli_method_vll_plugin($joinable)
     $on_exception = function ($exp) {
     };
 
-    return [['mysqli', 'prepare'], $on_before, $on_end, $on_exception];
+    return [$joinable, $on_before, $on_end, $on_exception];
 }
 
 
@@ -122,7 +122,7 @@ function make_mysqli_func_vll_plugin($joinable)
     $on_exception = function ($exp) {
     };
 
-    return [['mysqli', 'prepare'], $on_before, $on_end, $on_exception];
+    return [$joinable, $on_before, $on_end, $on_exception];
 }
 
 
@@ -146,7 +146,6 @@ $points = [
 foreach ($points as $point) {
     pinpoint_join_cut($point[0], $point[1], $point[2], $point[3]);
 }
-
 
 
 // author: eeliu

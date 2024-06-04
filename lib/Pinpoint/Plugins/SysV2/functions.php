@@ -70,7 +70,7 @@ function joinableToString(array $joinable): string
     if (count($joinable) == 1) {
         return $joinable[0];
     } else {
-        return "$joinable[0]:$joinable[1]";
+        return "$joinable[0]::$joinable[1]";
     }
 }
 
