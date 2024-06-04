@@ -36,7 +36,6 @@ pinpoint_join_cut(
             $url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
             $nextSpan = new NextSpan($url);
             $ch_res[(int) $ch] = $nextSpan;
-            var_dump($ch);
             $value = array_merge($value, $nextSpan->genNextSpan());
             return [$ch, $option, $value];
         }

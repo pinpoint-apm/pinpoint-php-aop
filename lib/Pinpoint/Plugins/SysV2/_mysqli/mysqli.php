@@ -18,7 +18,7 @@
 namespace Pinpoint\Plugins\SysV2\_mysqli;
 
 use function Pinpoint\Plugins\{pinpoint_join_cut, pinpoint_start_trace, pinpoint_add_clue, pinpoint_end_trace};
-use function Pinpoint\Plugins\SysV2\make_variable_length_list_plugin;
+use function Pinpoint\Plugins\SysV2\{make_variable_length_list_plugin, joinableToString};
 use mysqli;
 
 function make_mysqli_query_plugin()
@@ -72,11 +72,75 @@ function make_mysqli_prepare_plugin()
     return [['mysqli', 'prepare'], $on_before, $on_end, $on_exception];
 }
 
+function make_mysqli_method_vll_plugin($joinable)
+{
+    $name = joinableToString($joinable);
+    $on_before = function (...$args) use ($name) {
+        $mysqli = pinpoint_get_this();
+        $db_host = "localhost";
+        if ($mysqli instanceof mysqli) {
+            $db_host = $mysqli->host_info;
+        }
+        pinpoint_start_trace();
+        pinpoint_add_clue(PP_INTERCEPTOR_NAME, $name);
+        pinpoint_add_clue(PP_SERVER_TYPE, PP_MYSQL);
+        pinpoint_add_clue(PP_SQL_FORMAT, $args[0]);
+        pinpoint_add_clue(PP_DESTINATION, $db_host);
+    };
+
+    $on_end = function ($ret) {
+        pinpoint_end_trace();
+    };
+
+    $on_exception = function ($exp) {
+    };
+
+    return [['mysqli', 'prepare'], $on_before, $on_end, $on_exception];
+}
+
+
+function make_mysqli_func_vll_plugin($joinable)
+{
+    $name = joinableToString($joinable);
+    $on_before = function (...$args) use ($name) {
+        $mysqli = $args[0];
+        $db_host = "localhost";
+        if ($mysqli instanceof mysqli) {
+            $db_host = $mysqli->host_info;
+        }
+        pinpoint_start_trace();
+        pinpoint_add_clue(PP_INTERCEPTOR_NAME, $name);
+        pinpoint_add_clue(PP_SERVER_TYPE, PP_MYSQL);
+        pinpoint_add_clue(PP_SQL_FORMAT, $args[1]);
+        pinpoint_add_clue(PP_DESTINATION, $db_host);
+    };
+
+    $on_end = function ($ret) {
+        pinpoint_end_trace();
+    };
+
+    $on_exception = function ($exp) {
+    };
+
+    return [['mysqli', 'prepare'], $on_before, $on_end, $on_exception];
+}
+
+
 $points = [
     make_mysqli_prepare_plugin(),
     make_mysqli_query_plugin(),
     make_variable_length_list_plugin(['mysqli_stmt', 'execute']),
-    make_variable_length_list_plugin(['mysqli_stmt', 'fetch'])
+    make_variable_length_list_plugin(['mysqli_stmt', 'fetch']),
+    make_variable_length_list_plugin(['mysqli_stmt_bind_param']),
+    make_variable_length_list_plugin(['mysqli_stmt_bind_result']),
+    make_variable_length_list_plugin(['mysqli_stmt', 'bind_result']),
+    make_variable_length_list_plugin(['mysqli_stmt_execute']),
+    make_mysqli_func_vll_plugin(['mysqli_prepare']),
+    make_mysqli_func_vll_plugin(['mysqli_query']),
+    make_mysqli_func_vll_plugin(['mysqli_execute_query']),
+    make_mysqli_func_vll_plugin(['mysqli_real_query']),
+    make_mysqli_method_vll_plugin(['mysqli', 'execute_query']),
+    make_mysqli_method_vll_plugin(['mysqli', 'real_query'])
 ];
 
 foreach ($points as $point) {
