@@ -17,6 +17,10 @@
  ******************************************************************************/
 namespace Pinpoint\Plugins\SysV2\_mysqli;
 
+if (!extension_loaded('mysqli')){
+    return ;
+}
+
 require_once __DIR__ . "/mysqli.php";
 
 // author: eeliu

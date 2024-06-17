@@ -19,6 +19,10 @@ namespace Pinpoint\Plugins\SysV2\_pdo;
 
 require_once __DIR__ . "/common.php";
 
+if (!extension_loaded('redis')){
+    return ;
+}
+
 if (version_compare(phpversion(), '8.2.0', '>=')) {
     require_once __DIR__ . "/pdo8.php";
 } else {

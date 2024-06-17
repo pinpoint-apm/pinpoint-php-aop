@@ -17,6 +17,10 @@
  ******************************************************************************/
 namespace Pinpoint\Plugins\SysV2\_curl;
 
+if (!extension_loaded('curl')){
+    return ;
+}
+
 require_once __DIR__ . "/curl7.php";
 
 // author: eeliu

@@ -17,6 +17,10 @@
  ******************************************************************************/
 namespace Pinpoint\Plugins\SysV2\_memcached;
 
+if (!extension_loaded('memcached')){
+    return ;
+}
+
 require_once __DIR__ . "/memcached.php";
 
 // author: eeliu

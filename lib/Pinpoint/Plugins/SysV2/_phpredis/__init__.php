@@ -16,7 +16,8 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 namespace Pinpoint\Plugins\SysV2\_phpredis;
-
-require_once __DIR__ . "/phpredis.php";
+if (extension_loaded('phpredis')){
+    require_once __DIR__ . "/phpredis.php";
+}
 
 // author: eeliu
