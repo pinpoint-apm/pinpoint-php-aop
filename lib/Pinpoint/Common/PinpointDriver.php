@@ -43,7 +43,7 @@ class PinpointDriver
 
     final private function __construct()
     {
-        if (defined('PP_REQ_PLUGINS')  && class_exists(PP_REQ_PLUGINS)) {
+        if (defined('PP_REQ_PLUGINS') && class_exists(PP_REQ_PLUGINS)) {
             $userPerRequestClass = PP_REQ_PLUGINS;
             $this->reqInst = new $userPerRequestClass();
             assert(is_a($this->reqInst, 'Pinpoint\Common\UserFrameworkInterface'));
@@ -59,20 +59,22 @@ class PinpointDriver
 
     public function start()
     {
-        if (Utils::checkCacheReady()) {
-            Logger::Inst()->debug("found cache");
-            MonitorClass::getInstance()->createFrom(Utils::loadCachedClass());
-            MonitorClassLoader::start();
-            return;
-        }
-        Logger::Inst()->debug("no found cache, try to generate joinclass");
-        VendorClassLoaderAdaptor::Inst()->setUserFindClass($this->reqInst);
-        VendorClassLoaderAdaptor::Inst()->start();
-
         $joinedClassSet = $this->reqInst->joinedClassSet();
         if (empty($joinedClassSet)) {
             return;
         }
+
+        if (Utils::checkCacheReady()) {
+            Logger::Inst()->debug("found cache");
+            MonitorClass::getInstance()->createFrom(Utils::loadClassMap());
+            MonitorClassLoader::start();
+            return;
+        }
+
+        Logger::Inst()->debug("no found cache, try to generate joinclass");
+        VendorClassLoaderAdaptor::Inst()->setUserFindClass($this->reqInst);
+        VendorClassLoaderAdaptor::Inst()->start();
+
 
         foreach ($joinedClassSet as $aspClassHandler) {
             assert(is_a($aspClassHandler, '\Pinpoint\Common\AspectClassHandle'));
@@ -89,6 +91,6 @@ class PinpointDriver
             $visitor->runAllVisitor($fullPath, $aspClassHandler);
         }
         // save render aop class into index file
-        Utils::saveCachedClass(MonitorClass::getInstance()->getJointClassMap());
+        Utils::saveClassMap(MonitorClass::getInstance()->getJointClassMap());
     }
 }

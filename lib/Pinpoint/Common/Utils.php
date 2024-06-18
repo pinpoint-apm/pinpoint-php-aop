@@ -27,7 +27,9 @@ namespace Pinpoint\Common;
 
 class Utils
 {
-    const U_INDEX_FILE_PATH = AOP_CACHE_DIR . '/.__class_index_table';
+    static $CLS_DIR;
+    static $U_INDEX_FILE_PATH;
+    static $U_INDEX_PHP;
 
     public static function saveObj(&$context, $fullPath)
     {
@@ -38,7 +40,9 @@ class Utils
         file_put_contents($fullPath, $context);
     }
 
-
+    /**
+     * @deprecated
+     */
     public static function scanDir($dir, $pattern, &$tree)
     {
         foreach (glob($dir . '/*') as $loc) {
@@ -52,25 +56,54 @@ class Utils
 
     public static function checkCacheReady(): bool
     {
-        $cachePath = static::U_INDEX_FILE_PATH;
+        $cachePath = static::$U_INDEX_PHP;
         Logger::Inst()->debug("cachePath:'$cachePath'");
         return file_exists($cachePath);
     }
 
+    public static function loadClassMap(): array
+    {
+        if (file_exists(static::$U_INDEX_PHP)) {
+            return include_once static::$U_INDEX_PHP;
+        } else {
+            return NULL;
+        }
+    }
+
+    public static function saveClassMap(array $cls)
+    {
+        $genClass = new GenClassIndexMap($cls);
+        $genClass->save(static::$U_INDEX_PHP);
+    }
+
+    /**
+     * @deprecated
+     */
     public static function loadCachedClass(): array
     {
-        if (file_exists(static::U_INDEX_FILE_PATH)) {
-            return unserialize(file_get_contents(static::U_INDEX_FILE_PATH));
+        if (file_exists(static::$U_INDEX_FILE_PATH)) {
+            return unserialize(file_get_contents(static::$U_INDEX_FILE_PATH));
         } else {
             return null;
         }
     }
 
+    /**
+     * @deprecated
+     */
     public static function saveCachedClass(array $class)
     {
         $context = serialize($class);
-        static::saveObj($context, static::U_INDEX_FILE_PATH);
+        static::saveObj($context, static::$U_INDEX_FILE_PATH);
         $size = sizeof($class);
         Logger::Inst()->debug("saveCachedClass size= '$size'");
     }
 }
+if (defined('AOP_CACHE_DIR')) {
+    Utils::$CLS_DIR = AOP_CACHE_DIR;
+} else {
+    Utils::$CLS_DIR = sys_get_temp_dir() . '/.cache';
+}
+
+Utils::$U_INDEX_FILE_PATH = Utils::$CLS_DIR . '/.__class_index_table';
+Utils::$U_INDEX_PHP = Utils::$CLS_DIR . '/.__class_index.php';

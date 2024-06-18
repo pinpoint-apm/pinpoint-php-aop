@@ -73,11 +73,6 @@ abstract class AbstractClassFile
         $this->_astPrinter = new PrettyPrinter\Standard();
     }
 
-    // public function getNode()
-    // {
-    //     return $this->node;
-    // }
-
     public function handleEnterNamespaceNode($node)
     {
         assert($node instanceof Node\Stmt\Namespace_);
@@ -125,7 +120,8 @@ abstract class AbstractClassFile
 
     public function done()
     {
-        $fullPath = AOP_CACHE_DIR . '/' . str_replace('\\', '/', $this->className) . '.php';
+
+        $fullPath = Utils::$CLS_DIR . '/' . str_replace('\\', '/', $this->className) . '.php';
         $context = $this->_astPrinter->prettyPrintFile($this->newAstNode);
         MonitorClass::getInstance()->insertMapping($this->className, $fullPath);
         Logger::Inst()->debug("map/save new class '$this->className' to '$fullPath' ");

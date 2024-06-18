@@ -12,6 +12,7 @@
         <testsuite name="pinpoint">
             <directory>lib/Pinpoint/Plugins</directory>
             <directory>lib/Pinpoint/test</directory>
+            <directory>lib/Pinpoint/Common</directory>
         </testsuite>
     </testsuites>
     <filter>
