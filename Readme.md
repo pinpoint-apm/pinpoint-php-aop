@@ -4,66 +4,64 @@
 
 https://github.com/pinpoint-apm/pinpoint-c-agent/labels/php-aop
 
+## Requirements
+
+- php 7.0 ~ php 8.3
+- ext-pinpoint_php": "^0.5.2"
+
 ##  How to Use 
 
 ### 1. Import from packagist
 
-Add requirement into composer.json
+> composer require  pinpoint-apm/pinpoint-php-aop:v3.0.1
 
-```Json
-    "require": {
-        "pinpoint-apm/pinpoint-php-aop": "v2.1.0"
-    }
-```
-
-### 2. Write your plugins
-
-> UserPlugin
-
-```php
-use Pinpoint\Common\AbstractMonitor;
-class UserPlugin extends AbstractMonitor
-{
-    public function onBefore(){
-
-    }
-    public function onEnd(&$ret){
-
-    }
-    public function onException($e){
-    }
-}
-```
->eg: [OutputMonitor example](lib/Pinpoint/test/OutputMonitor.php)
-
-### 3. Register UserPlugin on target class
-
-```php
-    use Pinpoint\Common\AspectClassHandle;
-    ...
-    $classHandler = new AspectClassHandle(\namespace\Abc::class);
-    $classHandler->addJoinPoint('parseRequest', \UserPlugin::class);
-```
-
-### Here is the example for yii framework
-
-For yii2, [Yii2PerRequestPlugins example](lib/Pinpoint/Plugins/Yii2PerRequestPlugins.php)
-
-
+### 2. Add pinpoint entry into your entry file(eg: index.php)
 ``` php
 <?php
-
 require_once __DIR__."/../vendor/autoload.php";
 
-// A writable path for caching AOP code
-define('AOP_CACHE_DIR',__DIR__.'/../Cache/');   
-// API for register your own plugins eg: \Pinpoint\Plugins\Yii2PerRequestPlugins::class
-define('PP_REQ_PLUGINS', \Pinpoint\Plugins\Yii2PerRequestPlugins::class);                    
-// require auto_pinpointed, it must located after other loads
+// A writable path for caching AOP code, default is /tmp
+// define('AOP_CACHE_DIR',__DIR__.'/../Cache/');  // optional 
+// API for register your own plugins eg:
+define('PP_REQ_PLUGINS', Pinpoint\Plugins\DefaultRequestPlugin::class);                    
 require_once __DIR__. '/vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
-
 ```
 
+## Write your own plugins
+
+<details> <summary>Only for developers</summary>
+
+#### Steps 
+
+1. Write your own plugins(if needs). Here are some plugins template.
+
+- [pRedisCall.php](lib/Pinpoint/Plugins/autoload/_predis/pRedisCall.php)
+- [GuzzlePlugin.php](lib/Pinpoint/Plugins/autoload/_GuzzleHttp/GuzzlePlugin.php)
+
+
+2. Use `AspectClassHandle` to combine target class with plugin class.
+```php
+    $classHandler = new AspectClassHandle(\yii\web\UrlManager::class);
+    $classHandler->addJoinPoint('parseRequest', \Pinpoint\Plugins\yii2\UrlRule::class);
+    $cls[] = $classHandler;
+```
+
+3. Extends `DefaultRequestPlugin` and implement `joinedClassSet`.
+
+Examples:
+- [Yii2PerRequestPlugins](lib/Pinpoint/Plugins/Yii2PerRequestPlugins.php)
+- [DefaultRequestPlugin](lib/Pinpoint/Plugins/DefaultRequestPlugin.php)
+
+</details>
+
+## Our test project 
+
+- For yii2, [Yii2PerRequestPlugins example](lib/Pinpoint/Plugins/Yii2PerRequestPlugins.php)
+- [pinpoint-c-agent/SimplePHP](https://github.com/pinpoint-apm/pinpoint-c-agent/tree/dev/testapps/SimplePHP)
+- [pinpoint-c-agent/cachethq](https://github.com/pinpoint-apm/pinpoint-c-agent/tree/dev/testapps/cachethq)
+- [pinpoint-c-agent/flarum](https://github.com/pinpoint-apm/pinpoint-c-agent/tree/dev/testapps/flarum)
+- [pinpoint-c-agent/php_phpmyadmin](https://github.com/pinpoint-apm/pinpoint-c-agent/tree/dev/testapps/php_phpmyadmin)
+- [pinpoint-c-agent/php_wordpress](https://github.com/pinpoint-apm/pinpoint-c-agent/tree/dev/testapps/php_wordpress)
 
 ### How it works
 
@@ -72,17 +70,13 @@ require_once __DIR__. '/vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php
 * Intercept php classloader to redirect origin class to new class
 
 
-### 
-
-
-
 > pinpoint-php-aop wrappers your class with an onBefore/onEnd/onException suite.
 
 #### Data Chart Map
 
 ![how it works](https://raw.githubusercontent.com/pinpoint-apm/pinpoint-c-agent/master/images/principle_v0.2.x.png)
 
-More details please go to lib/pinpoint/test/Comparison/pinpoint/test
+There are some examples into [lib/pinpoint/test/Comparison/pinpoint/test](https://github.com/pinpoint-apm/pinpoint-php-aop/blob/dev/lib/Pinpoint/test/Comparison/Pinpoint/test/Bear.php)
 
 
 #### Needs Help/Issues
@@ -93,7 +87,7 @@ More details please go to lib/pinpoint/test/Comparison/pinpoint/test
 ## Copyright
 
 ```
-Copyright 2020-present NAVER Corp.
+Copyright 2024-present NAVER Corp.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
