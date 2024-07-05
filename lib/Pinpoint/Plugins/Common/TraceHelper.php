@@ -16,9 +16,10 @@
  ******************************************************************************/
 namespace Pinpoint\Plugins\Common;
 
-class TraceHelper{
+class TraceHelper
+{
 
-    public static function generateSpanID()
+    public static function generateSpanID(): int
     {
         try {
             return mt_rand();

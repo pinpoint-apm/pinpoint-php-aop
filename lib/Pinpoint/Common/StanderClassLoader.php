@@ -28,7 +28,7 @@ class StanderClassLoader
     public function __construct(array &$orgLoader)
     {
         Logger::Inst()->debug(" create a StanderClassLoader");
-        $this->loadClassFunc =  $orgLoader;
+        $this->loadClassFunc = $orgLoader;
         if ($orgLoader[0] instanceof ClassLoader) {
             $this->findClassFunc = [$orgLoader[0], 'findFile'];
         }
@@ -41,11 +41,11 @@ class StanderClassLoader
 
     public function findFile(string $classFullName): string
     {
-        Logger::Inst()->debug("findClass:'$classFullName'");
+        Logger::Inst()->debug("try to located:'$classFullName'");
         if (is_callable($this->findClassFunc)) {
             $file = call_user_func($this->findClassFunc, $classFullName);
             if ($file !== false) {
-                Logger::Inst()->debug("findClass:'$classFullName' ->'$file'");
+                Logger::Inst()->debug("'$classFullName' ->'$file'");
                 return realpath($file) ?: $file;
             }
         }
@@ -55,15 +55,15 @@ class StanderClassLoader
 
     /**
      * call vendor loader or other framework defined loader
-     * @param $class
+     * @param $class_name
      */
-    public function loadClass($class)
+    public function loadClass($class_name)
     {
-        Logger::Inst()->debug("try to loadClass:'$class'", ['StanderClassLoader']);
+        Logger::Inst()->debug("try to loadClass: $class_name", ['StanderClassLoader']);
         if (is_callable($this->loadClassFunc)) {
-            $classFilePath = call_user_func($this->loadClassFunc, $class);
+            $classFilePath = call_user_func($this->loadClassFunc, $class_name);
             if (is_string($classFilePath) && file_exists($classFilePath)) {
-                Logger::Inst()->debug("loadClass:'$class' -> '$classFilePath'", ['StanderClassLoader']);
+                Logger::Inst()->debug("loadClass:'$class_name' -> '$classFilePath'", ['StanderClassLoader']);
                 require_once $classFilePath;
             }
             return $classFilePath;

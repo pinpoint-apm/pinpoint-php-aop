@@ -73,11 +73,6 @@ abstract class AbstractClassFile
         $this->_astPrinter = new PrettyPrinter\Standard();
     }
 
-    // public function getNode()
-    // {
-    //     return $this->node;
-    // }
-
     public function handleEnterNamespaceNode($node)
     {
         assert($node instanceof Node\Stmt\Namespace_);
@@ -125,7 +120,13 @@ abstract class AbstractClassFile
 
     public function done()
     {
-        $fullPath = AOP_CACHE_DIR . '/' . str_replace('\\', '/', $this->className) . '.php';
+        // only for support phpunit test
+        if (defined('PHPUNIT_COMPOSER_INSTALL')) {
+            $fullPath = Utils::$CLS_DIR . '/' . str_replace('\\', '/', $this->className) . '.php';
+        } else {
+            $file_uuid_name = uniqid("pinpoint_");
+            $fullPath = Utils::$CLS_DIR . '/' . $file_uuid_name . '.php';
+        }
         $context = $this->_astPrinter->prettyPrintFile($this->newAstNode);
         MonitorClass::getInstance()->insertMapping($this->className, $fullPath);
         Logger::Inst()->debug("map/save new class '$this->className' to '$fullPath' ");

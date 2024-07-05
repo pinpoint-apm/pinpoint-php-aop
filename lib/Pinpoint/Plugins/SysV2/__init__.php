@@ -1,8 +1,7 @@
 <?php
 
-declare(strict_types=1);
 /******************************************************************************
- * Copyright 2020 NAVER Corp.                                                 *
+ * Copyright 2024 NAVER Corp.                                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -16,36 +15,17 @@ declare(strict_types=1);
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-/*
- * User: eeliu
- * Date: 12/20/21
- * Time: 5:12 PM
- */
+namespace Pinpoint\Plugins\SysV2\_pdo;
 
-namespace Pinpoint\Plugins\Common;
+use Pinpoint\Common\Logger;
 
-use Pinpoint\Common\AbstractMonitor;
-
-class Trace extends AbstractMonitor
-{
-    public function __construct($monitor_name, $who, &...$args)
-    {
-        parent::__construct($monitor_name, $who, ...$args);
-    }
-
-    public function __destruct()
-    {
-    }
-
-    function onBefore()
-    {
-    }
-
-    function onEnd(&$ret)
-    {
-    }
-
-    public function onException($e)
-    {
+$directories = glob(__DIR__ . '/*', GLOB_ONLYDIR);
+foreach ($directories as $dir) {
+    $load_file = $dir . '/__init__.php';
+    if (file_exists($load_file)) {
+        Logger::Inst()->debug("loading internal plugin: '$load_file' ");
+        require_once $load_file;
     }
 }
+
+// author: eeliu

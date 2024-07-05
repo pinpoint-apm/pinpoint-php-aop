@@ -1,8 +1,7 @@
 <?php
 
-declare(strict_types=1);
 /******************************************************************************
- * Copyright 2020 NAVER Corp.                                                 *
+ * Copyright 2024 NAVER Corp.                                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -16,36 +15,46 @@ declare(strict_types=1);
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-/*
- * User: eeliu
- * Date: 12/20/21
- * Time: 5:12 PM
- */
+namespace Pinpoint\Plugins\SysV2;
 
-namespace Pinpoint\Plugins\Common;
+use function Pinpoint\Plugins\{
+    pinpoint_start_trace,
+    pinpoint_add_clues,
+    pinpoint_add_clue,
+    pinpoint_end_trace
+};
 
-use Pinpoint\Common\AbstractMonitor;
-
-class Trace extends AbstractMonitor
+class FuncPlugin
 {
-    public function __construct($monitor_name, $who, &...$args)
+    public $name;
+    public $joinable = [];
+    public function __construct(array $joinable)
     {
-        parent::__construct($monitor_name, $who, ...$args);
+        $this->name = joinableToString($joinable);
+        $this->joinable = $joinable;
+    }
+    public function onBefore(string $arg = "")
+    {
+        pinpoint_start_trace();
+        pinpoint_add_clue(PP_SERVER_TYPE, PP_PHP_METHOD);
+        pinpoint_add_clue(PP_INTERCEPTOR_NAME, $this->name);
+        if ($arg) {
+            pinpoint_add_clues(PP_PHP_ARGS, $arg);
+        }
+    }
+    public function onEnd(string $value = "")
+    {
+        if ($value) {
+            pinpoint_add_clues(PP_PHP_RETURN, $value);
+        }
+        pinpoint_end_trace();
     }
 
-    public function __destruct()
+    public function onException(\Exception $e)
     {
-    }
-
-    function onBefore()
-    {
-    }
-
-    function onEnd(&$ret)
-    {
-    }
-
-    public function onException($e)
-    {
+        pinpoint_add_clue(PP_ADD_EXCEPTION, "$e");
     }
 }
+
+
+// author: eeliu

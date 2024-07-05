@@ -6,20 +6,31 @@
     "authors": [
         {
             "name": "eeliu",
-            "email": "liu.mingyi@navercorp.com"
+            "email": "dl_cd_pinpoint@navercorp.com"
         }
     ],
+    "require": {
+        "php": "^7.1 || ^8.0",
+        "ext-json": "*",
+        "ext-pinpoint_php": "^0.5.2",
+        "nikic/php-parser": "^4.1"
+    },
     "autoload": {
         "psr-4": {
             "Pinpoint\\": "lib/Pinpoint/"
-        }
+        },
+        "files": [
+            "lib/Pinpoint/Plugins/functions.php"
+        ]
     },
     "minimum-stability": "dev",
     "require-dev": {
-        "phpunit/phpunit": "^8"
-    },
-    "require": {
-        "php": ">=7",
-        "nikic/php-parser": "^4.1"
+        "phpunit/phpunit": "^8",
+        "phpbench/phpbench": "1.0.0",
+        "ext-pinpoint_php": "^0.5.2",
+        "nikic/php-parser": "^4.1",
+        "predis/predis": "^3.0@alpha",
+        "guzzlehttp/guzzle": "8.0.x-dev",
+        "mongodb/mongodb": "v1.19.x-dev"
     }
 }

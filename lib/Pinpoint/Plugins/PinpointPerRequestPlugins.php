@@ -18,8 +18,6 @@
 
 namespace Pinpoint\Plugins;
 
-require_once __DIR__ . "/__init__.php";
-
 use Pinpoint\Common\Logger;
 
 class PinpointPerRequestPlugins
@@ -123,12 +121,15 @@ class PinpointPerRequestPlugins
             //drop this request. collector could not receive any thing
             pinpoint_set_context("Pinpoint-Sampled", PP_NOT_SAMPLED);
             pinpoint_drop_trace();
+            require_once __DIR__ . "/SysV2/_curl/__init__.php";
+        } else {
+            require_once __DIR__ . "/SysV2/__init__.php";
         }
 
         pinpoint_add_clue(PP_TRANSCATION_ID, $this->tid);
         pinpoint_add_clue(PP_SPAN_ID, $this->sid);
         pinpoint_set_context(PP_TRANSCATION_ID, $this->tid);
-        pinpoint_set_context(PP_SPAN_ID, (string)$this->sid);
+        pinpoint_set_context(PP_SPAN_ID, (string) $this->sid);
     }
 
     public function __destruct()
@@ -175,6 +176,6 @@ class PinpointPerRequestPlugins
 
     public function generateTransactionID()
     {
-        return  $this->app_id . '^' . strval(pinpoint_start_time()) . '^' . strval(pinpoint_unique_id());
+        return $this->app_id . '^' . strval(pinpoint_start_time()) . '^' . strval(pinpoint_unique_id());
     }
 }

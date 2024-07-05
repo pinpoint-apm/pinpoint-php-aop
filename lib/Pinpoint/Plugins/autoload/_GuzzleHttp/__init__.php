@@ -1,8 +1,7 @@
 <?php
 
-declare(strict_types=1);
 /******************************************************************************
- * Copyright 2020 NAVER Corp.                                                 *
+ * Copyright 2024 NAVER Corp.                                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -16,36 +15,27 @@ declare(strict_types=1);
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-/*
- * User: eeliu
- * Date: 12/20/21
- * Time: 5:12 PM
- */
+namespace Pinpoint\Plugins\autoload\_GuzzleHttp;
 
-namespace Pinpoint\Plugins\Common;
 
-use Pinpoint\Common\AbstractMonitor;
+use Pinpoint\Common\AspectClassHandle;
 
-class Trace extends AbstractMonitor
-{
-    public function __construct($monitor_name, $who, &...$args)
-    {
-        parent::__construct($monitor_name, $who, ...$args);
-    }
+$cls = [];
 
-    public function __destruct()
-    {
-    }
-
-    function onBefore()
-    {
-    }
-
-    function onEnd(&$ret)
-    {
-    }
-
-    public function onException($e)
-    {
-    }
+$classHandler = new AspectClassHandle(\GuzzleHttp\Client::class);
+if (extension_loaded('curl')) {
+    $classHandler->addJoinPoint('request', \Pinpoint\Plugins\Common\CommonPlugin::class);
+} else {
+    $classHandler->addJoinPoint('request', GuzzlePlugin::class);
 }
+
+$cls[] = $classHandler;
+
+// $classHandler = new AspectClassHandle(\GuzzleHttp\Psr7\Request::class);
+// $classHandler->addJoinPoint('__construct', GuzzlePlugin::class);
+// $cls[] = $classHandler;
+
+
+return $cls;
+
+// author: eeliu

@@ -30,13 +30,6 @@ class Yii2PerRequestPlugins extends PinpointPerRequestPlugins implements UserFra
     public function __construct()
     {
         parent::__construct();
-        // if you need logger set here
-        // use Monolog\Logger as mLogger;
-        // use Monolog\Handler\StreamHandler;
-        // enable findFile patch
-        // $log = new mLogger('yii2');
-        // $log->pushHandler(new StreamHandler('php://stdout', mLogger::INFO));
-        // Logger::Inst()->setLogger($log);
     }
     /**
      * port from https://github.com/yiisoft/yii2/blob/6804fbeae8aa5f8ad5066b50f1864eb0b9d77849/framework/BaseYii.php#L279-L293

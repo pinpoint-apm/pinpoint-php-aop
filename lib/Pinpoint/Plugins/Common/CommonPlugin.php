@@ -18,17 +18,19 @@
 
 namespace Pinpoint\Plugins\Common;
 
+use function Pinpoint\Plugins\{pinpoint_add_clue};
+
 class CommonPlugin extends PinTrace
 {
     public function onBefore()
     {
         pinpoint_add_clue(PP_SERVER_TYPE, PP_PHP_METHOD);
-        pinpoint_add_clues(PP_PHP_ARGS, "--placeholder---");
+        // pinpoint_add_clues(PP_PHP_ARGS, "--placeholder---");
     }
 
     public function onEnd(&$ret)
     {
-        pinpoint_add_clues(PP_PHP_RETURN, "--placeholder---");
+        // pinpoint_add_clues(PP_PHP_RETURN, "--placeholder---");
     }
 
     public function onException($e)

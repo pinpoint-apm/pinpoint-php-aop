@@ -26,6 +26,9 @@
 
 namespace Pinpoint\Plugins\Common;
 
+use function Pinpoint\Plugins\{pinpoint_start_trace, pinpoint_add_clue, pinpoint_end_trace};
+use Pinpoint\Common\Logger;
+
 require_once __DIR__ . "/defines.php";
 
 
@@ -34,7 +37,8 @@ class PinTrace extends Trace
 
     public function __construct($monitorName, $who, &...$args)
     {
-        parent::__construct($monitorName, $who, $args);
+        parent::__construct($monitorName, $who, ...$args);
+        Logger::Inst()->debug("[pp] call pinpoint_start_trace $monitorName");
         pinpoint_start_trace();
         pinpoint_add_clue(PP_INTERCEPTOR_NAME, $monitorName);
     }
@@ -42,10 +46,12 @@ class PinTrace extends Trace
     public function __destruct()
     {
         pinpoint_end_trace();
+        Logger::Inst()->debug("[pp] call pinpoint_end_trace $this->monitor_name");
     }
 
     public function onException($e)
     {
+        Logger::Inst()->debug("[pp] call onException $this->monitor_name");
         pinpoint_add_clue(PP_ADD_EXCEPTION, $e->getMessage());
     }
 }

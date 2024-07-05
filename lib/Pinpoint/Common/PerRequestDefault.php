@@ -22,22 +22,19 @@ namespace Pinpoint\Common;
 
 class PerRequestDefault implements UserFrameworkInterface
 {
+    public $class_map = [];
     public function __construct()
     {
     }
     public function joinedClassSet(): array
     {
-        // add your AspectClassHandle here
-        // $classHandler = new AspectClassHandle(\yii\web\UrlManager::class);
-        // $classHandler->addJoinPoint('parseRequest', \Pinpoint\Plugins\yii2\UrlRule::class);
-        // $cls[] = $classHandler;
-        // return $cls;
         return [];
     }
 
     public function findClass($name): string
     {
-        return "";
+        // if($name in )
+        return $this->class_map[$name];
     }
 
     public function userFindClass(&$loader): callable

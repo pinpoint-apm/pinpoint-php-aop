@@ -50,9 +50,9 @@ class Logger
 
     public function setLogger($logger)
     {
-        assert(method_exists($logger, 'debug'));
-        assert(method_exists($logger, 'warning'));
-        assert(method_exists($logger, 'info'));
+        // assert(method_exists($logger, 'debug'));
+        // assert(method_exists($logger, 'warning'));
+        // assert(method_exists($logger, 'info'));
         $this->log = $logger;
     }
 

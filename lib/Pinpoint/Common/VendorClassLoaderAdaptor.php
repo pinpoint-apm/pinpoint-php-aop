@@ -30,7 +30,7 @@ use Exception;
 class VendorClassLoaderAdaptor
 {
     private static $inst = null;
-    private ClassLoaderFactory $classLoaderFactory;
+    private $classLoaderFactory;
 
     private function __construct()
     {
@@ -65,7 +65,7 @@ class VendorClassLoaderAdaptor
                     spl_autoload_unregister($olderLoader);
                     spl_autoload_register($newLoader->getClassLoader(), true, false);
                 } catch (Exception $e) {
-                    Logger::Inst()->debug(" re-register pinpointloader failed '$e' ");
+                    Logger::Inst()->debug(" re-register pinpoint loader failed '$e' ");
                 }
             }
         }

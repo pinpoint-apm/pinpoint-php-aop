@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 /******************************************************************************
  * Copyright 2020 NAVER Corp.                                                 *
  *                                                                            *
@@ -16,36 +17,39 @@ declare(strict_types=1);
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-/*
- * User: eeliu
- * Date: 12/20/21
- * Time: 5:12 PM
- */
 
-namespace Pinpoint\Plugins\Common;
+namespace Pinpoint;
 
-use Pinpoint\Common\AbstractMonitor;
+require_once __DIR__ . "/vendor/autoload.php";
 
-class Trace extends AbstractMonitor
+use Pinpoint\Common\PinpointDriver;
+use Pinpoint\Common\Logger;
+
+use Pinpoint\Plugins\PinpointPerRequestPlugins;
+use Pinpoint\Common\UserFrameworkInterface;
+
+class RequestPlugin extends PinpointPerRequestPlugins implements UserFrameworkInterface
 {
-    public function __construct($monitor_name, $who, &...$args)
+    public function __construct()
     {
-        parent::__construct($monitor_name, $who, ...$args);
+        parent::__construct();
     }
-
-    public function __destruct()
+    public function joinedClassSet(): array
     {
+        $ar = require_once __DIR__ . "/lib/Pinpoint/Plugins/autoload/__init__.php";
+
+        return $ar;
     }
-
-    function onBefore()
+    public function userFindClass(&$loader): callable
     {
-    }
-
-    function onEnd(&$ret)
-    {
-    }
-
-    public function onException($e)
-    {
+        return [NULL];
     }
 }
+define('APPLICATION_NAME', 'cd.dev.test.php');
+define('APPLICATION_ID', 'cd.dev.ci');
+define('PP_REQ_PLUGINS', RequestPlugin::class);
+
+
+Logger::Inst()->setLoggerLevel(4);
+PinpointDriver::getInstance()->cleanCache();
+PinpointDriver::getInstance()->start();
