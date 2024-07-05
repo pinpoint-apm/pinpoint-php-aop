@@ -17,6 +17,7 @@
 namespace Pinpoint\Plugins\Sys\curl;
 
 use Pinpoint\Plugins\Common\TraceHelper;
+use function Pinpoint\Plugins\{pinpoint_get_context, pinpoint_set_context};
 
 class CurlUtil
 {

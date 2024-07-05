@@ -15,12 +15,27 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Pinpoint\Plugins\SysV2\_curl;
+namespace Pinpoint\Plugins\autoload\_GuzzleHttp;
 
-if (!extension_loaded('curl')) {
-    return;
+
+use Pinpoint\Common\AspectClassHandle;
+
+$cls = [];
+
+$classHandler = new AspectClassHandle(\GuzzleHttp\Client::class);
+if (extension_loaded('curl')) {
+    $classHandler->addJoinPoint('request', \Pinpoint\Plugins\Common\CommonPlugin::class);
+} else {
+    $classHandler->addJoinPoint('request', GuzzlePlugin::class);
 }
 
-require_once __DIR__ . "/curl.php";
+$cls[] = $classHandler;
+
+// $classHandler = new AspectClassHandle(\GuzzleHttp\Psr7\Request::class);
+// $classHandler->addJoinPoint('__construct', GuzzlePlugin::class);
+// $cls[] = $classHandler;
+
+
+return $cls;
 
 // author: eeliu

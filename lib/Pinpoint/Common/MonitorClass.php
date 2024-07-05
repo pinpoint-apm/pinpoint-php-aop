@@ -39,7 +39,7 @@ class MonitorClass
         if (self::$_instance) {
             return self::$_instance;
         }
-        self::$_instance =  new MonitorClass();
+        self::$_instance = new MonitorClass();
         return self::$_instance;
     }
 
@@ -50,12 +50,12 @@ class MonitorClass
 
     public function findFile(string $classFullName): string
     {
-        Logger::Inst()->debug("try to loadclass '$classFullName'", [__CLASS__]);
+        Logger::Inst()->debug("try to find class '$classFullName' from MonitorClass", [__CLASS__]);
         $classFile = $this->classLoaderMap[$classFullName] ?? '';
         return $classFile;
     }
 
-    public  function insertMapping($cl, $file)
+    public function insertMapping($cl, $file)
     {
         $this->classLoaderMap[$cl] = $file;
     }

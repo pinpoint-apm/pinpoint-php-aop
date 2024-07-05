@@ -15,12 +15,22 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Pinpoint\Plugins\SysV2\_curl;
+namespace Pinpoint\Plugins\autoload;
 
-if (!extension_loaded('curl')) {
-    return;
+use Pinpoint\Common\Logger;
+
+$autoload_plugins = [];
+
+$directories = glob(__DIR__ . '/*', GLOB_ONLYDIR);
+foreach ($directories as $dir) {
+    $load_file = $dir . '/__init__.php';
+    if (file_exists($load_file)) {
+        Logger::Inst()->debug("loading internal plugin: '$load_file' ");
+        $plugin = require_once $load_file;
+        if ($plugin) {
+            $autoload_plugins = array_merge($autoload_plugins, $plugin);
+        }
+    }
 }
-
-require_once __DIR__ . "/curl.php";
-
+return $autoload_plugins;
 // author: eeliu

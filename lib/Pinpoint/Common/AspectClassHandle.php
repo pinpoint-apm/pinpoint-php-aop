@@ -22,7 +22,7 @@ namespace Pinpoint\Common;
 
 class AspectClassHandle
 {
-    public string $aspClassName;
+    public $aspClassName;
     public $methodJoinPoints = array();
     public $classAlias = array();
     public $funcAlias = array();
@@ -39,10 +39,6 @@ class AspectClassHandle
 
     public function addJoinPoint(string $method, string $monitor)
     {
-        if (method_exists($this->aspClassName, $method) == false) {
-            throw new \Exception("no '$method' in '$this->aspClassName'");
-        }
-
         $this->methodJoinPoints[$method] = $monitor;
     }
 

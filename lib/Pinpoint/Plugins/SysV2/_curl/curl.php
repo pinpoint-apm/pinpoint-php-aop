@@ -32,10 +32,10 @@ $ch_res = [];
 pinpoint_join_cut(
     ["curl_setopt"],
     function ($ch, $option, $value) use (&$ch_res) {
-        if ($option == CURLOPT_HTTPHEADER && is_array($value)) {
+        if ($option == CURLOPT_HTTPHEADER && is_array($value) && !in_array((int) $ch, $ch_res)) {
             $url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
             $nextSpan = new NextSpan($url);
-            $ch_res[(int) $ch] = $nextSpan;
+            $ch_res[(int) $ch] = true;
             $value = array_merge($value, $nextSpan->genNextSpan());
             return [$ch, $option, $value];
         }
@@ -50,7 +50,8 @@ pinpoint_join_cut(
     ["curl_exec"],
     function ($ch) use (&$ch_res) {
         $url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
-        if (!$ch_res[(int) $ch]) {
+        if (!in_array((int) $ch, $ch_res)) {
+            $ch_res[(int) $ch] = true;
             curl_setopt($ch, CURLOPT_HTTPHEADER, genUrlNextSpan($url));
         }
         pinpoint_start_trace();

@@ -22,6 +22,7 @@ namespace Pinpoint\Common;
 
 class PerRequestDefault implements UserFrameworkInterface
 {
+    public $class_map = [];
     public function __construct()
     {
     }
@@ -32,7 +33,8 @@ class PerRequestDefault implements UserFrameworkInterface
 
     public function findClass($name): string
     {
-        return "";
+        // if($name in )
+        return $this->class_map[$name];
     }
 
     public function userFindClass(&$loader): callable

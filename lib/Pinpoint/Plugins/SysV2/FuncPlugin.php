@@ -26,8 +26,8 @@ use function Pinpoint\Plugins\{
 
 class FuncPlugin
 {
-    public string $name;
-    public array $joinable = [];
+    public $name;
+    public $joinable = [];
     public function __construct(array $joinable)
     {
         $this->name = joinableToString($joinable);

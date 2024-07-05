@@ -17,7 +17,7 @@
  ******************************************************************************/
 namespace Pinpoint\Plugins\SysV2\_pdo;
 
-$weakMap = new WeakMap();
+$weakMap = new \WeakMap();
 
 use function Pinpoint\Plugins\{pinpoint_join_cut, pinpoint_start_trace, pinpoint_add_clue, pinpoint_end_trace};
 use function Pinpoint\Plugins\SysV2\make_variable_length_list_plugin;

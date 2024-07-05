@@ -16,7 +16,7 @@
 #-------------------------------------------------------------------------------
 
 
-namespace Pinpoint\Plugins\MongoPlugin;
+namespace Pinpoint\Plugins\autoload\_MongoPlugin;
 
 use Pinpoint\Plugins\Common\PinTrace;
 use function Pinpoint\Plugins\{pinpoint_add_clue, pinpoint_add_clues};

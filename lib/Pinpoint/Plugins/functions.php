@@ -17,9 +17,10 @@
 
 namespace Pinpoint\Plugins;
 
-if (!extension_loaded('pinpoint_php')) {
-    throw new \Exception("pinpoint_php module not load. Please check this guide: https://github.com/pinpoint-apm/pinpoint-c-agent/blob/dev/DOC/PHP/Readme.md#installation or Mailto: dl_cd_pinpoint@navercorp.com ");
-}
+// disable loading check 
+// if (!extension_loaded('pinpoint_php')) {
+//     throw new \Exception("pinpoint_php module not load. Please check this guide: https://github.com/pinpoint-apm/pinpoint-c-agent/blob/dev/DOC/PHP/Readme.md#installation or Mailto: dl_cd_pinpoint@navercorp.com ");
+// }
 
 require_once __DIR__ . "/SysV2/functions.php";
 require_once __DIR__ . "/Common/defines.php";

@@ -30,7 +30,7 @@ class Trace extends AbstractMonitor
 {
     public function __construct($monitor_name, $who, &...$args)
     {
-        parent::__construct($monitor_name, $who, $args);
+        parent::__construct($monitor_name, $who, ...$args);
     }
 
     public function __destruct()

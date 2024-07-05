@@ -15,12 +15,15 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Pinpoint\Plugins\SysV2\_curl;
+namespace Pinpoint\Plugins\autoload\_predis;
 
-if (!extension_loaded('curl')) {
-    return;
-}
 
-require_once __DIR__ . "/curl.php";
+use Pinpoint\Common\AspectClassHandle;
+
+$classHandler = new AspectClassHandle(\Predis\Client::class);
+$classHandler->addJoinPoint('__call', pRedisCall::class);
+
+
+return [$classHandler];
 
 // author: eeliu

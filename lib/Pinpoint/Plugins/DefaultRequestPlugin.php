@@ -20,7 +20,6 @@ namespace Pinpoint\Plugins;
 
 use Pinpoint\Common\UserFrameworkInterface;
 
-
 class DefaultRequestPlugin extends PinpointPerRequestPlugins implements UserFrameworkInterface
 {
     public function __construct()

@@ -66,7 +66,7 @@ class Utils
         if (file_exists(static::$U_INDEX_PHP)) {
             return include_once static::$U_INDEX_PHP;
         } else {
-            return NULL;
+            return [];
         }
     }
 
@@ -98,12 +98,19 @@ class Utils
         $size = sizeof($class);
         Logger::Inst()->debug("saveCachedClass size= '$size'");
     }
+
+    public static function getCacheDir()
+    {
+        if (defined('AOP_CACHE_DIR')) {
+            return AOP_CACHE_DIR;
+        } else {
+            return sys_get_temp_dir() . '/.cache';
+        }
+    }
+
 }
-if (defined('AOP_CACHE_DIR')) {
-    Utils::$CLS_DIR = AOP_CACHE_DIR;
-} else {
-    Utils::$CLS_DIR = sys_get_temp_dir() . '/.cache';
-}
+
+Utils::$CLS_DIR = Utils::getCacheDir();
 
 Utils::$U_INDEX_FILE_PATH = Utils::$CLS_DIR . '/.__class_index_table';
 Utils::$U_INDEX_PHP = Utils::$CLS_DIR . '/.__class_index.php';

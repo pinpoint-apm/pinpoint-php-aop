@@ -42,15 +42,11 @@ class OriginFileVisitor
 
     private function getVisitor(AspectClassHandle $classHandler)
     {
-        // $classPrefix = "";
         $visitors = [];
         if (!empty($classHandler->getMethodJoinPoints())) {
-            Logger::Inst()->debug("found methodJoinPoints ");
-            // $classPrefix = CLASS_PREFIX;
             $visitors[] = new GenProxyClassTemplateHelper($classHandler);
         }
 
-        // $visitors[] = new GenOriginClassTemplateHelper($classHandler, $classPrefix);
         $codeVisitor = new CodeVisitor($visitors);
         return $codeVisitor;
     }

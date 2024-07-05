@@ -14,31 +14,28 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Pinpoint\Plugins\GuzzleHttp;
+namespace Pinpoint\Plugins\autoload\_GuzzleHttp;
 
-use Pinpoint\Plugins\pinpoint_add_clue;
-use Pinpoint\Plugins\pinpoint_add_clues;
+use function Pinpoint\Plugins\{pinpoint_add_clue, pinpoint_add_clues, pinpoint_get_context};
 use Pinpoint\Plugins\Common\PinTrace;
 use Pinpoint\Plugins\Sys\curl\CurlUtil;
 
-///@hook:GuzzleHttp\Client::request
 class GuzzlePlugin extends PinTrace
 {
-    ///@hook:GuzzleHttp\Psr7\Request::__construct
     function onBefore()
     {
-        if (strpos($this->monitor_name, "Request::__construct") !== false) {
-            pinpoint_add_clue(PP_DESTINATION, CurlUtil::getHostFromURL((string) ($this->args[1])));
-            pinpoint_add_clues(PP_HTTP_URL, $this->args[1]);
-            pinpoint_add_clue(PP_SERVER_TYPE, PP_PHP_REMOTE);
+        var_dump($this->args);
+        pinpoint_add_clue(PP_DESTINATION, CurlUtil::getHostFromURL((string) ($this->args[1])));
+        pinpoint_add_clues(PP_HTTP_URL, $this->args[1]);
+        pinpoint_add_clue(PP_SERVER_TYPE, PP_PHP_REMOTE);
 
-            $n_headers = [];
-            if (is_array($this->args[2]) && array_key_exists('headers', $this->args[2])) {
-                $n_headers = $this->args[2];
-            }
-            $n_headers = array_merge($n_headers, CurlUtil::getPPHeader($this->args[1]));
-            $this->args[2] = $n_headers;
+        $pp_headers = [];
+        if (is_array($this->args[2]) && array_key_exists('headers', $this->args[2])) {
+            $pp_headers = $this->args[2];
         }
+        $pp_headers = array_merge($pp_headers, CurlUtil::getPPHeader($this->args[1]));
+
+        $this->args[2]['headers'] = $pp_headers;
     }
 
     function onEnd(&$ret)

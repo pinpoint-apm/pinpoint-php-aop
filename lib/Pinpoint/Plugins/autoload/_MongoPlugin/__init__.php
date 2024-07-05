@@ -15,12 +15,25 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Pinpoint\Plugins\SysV2\_curl;
+namespace Pinpoint\Plugins\autoload\_MongoPlugin;
 
-if (!extension_loaded('curl')) {
-    return;
-}
 
-require_once __DIR__ . "/curl.php";
+use Pinpoint\Common\AspectClassHandle;
+
+$cls = [];
+
+$classHandler = new AspectClassHandle(\MongoDB\Client::class);
+$classHandler->addJoinPoint('__construct', MongoPlugin::class);
+$cls[] = $classHandler;
+
+$classHandler = new AspectClassHandle(\MongoDB\Collection::class);
+$classHandler->addJoinPoint('insertOne', MongoPlugin::class);
+$classHandler->addJoinPoint('updateOne', MongoPlugin::class);
+$classHandler->addJoinPoint('deleteMany', MongoPlugin::class);
+$classHandler->addJoinPoint('find', MongoPlugin::class);
+$cls[] = $classHandler;
+
+
+return $cls;
 
 // author: eeliu

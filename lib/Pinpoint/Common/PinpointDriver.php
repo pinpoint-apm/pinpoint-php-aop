@@ -31,7 +31,7 @@ class PinpointDriver
     protected static $instance;
     protected $clAr = [];
 
-    private UserFrameworkInterface $reqInst;
+    private $reqInst;
 
     public static function getInstance()
     {
@@ -40,6 +40,12 @@ class PinpointDriver
         }
         return self::$instance;
     }
+
+    public static function cleanCache()
+    {
+        unlink(Utils::$U_INDEX_PHP);
+    }
+
 
     final private function __construct()
     {
@@ -59,11 +65,6 @@ class PinpointDriver
 
     public function start()
     {
-        $joinedClassSet = $this->reqInst->joinedClassSet();
-        if (empty($joinedClassSet)) {
-            return;
-        }
-
         if (Utils::checkCacheReady()) {
             Logger::Inst()->debug("found cache");
             MonitorClass::getInstance()->createFrom(Utils::loadClassMap());
@@ -71,11 +72,14 @@ class PinpointDriver
             return;
         }
 
-        Logger::Inst()->debug("no found cache, try to generate joinclass");
+        $joinedClassSet = $this->reqInst->joinedClassSet();
+        if (empty($joinedClassSet)) {
+            return;
+        }
+
+        Logger::Inst()->debug("no found cache, try to generate pinpointed class");
         VendorClassLoaderAdaptor::Inst()->setUserFindClass($this->reqInst);
         VendorClassLoaderAdaptor::Inst()->start();
-
-
         foreach ($joinedClassSet as $aspClassHandler) {
             assert(is_a($aspClassHandler, '\Pinpoint\Common\AspectClassHandle'));
             $fullClassName = $aspClassHandler->aspClassName;
@@ -83,14 +87,20 @@ class PinpointDriver
                 continue;
             }
             $fullPath = VendorClassLoaderAdaptor::Inst()->findFileViaSpl($fullClassName);
+            if (empty($fullPath)) {
+                Logger::Inst()->debug(" $fullClassName not found; skipped ");
+                continue;
+            }
+
             Logger::Inst()->debug("found aspectClass '$fullClassName' -> '$fullPath' ");
-            // Please DO NOT CHEAT ME
-            assert(file_exists($fullPath), "'$fullClassName' ->'$fullPath' must exist");
 
             $visitor = new OriginFileVisitor();
             $visitor->runAllVisitor($fullPath, $aspClassHandler);
         }
         // save render aop class into index file
-        Utils::saveClassMap(MonitorClass::getInstance()->getJointClassMap());
+        $class_map = MonitorClass::getInstance()->getJointClassMap();
+        Utils::saveClassMap($class_map);
+        // MonitorClass::getInstance()->createFrom($class_map);
+        MonitorClassLoader::start();
     }
 }

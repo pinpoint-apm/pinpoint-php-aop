@@ -1,7 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 /******************************************************************************
- * Copyright 2024 NAVER Corp.                                                 *
+ * Copyright 2020 NAVER Corp.                                                 *
  *                                                                            *
  * Licensed under the Apache License, Version 2.0 (the "License");            *
  * you may not use this file except in compliance with the License.           *
@@ -15,12 +17,39 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Pinpoint\Plugins\SysV2\_curl;
 
-if (!extension_loaded('curl')) {
-    return;
+namespace Pinpoint;
+
+require_once __DIR__ . "/vendor/autoload.php";
+
+use Pinpoint\Common\PinpointDriver;
+use Pinpoint\Common\Logger;
+
+use Pinpoint\Plugins\PinpointPerRequestPlugins;
+use Pinpoint\Common\UserFrameworkInterface;
+
+class RequestPlugin extends PinpointPerRequestPlugins implements UserFrameworkInterface
+{
+    public function __construct()
+    {
+        parent::__construct();
+    }
+    public function joinedClassSet(): array
+    {
+        $ar = require_once __DIR__ . "/lib/Pinpoint/Plugins/autoload/__init__.php";
+
+        return $ar;
+    }
+    public function userFindClass(&$loader): callable
+    {
+        return [NULL];
+    }
 }
+define('APPLICATION_NAME', 'cd.dev.test.php');
+define('APPLICATION_ID', 'cd.dev.ci');
+define('PP_REQ_PLUGINS', RequestPlugin::class);
 
-require_once __DIR__ . "/curl.php";
 
-// author: eeliu
+Logger::Inst()->setLoggerLevel(4);
+PinpointDriver::getInstance()->cleanCache();
+PinpointDriver::getInstance()->start();

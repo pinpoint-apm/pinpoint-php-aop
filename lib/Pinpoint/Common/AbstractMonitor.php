@@ -24,7 +24,7 @@ abstract class AbstractMonitor
     protected $monitor_name;
     protected $who;
     protected $args;
-    public function __construct($name, $who, ...$args)
+    public function __construct($name, $who, &...$args)
     {
         $this->monitor_name = $name;
         $this->who = $who;
