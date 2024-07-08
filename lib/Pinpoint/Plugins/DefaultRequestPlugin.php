@@ -28,12 +28,12 @@ class DefaultRequestPlugin extends PinpointPerRequestPlugins implements UserFram
     }
     public function joinedClassSet(): array
     {
-        $cls = [];
-        return $cls;
+        $ar = require_once __DIR__ . "/autoload/__init__.php";
+        return $ar;
     }
     public function userFindClass(&$loader): callable
     {
-        return NULL;
+        return [];
     }
 }
 

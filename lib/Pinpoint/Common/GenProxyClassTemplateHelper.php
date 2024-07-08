@@ -33,7 +33,7 @@ const _originNamePrefix_ = "__pinpoint__";
 
 class GenProxyClassTemplateHelper extends AbstractClassFile
 {
-    private BuilderFactory $factory;
+    private $factory;
     private $useBlockAr = [];
     private $handleLeaveMethodCb = [];
     public $methodJoinPoints = [];
@@ -51,7 +51,7 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
         parent::__construct();
         $this->factory = new BuilderFactory();
         $this->methodJoinPoints = $classHandler->methodJoinPoints;
-        $this->classAliasSet  = $classHandler->classAlias;
+        $this->classAliasSet = $classHandler->classAlias;
         $this->funcAlias = $classHandler->funcAlias;
         $this->methodJoint = $classHandler->methodJoinPoints;
     }
@@ -74,7 +74,7 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
             $prefixNm = $node->getFirst();
             if (isset($this->suffix_use[$prefixNm])) {
                 $namePrefix = $this->suffix_use[$prefixNm];
-                $nm =  $namePrefix . "\\" . $node->toString();
+                $nm = $namePrefix . "\\" . $node->toString();
                 return $nm;
             } else {
                 return $node->toString();
@@ -96,14 +96,14 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
     public function handleEnterNew($node)
     {
         assert($node instanceof Node\Expr\New_);
-        $node->class =  $this->renderClassName($node->class, $this->classAliasSet);
+        $node->class = $this->renderClassName($node->class, $this->classAliasSet);
         return $node;
     }
 
     public function handleEnterClassConstFetch($node)
     {
         assert($node instanceof Node\Expr\ClassConstFetch);
-        $node->class =  $this->renderClassName($node->class, $this->classAliasSet);
+        $node->class = $this->renderClassName($node->class, $this->classAliasSet);
         return $node;
     }
 
@@ -113,7 +113,7 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
         if ($node->name instanceof Node\Expr\Variable) {
             // not support anonymous function
         } else {
-            $node->name =  $this->renderFunName($node->name, $this->funcAlias);
+            $node->name = $this->renderFunName($node->name, $this->funcAlias);
         }
         return $node;
     }
@@ -148,7 +148,7 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
             $args[] = new Node\Arg($param->var);
         }
 
-        return  $args;
+        return $args;
     }
 
 
@@ -205,7 +205,7 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
             $selfVar = new Node\Arg(new Node\Expr\Variable('this'));
         }
 
-        $methodParams  = array_merge([$funcVar, $selfVar], GenProxyClassTemplateHelper::convertParamsName2Arg($node->params));
+        $methodParams = array_merge([$funcVar, $selfVar], GenProxyClassTemplateHelper::convertParamsName2Arg($node->params));
 
         $jointMethod->addParams($node->params);
         if ($node->returnType) {
@@ -216,17 +216,21 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
         $retName = '_pinpoint_' . $originMethodName . '_ret';
 
         /// $_pinpoint_method_var = new pinpoint\Plugins\CommonPlugins(__FUNCTION__,self,$p);
-        $newPluginsStm = new Node\Stmt\Expression(new Node\Expr\Assign(
-            new Node\Expr\Variable($varName),
-            $this->factory->new(new Node\Name\FullyQualified($monitorClassFullName), $methodParams)
-        ));
+        $newPluginsStm = new Node\Stmt\Expression(
+            new Node\Expr\Assign(
+                new Node\Expr\Variable($varName),
+                $this->factory->new(new Node\Name\FullyQualified($monitorClassFullName), $methodParams)
+            )
+        );
 
         $jointMethod->addStmt($newPluginsStm);
         // $var = null;
-        $newVar = new Node\Stmt\Expression(new Node\Expr\Assign(
-            new Node\Expr\Variable($retName),
-            new Node\Expr\ConstFetch(new Node\Name('null'))
-        ));
+        $newVar = new Node\Stmt\Expression(
+            new Node\Expr\Assign(
+                new Node\Expr\Variable($retName),
+                new Node\Expr\ConstFetch(new Node\Name('null'))
+            )
+        );
         $jointMethod->addStmt($newVar);
 
         $tryBlock = [];
@@ -242,24 +246,28 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
 
             if ($isStatic) {
                 /// $ret = self::newMethodName();
-                $tryBlock[] = new Node\Stmt\Expression(new Node\Expr\Assign(
-                    new Node\Expr\Variable($retName),
-                    new Node\Expr\StaticCall(
-                        new Node\Name("self"),
-                        new Node\Identifier($newMethodName),
-                        GenProxyClassTemplateHelper::convertParamsName2Arg($node->params)
+                $tryBlock[] = new Node\Stmt\Expression(
+                    new Node\Expr\Assign(
+                        new Node\Expr\Variable($retName),
+                        new Node\Expr\StaticCall(
+                            new Node\Name("self"),
+                            new Node\Identifier($newMethodName),
+                            GenProxyClassTemplateHelper::convertParamsName2Arg($node->params)
+                        )
                     )
-                ));
+                );
             } else {
                 /// $ret = $this->$newMethodName();
-                $tryBlock[] = new Node\Stmt\Expression(new Node\Expr\Assign(
-                    new Node\Expr\Variable($retName),
-                    new Node\Expr\MethodCall(
-                        new Node\Expr\Variable("this"),
-                        new Node\Identifier($newMethodName),
-                        GenProxyClassTemplateHelper::convertParamsName2Arg($node->params)
+                $tryBlock[] = new Node\Stmt\Expression(
+                    new Node\Expr\Assign(
+                        new Node\Expr\Variable($retName),
+                        new Node\Expr\MethodCall(
+                            new Node\Expr\Variable("this"),
+                            new Node\Identifier($newMethodName),
+                            GenProxyClassTemplateHelper::convertParamsName2Arg($node->params)
+                        )
                     )
-                ));
+                );
             }
 
             /// $var->onEnd($ret);
@@ -410,7 +418,7 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
     {
         assert($node instanceof Node\Stmt\Use_);
         foreach ($node->uses as $uses) {
-            $this->useBlockAr[] = array($uses->name->toString(), $uses->alias ?  $uses->alias->name : null);
+            $this->useBlockAr[] = array($uses->name->toString(), $uses->alias ? $uses->alias->name : null);
         }
 
         //rename the nodes
@@ -446,7 +454,7 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
 
     function handlerUseUseNode(&$node)
     {
-        assert($node instanceof  Node\Stmt\UseUse);
+        assert($node instanceof Node\Stmt\UseUse);
 
         // parse use A\B\C as ABC;
         // here , A\B\C is hidden by ABC
