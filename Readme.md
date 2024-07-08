@@ -7,9 +7,9 @@ https://github.com/pinpoint-apm/pinpoint-c-agent/labels/php-aop
 ## Requirements
 
 - php 7.0 ~ php 8.3
-- ext-pinpoint_php": "^0.5.2"
+- ext-pinpoint_php: "^0.5.2" ( [ Guide 📑](https://github.com/pinpoint-apm/pinpoint-c-agent/blob/dev/DOC/PHP/Readme.md#steps) )
 
-##  How to Use 
+##  How to use 
 
 ### 1. Import from packagist
 
@@ -46,7 +46,7 @@ require_once __DIR__. '/vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php
     $cls[] = $classHandler;
 ```
 
-3. Extends `DefaultRequestPlugin` and implement `joinedClassSet`.
+3. Extend `DefaultRequestPlugin` and implement `joinedClassSet`.
 
 Examples:
 - [Yii2PerRequestPlugins](lib/Pinpoint/Plugins/Yii2PerRequestPlugins.php)

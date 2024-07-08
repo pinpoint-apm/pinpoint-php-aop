@@ -15,7 +15,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           tools: composer:v2
-          extensions: pinpoint_php-https://github.com/eeliu/pinpoint-c-agent@feat-join-cut-5-11
+          extensions: pinpoint_php-https://github.com/pinpoint-apm/pinpoint-c-agent@dev
       - run: |
           composer install --prefer-dist
           vendor/bin/phpunit --configuration PHPUnit.xml --testsuit pinpoint --testdox
@@ -23,7 +23,7 @@ jobs:
   PHPUnit-AOP:
     strategy:
       matrix:
-        php-versions: [ '7.4','8.0','8.1','8.2']
+        php-versions: [ '7.4','8.0','8.1','8.2','8.3']
     runs-on: ubuntu-latest
     services:
       redis:
@@ -38,7 +38,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           tools: composer:v2
-          extensions: pinpoint_php-https://github.com/eeliu/pinpoint-c-agent@feat-join-cut, mongodb-mongodb/mongo-php-driver@1.19.3
+          extensions: pinpoint_php-https://github.com/pinpoint-apm/pinpoint-c-agent@dev, mongodb-mongodb/mongo-php-driver@1.19.3
       - run: |
           composer install --prefer-dist
           vendor/bin/phpunit --configuration PHPUnit_aop_libraries.xml --testsuit pinpoint --testdox          
