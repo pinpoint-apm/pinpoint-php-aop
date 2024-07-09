@@ -21,6 +21,7 @@ namespace Pinpoint\Plugins\yii2;
 
 use Pinpoint\Common\AbstractMonitor;
 use Pinpoint\Common\Logger;
+use function Pinpoint\Plugins\{pinpoint_set_context};
 
 class UrlRule extends AbstractMonitor
 {
