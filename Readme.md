@@ -13,7 +13,7 @@ https://github.com/pinpoint-apm/pinpoint-c-agent/labels/php-aop
 
 ### 1. Import from packagist
 
-> composer require  pinpoint-apm/pinpoint-php-aop:v3.0.1
+> composer require  pinpoint-apm/pinpoint-php-aop
 
 ### 2. Add pinpoint entry into your entry file(eg: index.php)
 ``` php
@@ -24,7 +24,7 @@ require_once __DIR__."/../vendor/autoload.php";
 // define('AOP_CACHE_DIR',__DIR__.'/../Cache/');  // optional 
 // API for register your own plugins eg:
 define('PP_REQ_PLUGINS', Pinpoint\Plugins\DefaultRequestPlugin::class);                    
-require_once __DIR__. '/vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
+require_once __DIR__. '/../vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
 ```
 
 ## Write your own plugins
