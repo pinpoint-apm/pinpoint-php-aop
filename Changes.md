@@ -1,5 +1,13 @@
 ﻿## Changes
 
+### v0.3.3
+
+* fix dsn on pdo8
+
+### v0.3.0 
+
+* add autoloader plugins
+
 ### v2.1.0
 
 * remove setting.ini
