@@ -28,7 +28,8 @@ pinpoint_join_cut(
     function ($dsn, $username = null, $password = null, $options = null) use ($weakMap) {
         $pdo = pinpoint_get_this();
         if ($pdo instanceof PDO) {
-            $weakMap[$pdo] = $dsn;
+            // fix https://github.com/pinpoint-apm/pinpoint-c-agent/issues/647
+            $weakMap[$pdo] = parse_connect_string($dsn)["host"];
         }
     },
     function ($ret) {
