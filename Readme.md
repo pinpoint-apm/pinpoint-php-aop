@@ -72,6 +72,33 @@ Examples:
 
 > pinpoint-php-aop wrappers your class with an onBefore/onEnd/onException suite.
 
+#### Supported libraries/framework
+
+<details> <summary>Libraries</summary>
+
+Type|Name|Version
+---|---|---
+Built-in | curl| 
+||memcached|`3.2.0`
+||mysqli|
+||pdo|
+||phpredis|`6.0.2`
+||apcu|
+|User |guzzlehttp| `8.0.x-dev`
+||predis|`3.0`
+||mongodb|`v1.19.x`
+</details> 
+
+<details> <summary>Frameworks</summary>
+ 
+Name|Version|
+|---|---|
+|Yii2||
+|wordpress||
+|thinkphp8||
+
+</details>
+
 #### Data Chart Map
 
 ![how it works](https://raw.githubusercontent.com/pinpoint-apm/pinpoint-c-agent/master/images/principle_v0.2.x.png)
