@@ -28,15 +28,15 @@ use function Pinpoint\Plugins\{
 
 use Memcached;
 
-function format_host(Memcached $Memcached): string
+function format_host(Memcached $memcached): string
 {
-    $servers = $Memcached->getServerList();
+    $servers = $memcached->getServerList();
     $ret = "";
     foreach ($servers as $ser) {
         $host = $ser['host'];
         $port = $ser['port'];
-        $weight = $ser['weight'];
-        $ret .= "memcached(host=$host,port=$port,weight=$weight)";
+        // removed weight
+        $ret .= "memcached(host=$host,port=$port)";
     }
     return $ret;
 }
