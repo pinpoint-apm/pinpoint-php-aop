@@ -34,7 +34,9 @@ class TraceTest extends TestCase
     {
         $message = static::$logger_->message_;
         foreach ($keys as $key => $time) {
-            $this->assertEquals(substr_count($message, $key), $time);
+            $real = substr_count($message, $key);
+            $target = $time;
+            $this->assertEquals($real, $target, "key=$key,real=$real, target=$target {$message}");
         }
         return True;
     }
