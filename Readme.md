@@ -68,9 +68,13 @@ Examples:
 * Use `nikic/PHP-Parser` generating glue layer code
 * Use namespace replace to reuse plugins or hook build-in class/function
 * Intercept php classloader to redirect origin class to new class
-
-
+  
 > pinpoint-php-aop wrappers your class with an onBefore/onEnd/onException suite.
+
+#### Blog 
+
+- [Intro pinpoint php aop](https://github.com/pinpoint-apm/pinpoint-php-aop/wiki/Intro-pinpoint-php-aop)
+
 
 #### Supported libraries/framework
 
