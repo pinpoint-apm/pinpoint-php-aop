@@ -100,6 +100,7 @@ Name|Version|
 |Yii2||
 |wordpress||
 |thinkphp8||
+|laravel||
 
 </details>
 
