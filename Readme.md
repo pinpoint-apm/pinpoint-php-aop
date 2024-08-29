@@ -1,4 +1,4 @@
-[![Build](https://github.com/pinpoint-apm/pinpoint-php-aop/workflows/Build/badge.svg?branch=master)](https://github.com/pinpoint-apm/pinpoint-php-aop/actions) [![LICENSE](https://img.shields.io/github/license/pinpoint-apm/pinpoint-php-aop)](LICENSE)
+[![Build](https://github.com/pinpoint-apm/pinpoint-php-aop/actions/workflows/main.yml/badge.svg)](https://github.com/pinpoint-apm/pinpoint-php-aop/actions/workflows/main.yml) [![LICENSE](https://img.shields.io/github/license/pinpoint-apm/pinpoint-php-aop)](LICENSE)
 
 ## Issues
 
