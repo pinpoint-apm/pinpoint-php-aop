@@ -21,8 +21,17 @@ class LaravelPerRequest extends DefaultRequestPlugin
 {
     public function __destruct()
     {
-        pinpoint_set_context(PP_ROUTE_KEY, Request()->route()->uri());
+        $route = Request()->route();
+        if ($route) {
+            pinpoint_set_context(PP_ROUTE_KEY, Request()->route()->uri());
+        } else {
+            pinpoint_set_context(PP_ROUTE_KEY, "_none_");
+        }
         parent::__destruct();
     }
 }
 //author: eeliu
+
+// Changes
+// 2024/9/02
+// fix "Request()->route()" can be none
