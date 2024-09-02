@@ -29,7 +29,8 @@ class OriginFileVisitor
     public function __construct()
     {
         $this->traverser = new NodeTraverser();
-        $this->phpFileParser = (new ParserFactory())->create(ParserFactory::ONLY_PHP7);
+        // $this->phpFileParser = (new ParserFactory())->create(ParserFactory::ONLY_PHP7);
+        $this->phpFileParser = (new ParserFactory())->createForHostVersion();
     }
 
     public function runAllVisitor(string $fullPath, AspectClassHandle $classHandler)

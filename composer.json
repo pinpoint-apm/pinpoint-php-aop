@@ -10,10 +10,10 @@
         }
     ],
     "require": {
-        "php": "^7.1 || ^8.0",
+        "php": "^7.4 || ^8.0",
         "ext-json": "*",
         "ext-pinpoint_php": "^0.5.2",
-        "nikic/php-parser": "^4.1"
+        "nikic/php-parser": "^5.0"
     },
     "autoload": {
         "psr-4": {
@@ -28,7 +28,7 @@
         "phpunit/phpunit": "^8",
         "phpbench/phpbench": "1.0.0",
         "ext-pinpoint_php": "^0.5.2",
-        "nikic/php-parser": "^4.1",
+        "nikic/php-parser": "^5.0",
         "predis/predis": "^3.0@alpha",
         "guzzlehttp/guzzle": "8.0.x-dev",
         "mongodb/mongodb": "v1.19.x-dev"

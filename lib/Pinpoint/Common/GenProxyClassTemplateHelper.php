@@ -159,7 +159,8 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
         // 1. make a new method overriding parent's
         $originMethodName = $node->name->toString();
         $newMethodName = $this->methodNewName($originMethodName);
-        $node->name = new Node\Name\FullyQualified($newMethodName);
+        // $node->name = new Node\Name\FullyQualified($newMethodName);
+        $node->name = new Node\Identifier($newMethodName);
 
         Logger::Inst()->debug("generate pinpoint code block for '$originMethodName'");
         $funcVar = new Node\Arg(new Node\Scalar\MagicConst\Method());
@@ -325,8 +326,8 @@ class GenProxyClassTemplateHelper extends AbstractClassFile
                 $expArgs
             )
         );
-
-        $catchBlock[] = new Node\Stmt\Throw_(new Node\Expr\Variable("e"));
+        // "throw $e;"
+        $catchBlock[] = new Node\Stmt\Expression(new Node\Expr\Throw_(new Node\Expr\Variable("e")));
 
         $catchNode[] = new Node\Stmt\Catch_(
             [new Node\Name('\Exception')],
