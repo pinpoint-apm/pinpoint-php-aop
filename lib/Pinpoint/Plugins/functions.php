@@ -158,4 +158,57 @@ function pinpoint_join_cut(array $joinable, callable $onBefore, callable $onEnd,
     return _pinpoint_join_cut($joinable, $onBefore, $onEnd, $onException);
 }
 
+/**
+ * Set async context in current span
+ * eg: 
+ *   $root = pinpoint_start_trace();
+ *   pinpoint_set_async_ctx($async_id,$sequence_id,$root); // current trace will be treat as a sub-trace
+ *    
+ * @param int $async_id
+ * @param int $sequence_id
+ * @param mixed $id any trace node
+ * @return void
+ */
+function pinpoint_set_async_ctx(int $async_id, int $sequence_id, $id = -1)
+{
+    _pinpoint_set_async_ctx($id, $async_id, $sequence_id);
+}
+
+/**
+ * Summary of Pinpoint\Plugins\pinpoint_get_sequence_id
+ * get current node sequence id
+ * @param mixed $id
+ * @return int
+ */
+function pinpoint_get_sequence_id($id = -1): int
+{
+    return _pinpoint_get_sequence_id($id);
+}
+
+/**
+ * check current trace is root trace
+ * `what's root trace ?` The first trace in a span or spanchunk, like `PinpointPerRequestPlugins`.
+ * 
+ * @param mixed $id
+ * @return bool
+ */
+function pinpoint_get_trace_depth($id = -1): int
+{
+    return _pinpoint_get_trace_depth($id);
+}
+
+function pinpoint_create_transaction_id(): string
+{
+    return APPLICATION_ID . '^' . strval(pinpoint_start_time()) . '^' . strval(pinpoint_unique_id());
+}
+
+function pinpoint_create_span_id(): int
+{
+    try {
+        return mt_rand();
+    } catch (\Exception $e) {
+        return rand();
+    }
+}
+
 //author @eeliu

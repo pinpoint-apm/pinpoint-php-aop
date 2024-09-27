@@ -1,5 +1,15 @@
 ﻿## Changes
 
+
+### v3.0.9 async invocation API
+
+
+### v3.0.8 
+
+> https://github.com/pinpoint-apm/pinpoint-php-aop/releases/tag/v3.0.8
+
+* fix a bug in https://github.com/pinpoint-apm/pinpoint-c-agent/issues/672
+
 ### v0.3.3
 
 * fix dsn on pdo8

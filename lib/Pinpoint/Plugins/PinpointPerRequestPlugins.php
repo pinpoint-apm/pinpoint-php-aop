@@ -126,9 +126,9 @@ class PinpointPerRequestPlugins
             require_once __DIR__ . "/SysV2/__init__.php";
         }
 
-        pinpoint_add_clue(PP_TRANSCATION_ID, $this->tid);
+        pinpoint_add_clue(PP_TRANSACTION_ID, $this->tid);
         pinpoint_add_clue(PP_SPAN_ID, $this->sid);
-        pinpoint_set_context(PP_TRANSCATION_ID, $this->tid);
+        pinpoint_set_context(PP_TRANSACTION_ID, $this->tid);
         pinpoint_set_context(PP_SPAN_ID, (string) $this->sid);
     }
 

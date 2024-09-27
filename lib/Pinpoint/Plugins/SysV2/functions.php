@@ -43,28 +43,6 @@ function make_variable_length_list_plugin(array $joinable)
     return [$joinable, $on_before, $on_end, $on_exception];
 }
 
-function make_3_plugin(array $joinable)
-{
-    $funcPlugin = new FuncPlugin($joinable);
-
-    $on_before = function () use ($funcPlugin) {
-        Logger::Inst()->debug("call $funcPlugin->name on_before");
-        $funcPlugin->onBefore();
-    };
-
-    $on_end = function ($ret) use ($funcPlugin) {
-        Logger::Inst()->debug("call $funcPlugin->name on_end");
-        $funcPlugin->onEnd();
-    };
-
-    $on_exception = function ($exp) use ($funcPlugin) {
-        Logger::Inst()->debug("call $funcPlugin->name on_exception");
-        $funcPlugin->onException($exp);
-    };
-
-    return [$joinable, $on_before, $on_end, $on_exception];
-}
-
 function joinableToString(array $joinable): string
 {
     if (count($joinable) == 1) {
@@ -87,7 +65,7 @@ function genUrlNextSpan($url)
         'Pinpoint-Papptype:1500',
         'Pinpoint-Pappname:' . APPLICATION_NAME,
         'Pinpoint-Host:' . getHostFromURL($url),
-        'Pinpoint-Traceid:' . pinpoint_get_context(PP_TRANSCATION_ID),
+        'Pinpoint-Traceid:' . pinpoint_get_context(PP_TRANSACTION_ID),
         'Pinpoint-Pspanid:' . pinpoint_get_context(PP_SPAN_ID),
         "Pinpoint-Spanid: $nextSid"
     ];
@@ -109,7 +87,7 @@ function getPPHeader($url)
         'Pinpoint-Papptype' => '1500',
         'Pinpoint-Pappname' => APPLICATION_NAME,
         'Pinpoint-Host' => getHostFromURL($url),
-        'Pinpoint-Traceid' => pinpoint_get_context(PP_TRANSCATION_ID),
+        'Pinpoint-Traceid' => pinpoint_get_context(PP_TRANSACTION_ID),
         'Pinpoint-Pspanid' => pinpoint_get_context(PP_SPAN_ID),
         'Pinpoint-Spanid' => $nsid
     ];
