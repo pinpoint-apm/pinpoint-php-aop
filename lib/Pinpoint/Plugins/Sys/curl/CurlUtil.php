@@ -34,7 +34,7 @@ class CurlUtil
             'Pinpoint-Papptype:1500',
             'Pinpoint-Pappname:' . APPLICATION_NAME,
             'Pinpoint-Host:' . static::getHostFromURL($url),
-            'Pinpoint-Traceid:' . pinpoint_get_context(PP_TRANSCATION_ID),
+            'Pinpoint-Traceid:' . pinpoint_get_context(PP_TRANSACTION_ID),
             'Pinpoint-Pspanid:' . pinpoint_get_context(PP_SPAN_ID),
             'Pinpoint-Spanid:' . $nsid
         ];
@@ -56,7 +56,7 @@ class CurlUtil
             'Pinpoint-Papptype' => '1500',
             'Pinpoint-Pappname' => APPLICATION_NAME,
             'Pinpoint-Host' => static::getHostFromURL($url),
-            'Pinpoint-Traceid' => pinpoint_get_context(PP_TRANSCATION_ID),
+            'Pinpoint-Traceid' => pinpoint_get_context(PP_TRANSACTION_ID),
             'Pinpoint-Pspanid' => pinpoint_get_context(PP_SPAN_ID),
             'Pinpoint-Spanid' => $nsid
         ];
