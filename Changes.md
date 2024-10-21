@@ -1,5 +1,19 @@
 ﻿## Changes
 
+### - v4.0.1 async invocation API
+
+- rdkafka plugins
+
+### v4.0.0
+> https://github.com/pinpoint-apm/pinpoint-php-aop/releases/tag/v4.0.0
+* support nikic/php-parser v5.1.0
+
+### - v3.0.8 async invocation API
+
+> https://github.com/pinpoint-apm/pinpoint-php-aop/releases/tag/v3.0.8
+
+* fix a bug in https://github.com/pinpoint-apm/pinpoint-c-agent/issues/672
+
 ### v0.3.3
 
 * fix dsn on pdo8
