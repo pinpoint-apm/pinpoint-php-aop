@@ -38,8 +38,9 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           tools: composer:v2
           coverage: none
-          extensions: mongodb-2.5.7
+          extensions: mongodb-mongodb/mongo-php-driver@2.5.7
         env:
+          mongodb_PATH: .
           fail-fast: true
       - name: Install the MongoDB library with its real extension
         run: |
@@ -65,7 +66,9 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           tools: composer:v2
-          extensions: pinpoint_php-https://github.com/pinpoint-apm/pinpoint-c-agent@dev, mongodb-2.5.7
+          extensions: pinpoint_php-https://github.com/pinpoint-apm/pinpoint-c-agent@dev, mongodb-mongodb/mongo-php-driver@2.5.7
+        env:
+          mongodb_PATH: .
       - run: |
           composer install --prefer-dist
           vendor/bin/phpunit --configuration PHPUnit.xml --testsuit pinpoint --testdox
@@ -94,7 +97,9 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           tools: composer:v2
-          extensions: pinpoint_php-https://github.com/pinpoint-apm/pinpoint-c-agent@dev, mongodb-2.5.7
+          extensions: pinpoint_php-https://github.com/pinpoint-apm/pinpoint-c-agent@dev, mongodb-mongodb/mongo-php-driver@2.5.7
+        env:
+          mongodb_PATH: .
       - run: |
           composer install --prefer-dist
           vendor/bin/phpunit --configuration PHPUnit_aop_libraries.xml --testsuit pinpoint --testdox          

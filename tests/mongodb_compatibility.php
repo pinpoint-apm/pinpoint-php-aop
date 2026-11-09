@@ -15,6 +15,9 @@ if ($argc !== 2) {
     exit(2);
 }
 require $argv[1];
+if (phpversion('mongodb') !== '2.5.7') {
+    throw new RuntimeException('Expected MongoDB extension 2.5.7');
+}
 
 // Construction and collection selection are lazy and need no MongoDB server.
 $client = new MongoDB\Client('mongodb://127.0.0.1:27017');
