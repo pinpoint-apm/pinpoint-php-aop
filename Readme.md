@@ -104,7 +104,7 @@ Built-in | curl|
 ||apcu|
 |User |guzzlehttp| `8.0.x-dev`
 ||predis|`3.0`
-||mongodb|`v1.19.x`
+||mongodb|Library `2.5.x`, extension `2.5.7`
 </details> 
 
 <details> <summary>Frameworks</summary>
