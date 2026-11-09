@@ -3,11 +3,62 @@ name: Build
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
+  PHP-Parser:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: [ '8.2','8.3','8.4','8.5']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          tools: composer:v2
+          coverage: none
+      - name: Install the declared parser dependency in isolation
+        run: |
+          PARSER_CONSTRAINT=$(php -r '$package = json_decode(file_get_contents("composer.json"), true); echo $package["require"]["nikic/php-parser"];')
+          mkdir -p "$RUNNER_TEMP/php-parser"
+          composer require --working-dir="$RUNNER_TEMP/php-parser" \
+            "nikic/php-parser:$PARSER_CONSTRAINT" --no-interaction --prefer-dist
+      - name: Check project parser APIs without the native extension
+        run: php tests/php_parser_compatibility.php "$RUNNER_TEMP/php-parser/vendor/autoload.php"
+
+  MongoDB:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: [ '8.2','8.3','8.4','8.5']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          tools: composer:v2
+          coverage: none
+          extensions: mongodb-mongodb/mongo-php-driver@2.5.7
+        env:
+          mongodb_PATH: .
+          fail-fast: true
+      - name: Install the MongoDB library with its real extension
+        run: |
+          MONGODB_CONSTRAINT=$(php -r '$package = json_decode(file_get_contents("composer.json"), true); echo $package["require-dev"]["mongodb/mongodb"];')
+          EXTENSION_CONSTRAINT=$(php -r '$package = json_decode(file_get_contents("composer.json"), true); echo $package["require-dev"]["ext-mongodb"];')
+          mkdir -p "$RUNNER_TEMP/mongodb"
+          composer require --working-dir="$RUNNER_TEMP/mongodb" \
+            "mongodb/mongodb:$MONGODB_CONSTRAINT" "ext-mongodb:$EXTENSION_CONSTRAINT" \
+            --no-interaction --prefer-dist
+      - name: Check MongoDB client and plugin target APIs
+        run: php tests/mongodb_compatibility.php "$RUNNER_TEMP/mongodb/vendor/autoload.php"
+
   PHPUnit:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        php-versions: [ '7.4','8.0','8.1','8.2']
+        php-versions: [ '8.2','8.3','8.4','8.5']
     steps:
       - uses: actions/checkout@v2
       - name: Setup PHP
@@ -15,15 +66,18 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           tools: composer:v2
-          extensions: pinpoint_php-https://github.com/pinpoint-apm/pinpoint-c-agent@dev
+          extensions: pinpoint_php-https://github.com/pinpoint-apm/pinpoint-c-agent@dev, mongodb-mongodb/mongo-php-driver@2.5.7
+        env:
+          mongodb_PATH: .
       - run: |
           composer install --prefer-dist
           vendor/bin/phpunit --configuration PHPUnit.xml --testsuit pinpoint --testdox
 
   PHPUnit-AOP:
     strategy:
+      fail-fast: false
       matrix:
-        php-versions: [ '7.4','8.0','8.1','8.2','8.3']
+        php-versions: [ '8.2','8.3','8.4','8.5']
     runs-on: ubuntu-latest
     services:
       redis:
@@ -43,7 +97,9 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           tools: composer:v2
-          extensions: pinpoint_php-https://github.com/pinpoint-apm/pinpoint-c-agent@dev, mongodb-mongodb/mongo-php-driver@1.19.3
+          extensions: pinpoint_php-https://github.com/pinpoint-apm/pinpoint-c-agent@dev, mongodb-mongodb/mongo-php-driver@2.5.7
+        env:
+          mongodb_PATH: .
       - run: |
           composer install --prefer-dist
           vendor/bin/phpunit --configuration PHPUnit_aop_libraries.xml --testsuit pinpoint --testdox          

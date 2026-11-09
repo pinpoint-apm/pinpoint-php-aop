@@ -6,8 +6,22 @@ https://github.com/pinpoint-apm/pinpoint-c-agent/labels/php-aop
 
 ## Requirements
 
-- php 7.0 ~ php 8.3
-- ext-pinpoint_php: "^0.5.2" ( [ Guide 📑](https://github.com/pinpoint-apm/pinpoint-c-agent/blob/dev/DOC/PHP/Readme.md#steps) )
+- PHP runtime: 8.2, 8.3, 8.4, or 8.5 (CI matrix)
+- ext-pinpoint_php: `^0.5.2 || ^0.6.0` ( [ Guide 📑](https://github.com/pinpoint-apm/pinpoint-c-agent/blob/dev/DOC/PHP/Readme.md#steps) )
+
+The extension requirement accepts versions `>=0.5.2 <0.6.0` or `>=0.6.0 <0.7.0`, including `0.6.2`. Install and enable the extension before installing this library with Composer.
+
+### PHP-Parser compatibility
+
+This library requires `nikic/php-parser:^4.19.5`. Version 4.19.5 includes PHP 8.5 runtime deprecation fixes while retaining the 4.x parser API used by this project.
+
+Runtime compatibility does not imply support for parsing every syntax feature of that PHP version. PHP-Parser 4.x parses syntax through PHP 8.3; monitored source files using PHP 8.4 property hooks or PHP 8.5 pipe operators are not supported. PHP-Parser 5.x requires an API migration before it can be enabled here.
+
+See the [PHP-Parser 4.x changelog](https://github.com/nikic/PHP-Parser/blob/4.x/CHANGELOG.md) and [5.x migration guide](https://github.com/nikic/PHP-Parser/blob/master/UPGRADE-5.0.md).
+
+### MongoDB development dependencies
+
+The test environment uses MongoDB PHP library `~2.5.1` with extension `~2.5.7` (CI pins extension 2.5.7) across PHP 8.2–8.5. These are development dependencies; applications using the MongoDB plugin must install their own matching library and extension.
 
 ##  How to use 
 
@@ -90,7 +104,7 @@ Built-in | curl|
 ||apcu|
 |User |guzzlehttp| `8.0.x-dev`
 ||predis|`3.0`
-||mongodb|`v1.19.x`
+||mongodb|Library `2.5.x`, extension `2.5.7`
 </details> 
 
 <details> <summary>Frameworks</summary>
