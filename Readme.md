@@ -19,6 +19,10 @@ Runtime compatibility does not imply support for parsing every syntax feature of
 
 See the [PHP-Parser 4.x changelog](https://github.com/nikic/PHP-Parser/blob/4.x/CHANGELOG.md) and [5.x migration guide](https://github.com/nikic/PHP-Parser/blob/master/UPGRADE-5.0.md).
 
+### MongoDB development dependencies
+
+The test environment uses MongoDB PHP library `~2.5.1` with extension `~2.5.7` (CI pins extension 2.5.7) across PHP 8.2–8.5. These are development dependencies; applications using the MongoDB plugin must install their own matching library and extension.
+
 ##  How to use 
 
 ### 1. Import from packagist

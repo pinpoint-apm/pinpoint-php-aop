@@ -31,6 +31,7 @@
         "nikic/php-parser": "^4.19.5",
         "predis/predis": "^3.0@alpha",
         "guzzlehttp/guzzle": "8.0.x-dev",
-        "mongodb/mongodb": "v1.19.x-dev"
+        "ext-mongodb": "~2.5.7",
+        "mongodb/mongodb": "~2.5.1"
     }
 }

@@ -25,6 +25,33 @@ jobs:
       - name: Check project parser APIs without the native extension
         run: php tests/php_parser_compatibility.php "$RUNNER_TEMP/php-parser/vendor/autoload.php"
 
+  MongoDB:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: [ '8.2','8.3','8.4','8.5']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          tools: composer:v2
+          coverage: none
+          extensions: mongodb-2.5.7
+        env:
+          fail-fast: true
+      - name: Install the MongoDB library with its real extension
+        run: |
+          MONGODB_CONSTRAINT=$(php -r '$package = json_decode(file_get_contents("composer.json"), true); echo $package["require-dev"]["mongodb/mongodb"];')
+          EXTENSION_CONSTRAINT=$(php -r '$package = json_decode(file_get_contents("composer.json"), true); echo $package["require-dev"]["ext-mongodb"];')
+          mkdir -p "$RUNNER_TEMP/mongodb"
+          composer require --working-dir="$RUNNER_TEMP/mongodb" \
+            "mongodb/mongodb:$MONGODB_CONSTRAINT" "ext-mongodb:$EXTENSION_CONSTRAINT" \
+            --no-interaction --prefer-dist
+      - name: Check MongoDB client and plugin target APIs
+        run: php tests/mongodb_compatibility.php "$RUNNER_TEMP/mongodb/vendor/autoload.php"
+
   PHPUnit:
     runs-on: ubuntu-latest
     strategy:
@@ -38,7 +65,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           tools: composer:v2
-          extensions: pinpoint_php-https://github.com/pinpoint-apm/pinpoint-c-agent@dev
+          extensions: pinpoint_php-https://github.com/pinpoint-apm/pinpoint-c-agent@dev, mongodb-2.5.7
       - run: |
           composer install --prefer-dist
           vendor/bin/phpunit --configuration PHPUnit.xml --testsuit pinpoint --testdox
@@ -67,7 +94,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           tools: composer:v2
-          extensions: pinpoint_php-https://github.com/pinpoint-apm/pinpoint-c-agent@dev, mongodb-mongodb/mongo-php-driver@1.19.3
+          extensions: pinpoint_php-https://github.com/pinpoint-apm/pinpoint-c-agent@dev, mongodb-2.5.7
       - run: |
           composer install --prefer-dist
           vendor/bin/phpunit --configuration PHPUnit_aop_libraries.xml --testsuit pinpoint --testdox          
