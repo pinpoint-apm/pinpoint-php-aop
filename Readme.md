@@ -6,8 +6,10 @@ https://github.com/pinpoint-apm/pinpoint-c-agent/labels/php-aop
 
 ## Requirements
 
-- php 7.0 ~ php 8.3
-- ext-pinpoint_php: "^0.5.2" ( [ Guide 📑](https://github.com/pinpoint-apm/pinpoint-c-agent/blob/dev/DOC/PHP/Readme.md#steps) )
+- PHP 7.1 ~ PHP 8.3
+- ext-pinpoint_php: `^0.5.2 || ^0.6.0` ( [ Guide 📑](https://github.com/pinpoint-apm/pinpoint-c-agent/blob/dev/DOC/PHP/Readme.md#steps) )
+
+The extension requirement accepts versions `>=0.5.2 <0.6.0` or `>=0.6.0 <0.7.0`, including `0.6.2`. Install and enable the extension before installing this library with Composer.
 
 ##  How to use 
 
